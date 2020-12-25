@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerMoj"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dis4"
+    android:fitsSystemWindows="true"
+    tools:context=".DockerListerFragment"
+    tools:openDrawer="start">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/dis4"
+        tools:context=".DockerListerFragment">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/toolbarBLue"
+            android:elevation="20dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/ubuntu_bold"
+                android:text="Docker Containers"
+                android:textColor="@color/disText1"
+                android:textSize="25dp"
+                android:textStyle="bold" />
+        </androidx.appcompat.widget.Toolbar>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbarMenu"
+            tools:listitem="@layout/docker_card_item" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nav_view"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/dis3"
+        android:clickable="true"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/ejHeder"
+            layout="@layout/drawer_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ejHeder"
+            app:layout_constraintVertical_bias="0.005">
+
+            <Button
+                android:id="@+id/btn_logout"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:backgroundTint="@color/dis3"
+                android:fontFamily="@font/ubuntu"
+                android:textSize="15sp"
+                app:drawableTint="@color/disText2"
+                android:drawableLeft="@drawable/ic_logout_icon"
+                android:gravity="start|center_vertical"
+                style="?android:attr/borderlessButtonStyle"
+                android:textAllCaps="false"
+                android:text="Logout" />
+
+
+            <View
+                android:layout_marginTop="5dp"
+                android:layout_width="250dp"
+                android:layout_gravity="center"
+                android:layout_height="1dp"
+                android:background="@color/blue_main"/>
+
+            <Button
+                android:id="@+id/btnAbout"
+                android:layout_marginTop="3dp"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:backgroundTint="@color/dis3"
+                android:textSize="15sp"
+                android:fontFamily="@font/ubuntu"
+                app:drawableTint="@color/disText2"
+                android:drawableLeft="@drawable/info_logo"
+                android:gravity="start|center_vertical"
+                style="?android:attr/borderlessButtonStyle"
+                android:textAllCaps="false"
+                android:text="About" />
+
+            <TextView
+                android:id="@+id/tvAboutInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:justificationMode="inter_word"
+                android:fontFamily="@font/ubuntu"
+                android:layout_marginTop="15dp"
+                android:visibility="invisible"
+                android:paddingStart="19dp"
+                android:paddingEnd="19dp"
+                android:textSize="13sp"
+                android:autoLink="web"
+                android:linksClickable="true"
+                android:textColor="@color/disText2"
+                android:text="Venison short loin ham tail. Fatback kielbasa jerky pork belly chislic sirloin cow prosciutto venison ham hock drumstick chicken. Pork cow filet mignon ball tip. Leberkas chicken andouille pork, meatloaf tenderloin ham hock strip steak"
+                />
+
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.drawerlayout.widget.DrawerLayout>

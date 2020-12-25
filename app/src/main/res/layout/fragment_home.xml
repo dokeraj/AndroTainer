@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient"
+    tools:context=".HomeFragment">
+
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="90dp"
+        app:srcCompat="@drawable/androtainerlogo_text" />
+
+    <EditText
+        android:id="@+id/etUrl"
+        style="@style/Widget.AppCompat.EditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageView3"
+        android:layout_gravity="center"
+        android:layout_marginTop="100dp"
+        android:width="300dip"
+        android:backgroundTint="#38daff"
+        android:drawableStart="@drawable/web_link_logo"
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:inputType="textPersonName"
+        android:maxLength="760"
+        android:hint="https://mydomain.com/portainer"
+        android:textColorHint="#82C8CEDA"
+        android:textColor="#C8CEDA" />
+
+    <EditText
+        android:id="@+id/etUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etUrl"
+        android:layout_marginTop="25dp"
+        android:drawableStart="@drawable/person_login"
+        android:width="250dip"
+        android:inputType="textPersonName"
+        android:backgroundTint="#38daff"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="sans-serif-light"
+        android:hint="UserName"
+        android:textColorHint="#82C8CEDA"
+        android:textColor="#C8CEDA"/>
+
+    <EditText
+        android:id="@+id/etPass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etUser"
+        android:layout_marginTop="25dp"
+        android:drawableStart="@drawable/padlock_logo"
+        android:width="250dip"
+        android:inputType="textPassword"
+        android:backgroundTint="#38daff"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="sans-serif-light"
+        android:hint="Password"
+        android:textColorHint="#82C8CEDA"
+        android:textColor="#C8CEDA"
+        />
+
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etPass"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:width="155dip"
+        android:backgroundTint="@color/button_state_bck_colors"
+        android:fontFamily="@font/ubuntu_bold"
+        android:gravity="center"
+        android:text="Login"
+        android:textColor="@color/button_state_text_colors"
+        tools:text="Login" />
+
+</RelativeLayout>

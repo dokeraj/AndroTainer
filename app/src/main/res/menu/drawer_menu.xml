@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:showIn="navigation_view">
+
+    <item android:title="Network">
+        <menu>
+            <item
+                android:id="@+id/logout_item"
+                android:icon="@drawable/padlock_logo"
+                android:iconTint="@color/blue_main"
+                app:iconTint="@color/blue_main"
+                android:title="Logout" />
+        </menu>
+    </item>
+
+    <item android:title="About">
+        <menu>
+            <item
+                android:id="@+id/about_item"
+                android:icon="@drawable/padlock_logo"
+                android:title="aspodf" />
+        </menu>
+    </item>
+
+    <!-- <item android:title="Communicat">
+         <menu>
+             <item
+                 android:id="@+id/nav_share"
+                 android:icon="@drawable/http_logo"
+                 android:title="share" />
+             <item
+                 android:id="@+id/nav_share2"
+                 android:icon="@drawable/person_login"
+                 android:title="share" />
+         </menu>
+     </item>
+     -->
+
+</menu>
