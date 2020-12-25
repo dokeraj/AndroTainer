@@ -69,8 +69,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.dis4)
+
         etUrl.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
+
                 when (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
                     true -> {
                         etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.web_link_logo,
@@ -80,7 +83,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val background = etUrl.background
                         background.mutate()
                         background.colorFilter =
-                            PorterDuffColorFilter(resources.getColor(R.color.blue_main),
+                            PorterDuffColorFilter(ContextCompat.getColor(requireContext(), R.color.blue_main),
                                 PorterDuff.Mode.SRC_ATOP)
                         etUrl.background = background
                     }
@@ -92,7 +95,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val background = etUrl.background
                         background.mutate()
                         background.colorFilter =
-                            PorterDuffColorFilter(resources.getColor(R.color.yellow_warning),
+                            PorterDuffColorFilter(ContextCompat.getColor(requireContext(), R.color.yellow_warning),
                                 PorterDuff.Mode.SRC_ATOP)
                         etUrl.background = background
                     }
@@ -116,30 +119,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         val globActivity: MainActiviy = (activity as MainActiviy?)!!
-        val global = (globActivity.application as GlobalApp)
+        val globalVars = (globActivity.application as GlobalApp)
 
-        global.url?.let { etUrl.setText(it) }
-        global.user?.let { etUser.setText(it) }
-        global.pwd?.let { etPass.setText(it) }
-        /*if (globActivity.hasJwt()) {
-            println("CREDENTIALS ARE VALID!")
-            if (globActivity.isJwtValid()) {
-                println("JWT IS VALID")
-                getPortainerContainers(global.url!!, global.jwt!!)
-            } else {
-                println("JWT NEEDS REFRESHING")
-                authenticate(etUrl.text.toString(),
-                    etUser.text.toString(),
-                    etPass.text.toString(),
-                    null,
-                    true)
-            }
-        }*/
+        globalVars.url?.let { etUrl.setText(it) }
+        globalVars.user?.let { etUser.setText(it) }
+        globalVars.pwd?.let { etPass.setText(it) }
 
         if(globActivity.hasJwt() && globActivity.isJwtValid()) {
             println("JWT IS VALID")
-            getPortainerContainers(global.url!!, global.jwt!!)
-        } else if (globActivity.hasJwt() && (!globActivity.isJwtValid())){
+            getPortainerContainers(globalVars.url!!, globalVars.jwt!!)
+        } else if (globActivity.hasJwt() && !globActivity.isJwtValid()){
             println("JWT NEEDS REFRESHING")
             authenticate(etUrl.text.toString(),
                 etUser.text.toString(),

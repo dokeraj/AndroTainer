@@ -21,7 +21,7 @@ class MainActiviy : AppCompatActivity() {
         jwt: String?,
         validUntil: Long?,
     ) {
-        val sharedPrefs = this.getSharedPreferences(SP_NAME, AppCompatActivity.MODE_PRIVATE)
+        val sharedPrefs = this.getSharedPreferences(SP_NAME, MODE_PRIVATE)
         val editor = sharedPrefs?.edit()
         println("U PERMA SME SEGAxxxxxx")
         editor?.putString(URL_NAME, url)

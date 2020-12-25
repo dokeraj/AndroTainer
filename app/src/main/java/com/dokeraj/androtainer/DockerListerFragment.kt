@@ -1,15 +1,20 @@
 package com.dokeraj.androtainer
 
 import android.os.Bundle
-import android.text.Html
+import android.text.util.Linkify
 import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.adapter.DockerContainerAdapter
+import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.PContainer
+import io.noties.markwon.Markwon
+import io.noties.markwon.linkify.LinkifyPlugin
+import kotlinx.android.synthetic.main.drawer_header.*
 import kotlinx.android.synthetic.main.fragment_docker_lister.*
 
 
@@ -19,9 +24,12 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //(activity as AppCompatActivity?)!!.setSupportActionBar(toolbarMenu
+        requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.dis2)
 
-        val wwqz: MainActiviy = (activity as MainActiviy?)!!
+        val globActivity: MainActiviy = (activity as MainActiviy?)!!
+        val globalVars: GlobalApp = (globActivity.application as GlobalApp)
+
+        setDrawerInfo(globalVars)
 
 
         val hamburgerMenu = ActionBarDrawerToggle(activity,
@@ -29,7 +37,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             toolbarMenu,
             R.string.nav_app_bar_open_drawer_description,
             R.string.navigation_drawer_close)
-        val ss = context?.let { ContextCompat.getColor(it, R.color.blue_main) }
+        val ss = context?.let { ContextCompat.getColor(it, R.color.disText2) }
         hamburgerMenu.drawerArrowDrawable.color = ss!!
         drawerMoj.addDrawerListener(hamburgerMenu)
         hamburgerMenu.syncState()
@@ -48,28 +56,15 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         recycler_view.layoutManager = LinearLayoutManager(activity)
         recycler_view.setHasFixedSize(true)
 
-        /** za vrakjanje nazad na login egkranot
-        btnTest.setOnClickListener(View.OnClickListener {
+
+        btnLogout.setOnClickListener(View.OnClickListener {
+            globActivity.invalidateJwt()
             val action = DockerListerFragmentDirections.actionDockerListerFragmentToHomeFragment()
             findNavController().navigate(action)
+        })
 
-        })*/
-
-        /*try {
-            val pInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
-            val versionx = pInfo.versionName
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-        }*/
-
-        //get version name of app
 
         btnAbout.setOnClickListener(View.OnClickListener {
-            val pInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
-            val versionx: String = pInfo.versionName
-
-            //tvAboutInfo.text = Html.fromHtml(getString(R.string.welcome_messages, versionx), Html.FROM_HTML_MODE_COMPACT)
-
             if (tvAboutInfo.visibility == View.VISIBLE)
                 tvAboutInfo.visibility = View.INVISIBLE
             else
@@ -77,6 +72,24 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
 
         })
 
+    }
+
+    private fun setDrawerInfo(globalVars:GlobalApp){
+        // set the name of the logged in user and the server url
+        tvLoggedUsername.text = globalVars.user
+        tvLoggedUrl.text = globalVars.url
+
+        //get version name of app
+        val pInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+        val appVersion: String = pInfo.versionName
+
+        // use Markwon to format the text
+        val markwon = Markwon.builder(requireContext())
+            .usePlugin(LinkifyPlugin.create(Linkify.EMAIL_ADDRESSES or Linkify.WEB_URLS))
+            .build()
+
+        // get the text from the string resources and add the version number
+        markwon.setMarkdown(tvAboutInfo, getString(R.string.about_app, appVersion))
     }
 
 

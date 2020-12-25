@@ -8,7 +8,7 @@
     android:background="@color/dis4"
     android:fitsSystemWindows="true"
     tools:context=".DockerListerFragment"
-    tools:openDrawer="start">
+    >
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,7 +21,7 @@
             android:id="@+id/toolbarMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/toolbarBLue"
+            android:background="@color/dis2"
             android:elevation="20dp"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/ubuntu_bold"
                 android:text="Docker Containers"
-                android:textColor="@color/disText1"
+                android:textColor="@color/disText2"
                 android:textSize="25dp"
                 android:textStyle="bold" />
         </androidx.appcompat.widget.Toolbar>
@@ -73,7 +73,7 @@
             app:layout_constraintVertical_bias="0.005">
 
             <Button
-                android:id="@+id/btn_logout"
+                android:id="@+id/btnLogout"
                 android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
@@ -119,12 +119,10 @@
                 android:layout_marginTop="15dp"
                 android:visibility="invisible"
                 android:paddingStart="19dp"
-                android:paddingEnd="19dp"
-                android:textSize="13sp"
-                android:autoLink="web"
+                android:paddingEnd="30dp"
+                android:textSize="12sp"
                 android:linksClickable="true"
                 android:textColor="@color/disText2"
-                android:text="Venison short loin ham tail. Fatback kielbasa jerky pork belly chislic sirloin cow prosciutto venison ham hock drumstick chicken. Pork cow filet mignon ball tip. Leberkas chicken andouille pork, meatloaf tenderloin ham hock strip steak"
                 />
 
         </LinearLayout>

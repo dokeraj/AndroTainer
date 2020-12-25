@@ -50,6 +50,8 @@ dependencies {
     implementation 'androidx.wear:wear:1.1.0'
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+    implementation "io.noties.markwon:core:$markwon_version"
+    implementation "io.noties.markwon:linkify:$markwon_version"
 
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
