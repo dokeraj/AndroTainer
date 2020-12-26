@@ -1,6 +1,8 @@
 package com.dokeraj.androtainer.adapter
 
 import android.content.Context
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -56,8 +58,8 @@ class DockerContainerAdapter(
                 holder.dockerNameView.text = currentItem.name
                 holder.dockerStatusView.text = currentItem.status
                 holder.dockerButton.isEnabled = false
-                holder.dockerButton.setBackgroundColor(ContextCompat.getColor(contekst,
-                    R.color.disRed))
+                holder.dockerButton.background.colorFilter = BlendModeColorFilter(ContextCompat.getColor(contekst,
+                    R.color.disRed), BlendMode.SRC)
                 ContainerActionType.START
             }
         }
@@ -143,10 +145,10 @@ class DockerContainerAdapter(
 
         if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim().capitalize()) {
             holder.dockerStatusView.text = currentItem.status.capitalize()
-            holder.dockerButton.isEnabled = true
             holder.dockerButton.text = ContainerActionType.START.name
-            holder.dockerButton.setBackgroundColor(ContextCompat.getColor(contekst,
-                R.color.disGreen))
+            holder.dockerButton.isEnabled = true
+            holder.dockerButton.background.colorFilter = BlendModeColorFilter(ContextCompat.getColor(contekst,
+                R.color.disGreen), BlendMode.SRC)
         }
     }
 
@@ -161,10 +163,10 @@ class DockerContainerAdapter(
 
         if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim().capitalize()) {
             holder.dockerStatusView.text = currentItem.status.capitalize()
-            holder.dockerButton.isEnabled = true
             holder.dockerButton.text = ContainerActionType.STOP.name
-            holder.dockerButton.setBackgroundColor(ContextCompat.getColor(contekst,
-                R.color.disRed))
+            holder.dockerButton.isEnabled = true
+            holder.dockerButton.background.colorFilter = BlendModeColorFilter(ContextCompat.getColor(contekst,
+                R.color.disRed), BlendMode.SRC)
         }
     }
 
