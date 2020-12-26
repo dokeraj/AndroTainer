@@ -18,4 +18,7 @@ interface ApiInterface {
     @POST
     fun loginRequest(@Body userData: UserCredentials, @Url fullPath: String): Call<Jwt>
 
+    @POST
+    fun startStopContainer(@Header("Authorization") jwt: String?, @Url fullPath: String): Call<Unit>
+
 }

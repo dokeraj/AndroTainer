@@ -1,76 +1,179 @@
 package com.dokeraj.androtainer.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.navigation.fragment.findNavController
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.dokeraj.androtainer.HomeFragmentDirections
+import com.dokeraj.androtainer.Interfaces.ApiInterface
 import com.dokeraj.androtainer.R
-import com.dokeraj.androtainer.models.PContainer
+import com.dokeraj.androtainer.models.*
+import com.dokeraj.androtainer.network.RetrofitInstance
 import kotlinx.android.synthetic.main.docker_card_item.view.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-import kotlinx.android.synthetic.main.fragment_home.*
-import androidx.fragment.app.Fragment
-import androidx.navigation.Navigation.findNavController
-import androidx.navigation.fragment.findNavController
-import com.dokeraj.androtainer.DockerListerFragmentDirections
+class DockerContainerAdapter(
+    private var pContainerList: List<PContainer>,
+    baseUrl: String?,
+    jwt: String?,
+    private val contekst: Context
+) :
+    RecyclerView.Adapter<DockerContainerAdapter.ContainerViewHolder>() {
 
-class DockerContainerAdapter(private var PContainerList: List<PContainer>) :
-    RecyclerView.Adapter<DockerContainerAdapter.ExampleViewHolder>() {
+    val bUrl: String = baseUrl!!
+    val bJwt: String = jwt!!
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExampleViewHolder {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContainerViewHolder {
         val itemViewX =
             LayoutInflater.from(parent.context).inflate(R.layout.docker_card_item, parent, false)
 
-        return ExampleViewHolder(itemViewX)
+        return ContainerViewHolder(itemViewX)
     }
 
-    private val selectedPosition = mutableMapOf<Int, Boolean>()
-    override fun onBindViewHolder(holder: ExampleViewHolder, position: Int) {
-        val currentItem = PContainerList[position]
 
-        PContainerList[0].name = "go menjame"
+    override fun onBindViewHolder(holder: ContainerViewHolder, position: Int) {
+        val currentItem: PContainer = pContainerList[position]
 
-        holder.dockerNameView.text = currentItem.name
-        holder.dockerStateView.text = currentItem.state
+        holder.dockerNameView.text = currentItem.name.trim().capitalize()
 
-
-
-        if (selectedPosition.getOrDefault(position, false)) {
-            println("TRUE")
-            holder.dockerButton.text = "start"
-        } else {
-            println("EVE ${holder.dockerButton.text}")
-            holder.dockerButton.text = "Stop"
+        val actionType: ContainerActionType = when (currentItem.state) {
+            "running" -> {
+                setStateForRunning(currentItem.status.capitalize(), position, holder)
+                ContainerActionType.STOP
+            }
+            "exited" -> {
+                setStateForExited(currentItem.status.capitalize(), position, holder)
+                ContainerActionType.START
+            }
+            else -> {
+                holder.dockerButton.text = "Issue!?!"
+                holder.dockerNameView.text = currentItem.name
+                holder.dockerStatusView.text = currentItem.status
+                holder.dockerButton.isEnabled = false
+                holder.dockerButton.setBackgroundColor(ContextCompat.getColor(contekst,
+                    R.color.disRed))
+                ContainerActionType.START
+            }
         }
 
-        holder.dockerButton.setOnClickListener(View.OnClickListener {
-            /*if (selectedPosition.getOrDefault(position, false)) {
-                selectedPosition.put(position, true)
-                println("true: $selectedPosition")
-                println("TRUE")
-                holder.dockerButton.text = "Start"
-            } else {
-                selectedPosition.put(position, true)
-                println("fal: $selectedPosition")
-                println("EVE ${holder.dockerButton.text}")
-                holder.dockerButton.text = "Stop"
-            }*/
 
-
-        })
+        holder.dockerButton.setOnClickListener {
+            startStopDockerContainer(bUrl,
+                bJwt,
+                currentItem.id,
+                if (pContainerList[position].state == "running") ContainerActionType.STOP else ContainerActionType.START,
+                holder,
+                position)
+        }
 
     }
 
-    override fun getItemCount() = PContainerList.size
+    override fun getItemCount() = pContainerList.size
 
-    class ExampleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ContainerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val dockerNameView: TextView = itemView.etDockerName
-        val dockerStateView: TextView = itemView.etDockerState
+        val dockerStatusView: TextView = itemView.etDockerStatus
         val dockerButton: Button = itemView.btnStartStop
-
     }
+
+    private fun startStopDockerContainer(
+        url: String,
+        jwt: String,
+        containerId: String,
+        actionType: ContainerActionType,
+        holder: ContainerViewHolder,
+        currentItemNum: Int,
+    ) {
+        val header = "Bearer $jwt"
+
+        val urlToCall =
+            "${url.removeSuffix("/")}/api/endpoints/1/docker/containers/$containerId/${actionType.name.toLowerCase()}"
+
+        println("URL TO CALL: ${urlToCall}")
+        val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
+
+        api.startStopContainer(header, urlToCall).enqueue(object : Callback<Unit?> {
+            override fun onResponse(call: Call<Unit?>, response: Response<Unit?>) {
+
+                when (response.code()) {
+                    204 -> {
+                        println("VO 204 i action-ot so e praten: ${actionType.name}")
+                        when (actionType) {
+                            ContainerActionType.START -> setStateForRunning(null,
+                                currentItemNum,
+                                holder)
+                            ContainerActionType.STOP -> setStateForExited(null,
+                                currentItemNum,
+                                holder)
+                        }
+                    }
+                    304 -> {
+                        /** not modified */
+                        println("NEMA PROMENA VO START/STOP")
+                    }
+                    else -> {
+                        // some problem?!?!
+                        println("DADE NEKOJ CUDEN KOD: ${response.code()}")
+                    }
+                }
+
+            }
+
+            override fun onFailure(call: Call<Unit?>, t: Throwable) {
+                println("FAILURE!!! na START/STOP!!!!!! ${t.message}")
+            }
+        })
+    }
+
+    private fun setStateForExited(
+        statusText: String?,
+        currentItemNum: Int,
+        holder: ContainerViewHolder,
+    ) {
+        pContainerList[currentItemNum].state = "exited"
+        pContainerList[currentItemNum].status = statusText ?: "Exited just now"
+        val currentItem = pContainerList[currentItemNum]
+
+
+        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim().capitalize()) {
+            holder.dockerStatusView.text = currentItem.status.capitalize()
+            holder.dockerButton.isEnabled = true
+            holder.dockerButton.text = ContainerActionType.START.name
+            holder.dockerButton.setBackgroundColor(ContextCompat.getColor(contekst,
+                R.color.disGreen))
+        }
+    }
+
+    private fun setStateForRunning(
+        statusText: String?,
+        currentItemNum: Int,
+        holder: ContainerViewHolder,
+    ) {
+        pContainerList[currentItemNum].state = "running"
+        pContainerList[currentItemNum].status = statusText ?: "Started just now"
+        val currentItem = pContainerList[currentItemNum]
+
+        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim().capitalize()) {
+            holder.dockerStatusView.text = currentItem.status.capitalize()
+            holder.dockerButton.isEnabled = true
+            holder.dockerButton.text = ContainerActionType.STOP.name
+            holder.dockerButton.setBackgroundColor(ContextCompat.getColor(contekst,
+                R.color.disRed))
+        }
+    }
+
+    private fun setStateForStarting() {
+        // todo:: implement
+    }
+
+    private fun setStateForStopping() {
+        // todo:: implement
+    }
+
 }

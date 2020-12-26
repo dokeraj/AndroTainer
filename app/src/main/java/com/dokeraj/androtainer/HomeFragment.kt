@@ -25,47 +25,6 @@ import java.time.ZonedDateTime
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
-    /*val SP_NAME = "SHARED_PREFS"
-    val URL_NAME = "URL"
-    val USR_NAME = "USR"
-    val PWD_NAME = "PWD"
-    val JWT_NAME = "JWT"
-
-    fun savePermaData(url: String, usr: String, pwd: String, jwt: String?) {
-        val sharedPrefs =
-            this.activity?.getSharedPreferences(SP_NAME, AppCompatActivity.MODE_PRIVATE)
-        val editor = sharedPrefs?.edit()
-
-        editor?.putString(URL_NAME, url)
-        editor?.putString(USR_NAME, usr)
-        editor?.putString(PWD_NAME, pwd)
-        editor?.putString(JWT_NAME, jwt)
-
-        editor?.apply()
-    }
-
-    fun getPermaVal(paramName: String): String? {
-        val sharedPrefs =
-            this.activity?.getSharedPreferences(SP_NAME, AppCompatActivity.MODE_PRIVATE)
-        return sharedPrefs?.getString(paramName, null)
-    }
-
-    fun isPermaJWTEmpty(): Boolean {
-        val sharedPrefs =
-            this.activity?.getSharedPreferences(SP_NAME, AppCompatActivity.MODE_PRIVATE)
-        val permaJwt: String? = sharedPrefs?.getString(JWT_NAME, null)
-        return permaJwt == null
-    }
-
-    fun setGlobalVars(url: String, usr: String, pwd: String, jwt: String?) {
-        val global = GlobalApp()
-        global.url = url
-        global.user = usr
-        global.pwd = pwd
-        global.jwt = jwt
-    }*/
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

@@ -40,7 +40,7 @@
             app:tint="@color/blue_main" />
 
         <TextView
-            android:id="@+id/etDockerState"
+            android:id="@+id/etDockerStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/ubuntu"
