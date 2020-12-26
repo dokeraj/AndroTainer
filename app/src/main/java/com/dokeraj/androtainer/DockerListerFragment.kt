@@ -52,7 +52,8 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
 
         val allContainers = (containers + nni)
 
-        recycler_view.adapter = DockerContainerAdapter(allContainers)
+        // todo:: make logic to check if the jwt has expired by timestamp - and call the authenticate agian
+        recycler_view.adapter = DockerContainerAdapter(allContainers, globalVars.url, globalVars.jwt, requireContext())
         recycler_view.layoutManager = LinearLayoutManager(activity)
         recycler_view.setHasFixedSize(true)
 
