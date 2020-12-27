@@ -13,17 +13,17 @@
     <color name="dis3">#2f3136</color>
     <color name="dis4">#36393F</color>
     <color name="dis5">#40444b</color>
+    <color name="dis6">#848688</color>
     <color name="disText1">#b9bbbe</color>
     <color name="disText2">#f2ffff</color>
-    <color name="disText3">#848688</color>
     <color name="light_gray">#4E525A</color>
     <color name="red">#C62B2B</color>
     <color name="orange_warning">#C6732B</color>
     <color name="yellow_warning">#D9CB33</color>
     <color name="green_success">#237826</color>
-    <color name="disGreen">#43b581</color>
-    <color name="disRed">#f25632</color>
+    <color name="disGreen">#236845</color>
+    <color name="disRed">#993341</color>
     <color name="gradientBlue">#2A3c58</color>
     <color name="toolbarBLue">#253041</color>
-    <color name="blue_main_btn_disabled">#a4d1db</color>
+    <color name="btn_disabled">#a4d1db</color>
 </resources>

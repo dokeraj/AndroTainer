@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.adapter.DockerContainerAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.PContainer
+import com.dokeraj.androtainer.models.ContainerStateType
 import io.noties.markwon.Markwon
 import io.noties.markwon.linkify.LinkifyPlugin
 import kotlinx.android.synthetic.main.drawer_header.*
@@ -47,7 +48,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
 
 
         val nni = (1..100).map { x ->
-            PContainer(x.toString(), x.toString(), "trt", "mrt")
+            PContainer(x.toString(), x.toString(), "trt", ContainerStateType.running)
         }
 
         val allContainers = (containers + nni)
