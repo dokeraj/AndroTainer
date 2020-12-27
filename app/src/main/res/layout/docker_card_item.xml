@@ -62,6 +62,7 @@
             android:enabled="true"
             android:fontFamily="@font/ubuntu_bold"
             android:textColor="@color/disText2"
+            android:backgroundTint="@color/button_lister_background_colors"
             android:text="stop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.dokeraj.androtainer.Interfaces.ApiInterface
@@ -15,7 +16,6 @@ import com.dokeraj.androtainer.R
 import com.dokeraj.androtainer.models.*
 import com.dokeraj.androtainer.network.RetrofitInstance
 import kotlinx.android.synthetic.main.docker_card_item.view.*
-import kotlinx.android.synthetic.main.fragment_home.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -45,13 +45,15 @@ class DockerContainerAdapter(
 
         holder.dockerNameView.text = currentItem.name.trim().capitalize()
 
-
         when (currentItem.state) {
             ContainerStateType.running -> {
                 setStateForRunning(currentItem.status.capitalize(), position, holder)
             }
             ContainerStateType.exited -> {
                 setStateForExited(currentItem.status.capitalize(), position, holder)
+            }
+            ContainerStateType.transitioning -> {
+                setTransitioningStyle(currentItem.status, position, holder)
             }
             /**else -> { // todo:: wait to see if there are any more states
             holder.dockerButton.text = "Issue!"
@@ -81,7 +83,7 @@ class DockerContainerAdapter(
         val dockerNameView: TextView = itemView.etDockerName
         val dockerStatusView: TextView = itemView.etDockerStatus
         val dockerButton: Button = itemView.btnStartStop
-        val cardHolderLayout = itemView.cardHolderLayout
+        val cardHolderLayout: ConstraintLayout = itemView.cardHolderLayout
     }
 
     private fun startStopDockerContainer(
@@ -103,7 +105,7 @@ class DockerContainerAdapter(
         // change the style and disable button
         val transitioningText =
             if (actionType == ContainerActionType.START) "Starting" else "Exiting"
-        setStateForStarting(transitioningText, currentItemNum, holder)
+        setTransitioningStyle(transitioningText, currentItemNum, holder)
 
         api.startStopContainer(header, urlToCall).enqueue(object : Callback<Unit?> {
             override fun onResponse(call: Call<Unit?>, response: Response<Unit?>) {
@@ -163,7 +165,7 @@ class DockerContainerAdapter(
             btnBackground.mutate()
             btnBackground.colorFilter =
                 BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.dis6), BlendMode.SRC)
+                    R.color.btn_lister), BlendMode.SRC)
             holder.dockerButton.background = btnBackground
         }
     }
@@ -192,12 +194,13 @@ class DockerContainerAdapter(
             btnBackground.mutate()
             btnBackground.colorFilter =
                 BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.dis6), BlendMode.SRC)
+                    R.color.btn_lister), BlendMode.SRC)
             holder.dockerButton.background = btnBackground
+
         }
     }
 
-    private fun setStateForStarting(
+    private fun setTransitioningStyle(
         statusText: String,
         currentItemNum: Int,
         holder: ContainerViewHolder,
@@ -221,13 +224,16 @@ class DockerContainerAdapter(
             btnBackground.mutate()
             btnBackground.colorFilter =
                 BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.btn_disabled), BlendMode.SRC)
+                    R.color.dis6), BlendMode.SRC)
             holder.dockerButton.background = btnBackground
         }
     }
 
-    private fun setStateForStopping() {
-        // todo:: implement
+    fun setItems(newContainerList: List<PContainer>) {
+        this.pContainerList = newContainerList
     }
 
+    fun areItemsInTransitioningState(): Boolean {
+        return pContainerList.any { x -> x.state == ContainerStateType.transitioning }
+    }
 }

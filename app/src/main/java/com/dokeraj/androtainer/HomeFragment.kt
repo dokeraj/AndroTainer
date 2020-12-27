@@ -97,7 +97,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         } else {
             println("First Time user / or logged out")
         }
-
     }
 
 
@@ -191,7 +190,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (responseStatus != "200")
             snackbar.show()
     }
-
 
     fun changeBtnState(btn: Button, enable: Boolean) {
         btn.isEnabled = enable
