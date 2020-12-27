@@ -38,7 +38,7 @@
             app:layout_constraintTop_toBottomOf="@+id/etDockerName"
             app:layout_constraintVertical_bias="0.34"
             app:srcCompat="@drawable/docker_status_icon"
-            app:tint="@color/blue_main" />
+            app:tint="@color/disText1" />
 
         <TextView
             android:id="@+id/etDockerStatus"
@@ -56,13 +56,12 @@
 
         <Button
             android:id="@+id/btnStartStop"
-            android:layout_width="100dp"
+            android:layout_width="115dp"
             android:layout_height="45dp"
             android:layout_marginEnd="16dp"
             android:enabled="true"
             android:fontFamily="@font/ubuntu_bold"
             android:textColor="@color/disText2"
-            android:backgroundTint="@color/button_state_bck_colors"
             android:text="stop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

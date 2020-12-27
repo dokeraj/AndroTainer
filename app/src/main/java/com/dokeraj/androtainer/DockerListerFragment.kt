@@ -48,7 +48,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
 
 
         val nni = (1..100).map { x ->
-            PContainer(x.toString(), x.toString(), "trt", ContainerStateType.running)
+            PContainer(x.toString(), x.toString(), "trt", ContainerStateType.exited)
         }
 
         val allContainers = (containers + nni)

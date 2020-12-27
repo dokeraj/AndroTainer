@@ -15,6 +15,7 @@ import com.dokeraj.androtainer.R
 import com.dokeraj.androtainer.models.*
 import com.dokeraj.androtainer.network.RetrofitInstance
 import kotlinx.android.synthetic.main.docker_card_item.view.*
+import kotlinx.android.synthetic.main.fragment_home.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -44,9 +45,6 @@ class DockerContainerAdapter(
 
         holder.dockerNameView.text = currentItem.name.trim().capitalize()
 
-        holder.dockerButton.background.colorFilter =
-            BlendModeColorFilter(ContextCompat.getColor(contekst,
-                R.color.dis6), BlendMode.SRC)
 
         when (currentItem.state) {
             ContainerStateType.running -> {
@@ -56,13 +54,13 @@ class DockerContainerAdapter(
                 setStateForExited(currentItem.status.capitalize(), position, holder)
             }
             /**else -> { // todo:: wait to see if there are any more states
-                holder.dockerButton.text = "Issue!"
-                holder.dockerNameView.text = currentItem.name
-                holder.dockerStatusView.text = currentItem.status
-                holder.dockerButton.isEnabled = false
-                holder.dockerButton.background.colorFilter =
-                    BlendModeColorFilter(ContextCompat.getColor(contekst,
-                        R.color.disRed), BlendMode.SRC)
+            holder.dockerButton.text = "Issue!"
+            holder.dockerNameView.text = currentItem.name
+            holder.dockerStatusView.text = currentItem.status
+            holder.dockerButton.isEnabled = false
+            holder.dockerButton.background.colorFilter =
+            BlendModeColorFilter(ContextCompat.getColor(contekst,
+            R.color.disRed), BlendMode.SRC)
             }*/
         }
 
@@ -101,6 +99,11 @@ class DockerContainerAdapter(
 
         println("URL TO CALL: ${urlToCall}")
         val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
+
+        // change the style and disable button
+        val transitioningText =
+            if (actionType == ContainerActionType.START) "Starting" else "Exiting"
+        setStateForStarting(transitioningText, currentItemNum, holder)
 
         api.startStopContainer(header, urlToCall).enqueue(object : Callback<Unit?> {
             override fun onResponse(call: Call<Unit?>, response: Response<Unit?>) {
@@ -147,15 +150,21 @@ class DockerContainerAdapter(
         if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim()
                 .capitalize()
         ) {
+            // change cardHolderLayout background
             holder.cardHolderLayout.background.colorFilter =
                 BlendModeColorFilter(ContextCompat.getColor(contekst,
                     R.color.disRed), BlendMode.SRC)
             holder.dockerStatusView.text = currentItem.status.capitalize()
             holder.dockerButton.text = ContainerActionType.START.name
             holder.dockerButton.isEnabled = true
-            /*holder.dockerButton.background.colorFilter =
+
+            // change button background
+            val btnBackground = holder.dockerButton.background
+            btnBackground.mutate()
+            btnBackground.colorFilter =
                 BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.dis6), BlendMode.SRC)*/
+                    R.color.dis6), BlendMode.SRC)
+            holder.dockerButton.background = btnBackground
         }
     }
 
@@ -177,14 +186,44 @@ class DockerContainerAdapter(
             holder.dockerStatusView.text = currentItem.status.capitalize()
             holder.dockerButton.text = ContainerActionType.STOP.name
             holder.dockerButton.isEnabled = true
-            /*holder.dockerButton.background.colorFilter =
+
+            // change button background
+            val btnBackground = holder.dockerButton.background
+            btnBackground.mutate()
+            btnBackground.colorFilter =
                 BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.dis6), BlendMode.SRC)*/
+                    R.color.dis6), BlendMode.SRC)
+            holder.dockerButton.background = btnBackground
         }
     }
 
-    private fun setStateForStarting() {
-        // todo:: implement
+    private fun setStateForStarting(
+        statusText: String,
+        currentItemNum: Int,
+        holder: ContainerViewHolder,
+    ) {
+        pContainerList[currentItemNum].state = ContainerStateType.transitioning
+        pContainerList[currentItemNum].status = statusText
+        val currentItem = pContainerList[currentItemNum]
+
+        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim()
+                .capitalize()
+        ) {
+            holder.cardHolderLayout.background.colorFilter =
+                BlendModeColorFilter(ContextCompat.getColor(contekst,
+                    R.color.dis6), BlendMode.SRC)
+            holder.dockerStatusView.text = currentItem.status.capitalize()
+            holder.dockerButton.text = statusText
+            holder.dockerButton.isEnabled = false
+
+            // change button background
+            val btnBackground = holder.dockerButton.background
+            btnBackground.mutate()
+            btnBackground.colorFilter =
+                BlendModeColorFilter(ContextCompat.getColor(contekst,
+                    R.color.btn_disabled), BlendMode.SRC)
+            holder.dockerButton.background = btnBackground
+        }
     }
 
     private fun setStateForStopping() {
