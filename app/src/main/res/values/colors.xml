@@ -26,4 +26,5 @@
     <color name="gradientBlue">#2A3c58</color>
     <color name="toolbarBLue">#253041</color>
     <color name="btn_disabled">#a4d1db</color>
+    <color name="btn_lister">#32c5e6</color>
 </resources>
