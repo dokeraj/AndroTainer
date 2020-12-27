@@ -228,10 +228,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         println("INJUNUIN")
 
                         // remap from retrofit model to regular data class
-                        val pcs = it.map { pcr ->
-                            PContainer(pcr.Id, pcr.Names[0].drop(1),
-                                pcr.Status,
-                                pcr.State)
+                        val pcs: List<PContainer> = it.mapNotNull { pcr ->
+                            ContainerStateType.values().firstOrNull {xx -> xx.name == pcr.State}?.let{cst ->
+                                PContainer(pcr.Id, pcr.Names[0].drop(1),
+                                    pcr.Status, cst
+                                )
+                            }
+
                         }
 
                         // go to the ListerFragment and transfer all found docker files

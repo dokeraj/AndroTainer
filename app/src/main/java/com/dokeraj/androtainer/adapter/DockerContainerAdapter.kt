@@ -15,6 +15,7 @@ import com.dokeraj.androtainer.R
 import com.dokeraj.androtainer.models.*
 import com.dokeraj.androtainer.network.RetrofitInstance
 import kotlinx.android.synthetic.main.docker_card_item.view.*
+import kotlinx.android.synthetic.main.fragment_home.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -23,7 +24,7 @@ class DockerContainerAdapter(
     private var pContainerList: List<PContainer>,
     baseUrl: String?,
     jwt: String?,
-    private val contekst: Context
+    private val contekst: Context,
 ) :
     RecyclerView.Adapter<DockerContainerAdapter.ContainerViewHolder>() {
 
@@ -44,32 +45,30 @@ class DockerContainerAdapter(
 
         holder.dockerNameView.text = currentItem.name.trim().capitalize()
 
-        val actionType: ContainerActionType = when (currentItem.state) {
-            "running" -> {
-                setStateForRunning(currentItem.status.capitalize(), position, holder)
-                ContainerActionType.STOP
-            }
-            "exited" -> {
-                setStateForExited(currentItem.status.capitalize(), position, holder)
-                ContainerActionType.START
-            }
-            else -> {
-                holder.dockerButton.text = "Issue!?!"
-                holder.dockerNameView.text = currentItem.name
-                holder.dockerStatusView.text = currentItem.status
-                holder.dockerButton.isEnabled = false
-                holder.dockerButton.background.colorFilter = BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.disRed), BlendMode.SRC)
-                ContainerActionType.START
-            }
-        }
 
+        when (currentItem.state) {
+            ContainerStateType.running -> {
+                setStateForRunning(currentItem.status.capitalize(), position, holder)
+            }
+            ContainerStateType.exited -> {
+                setStateForExited(currentItem.status.capitalize(), position, holder)
+            }
+            /**else -> { // todo:: wait to see if there are any more states
+            holder.dockerButton.text = "Issue!"
+            holder.dockerNameView.text = currentItem.name
+            holder.dockerStatusView.text = currentItem.status
+            holder.dockerButton.isEnabled = false
+            holder.dockerButton.background.colorFilter =
+            BlendModeColorFilter(ContextCompat.getColor(contekst,
+            R.color.disRed), BlendMode.SRC)
+            }*/
+        }
 
         holder.dockerButton.setOnClickListener {
             startStopDockerContainer(bUrl,
                 bJwt,
                 currentItem.id,
-                if (pContainerList[position].state == "running") ContainerActionType.STOP else ContainerActionType.START,
+                if (pContainerList[position].state == ContainerStateType.running) ContainerActionType.STOP else ContainerActionType.START,
                 holder,
                 position)
         }
@@ -82,6 +81,7 @@ class DockerContainerAdapter(
         val dockerNameView: TextView = itemView.etDockerName
         val dockerStatusView: TextView = itemView.etDockerStatus
         val dockerButton: Button = itemView.btnStartStop
+        val cardHolderLayout = itemView.cardHolderLayout
     }
 
     private fun startStopDockerContainer(
@@ -100,6 +100,11 @@ class DockerContainerAdapter(
         println("URL TO CALL: ${urlToCall}")
         val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
 
+        // change the style and disable button
+        val transitioningText =
+            if (actionType == ContainerActionType.START) "Starting" else "Exiting"
+        setStateForStarting(transitioningText, currentItemNum, holder)
+
         api.startStopContainer(header, urlToCall).enqueue(object : Callback<Unit?> {
             override fun onResponse(call: Call<Unit?>, response: Response<Unit?>) {
 
@@ -116,8 +121,7 @@ class DockerContainerAdapter(
                         }
                     }
                     304 -> {
-                        /** not modified */
-                        println("NEMA PROMENA VO START/STOP")
+                        println("No change in state")
                     }
                     else -> {
                         // some problem?!?!
@@ -138,17 +142,29 @@ class DockerContainerAdapter(
         currentItemNum: Int,
         holder: ContainerViewHolder,
     ) {
-        pContainerList[currentItemNum].state = "exited"
+        pContainerList[currentItemNum].state = ContainerStateType.exited
         pContainerList[currentItemNum].status = statusText ?: "Exited just now"
         val currentItem = pContainerList[currentItemNum]
 
 
-        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim().capitalize()) {
+        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim()
+                .capitalize()
+        ) {
+            // change cardHolderLayout background
+            holder.cardHolderLayout.background.colorFilter =
+                BlendModeColorFilter(ContextCompat.getColor(contekst,
+                    R.color.disRed), BlendMode.SRC)
             holder.dockerStatusView.text = currentItem.status.capitalize()
             holder.dockerButton.text = ContainerActionType.START.name
             holder.dockerButton.isEnabled = true
-            holder.dockerButton.background.colorFilter = BlendModeColorFilter(ContextCompat.getColor(contekst,
-                R.color.disGreen), BlendMode.SRC)
+
+            // change button background
+            val btnBackground = holder.dockerButton.background
+            btnBackground.mutate()
+            btnBackground.colorFilter =
+                BlendModeColorFilter(ContextCompat.getColor(contekst,
+                    R.color.dis6), BlendMode.SRC)
+            holder.dockerButton.background = btnBackground
         }
     }
 
@@ -157,21 +173,57 @@ class DockerContainerAdapter(
         currentItemNum: Int,
         holder: ContainerViewHolder,
     ) {
-        pContainerList[currentItemNum].state = "running"
+        pContainerList[currentItemNum].state = ContainerStateType.running
         pContainerList[currentItemNum].status = statusText ?: "Started just now"
         val currentItem = pContainerList[currentItemNum]
 
-        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim().capitalize()) {
+        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim()
+                .capitalize()
+        ) {
+            holder.cardHolderLayout.background.colorFilter =
+                BlendModeColorFilter(ContextCompat.getColor(contekst,
+                    R.color.disGreen), BlendMode.SRC)
             holder.dockerStatusView.text = currentItem.status.capitalize()
             holder.dockerButton.text = ContainerActionType.STOP.name
             holder.dockerButton.isEnabled = true
-            holder.dockerButton.background.colorFilter = BlendModeColorFilter(ContextCompat.getColor(contekst,
-                R.color.disRed), BlendMode.SRC)
+
+            // change button background
+            val btnBackground = holder.dockerButton.background
+            btnBackground.mutate()
+            btnBackground.colorFilter =
+                BlendModeColorFilter(ContextCompat.getColor(contekst,
+                    R.color.dis6), BlendMode.SRC)
+            holder.dockerButton.background = btnBackground
         }
     }
 
-    private fun setStateForStarting() {
-        // todo:: implement
+    private fun setStateForStarting(
+        statusText: String,
+        currentItemNum: Int,
+        holder: ContainerViewHolder,
+    ) {
+        pContainerList[currentItemNum].state = ContainerStateType.transitioning
+        pContainerList[currentItemNum].status = statusText
+        val currentItem = pContainerList[currentItemNum]
+
+        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim()
+                .capitalize()
+        ) {
+            holder.cardHolderLayout.background.colorFilter =
+                BlendModeColorFilter(ContextCompat.getColor(contekst,
+                    R.color.dis6), BlendMode.SRC)
+            holder.dockerStatusView.text = currentItem.status.capitalize()
+            holder.dockerButton.text = statusText
+            holder.dockerButton.isEnabled = false
+
+            // change button background
+            val btnBackground = holder.dockerButton.background
+            btnBackground.mutate()
+            btnBackground.colorFilter =
+                BlendModeColorFilter(ContextCompat.getColor(contekst,
+                    R.color.btn_disabled), BlendMode.SRC)
+            holder.dockerButton.background = btnBackground
+        }
     }
 
     private fun setStateForStopping() {
