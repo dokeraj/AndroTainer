@@ -11,5 +11,5 @@ enum class ContainerActionType {
 }
 
 enum class ContainerStateType {
-    running, exited, transitioning
+    running, exited, transitioning, errored
 }

@@ -128,7 +128,28 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     response: Response<PContainersResponse?>,
                 ) {
                     val pcResponse: PContainersResponse? = response.body()
-                    pcResponse?.let {
+
+                    if(pcResponse != null){
+                        println("ODGOVOR OD Swiper retrofit")
+                        // remap from retrofit model to regular data class
+                        val pcs: List<PContainer> = pcResponse.mapNotNull { pcr ->
+                            ContainerStateType.values().firstOrNull { xx -> xx.name == pcr.State }
+                                ?.let { cst ->
+                                    PContainer(pcr.Id, pcr.Names[0].drop(1).capitalize(),
+                                        pcr.Status, cst
+                                    )
+                                }
+                        }
+
+                        recyclerAdapter.setItems(pcs)
+                        recyclerAdapter.notifyDataSetChanged()
+                        swiperLayout.isRefreshing = false
+                    } else {
+                        // todo:: kick back to login and display snackbar
+                        swiperLayout.isRefreshing = false
+                    }
+
+                    /*pcResponse?.let {
 
                         println("ODGOVOR OD Swiper retrofit")
 
@@ -145,14 +166,15 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                         recyclerAdapter.setItems(pcs)
                         recyclerAdapter.notifyDataSetChanged()
                         swiperLayout.isRefreshing = false
-                    }
+                    }*/
                 }
 
                 override fun onFailure(call: Call<PContainersResponse?>, t: Throwable) {
-                    println("U EROROROOOOOOXOXOXOXOXOXOXOOXOX: ${t.message}")
+                    println("U EROROROOOOOOXOXOXOXOXOXOXOOXOX: ${t.message}") // todo:: kick back to login and display snackbar
                     Toast.makeText(activity,
                         "Server not permitting communication! Please Log in manually",
                         Toast.LENGTH_SHORT).show()
+                    swiperLayout.isRefreshing = false
                 }
             })
     }
