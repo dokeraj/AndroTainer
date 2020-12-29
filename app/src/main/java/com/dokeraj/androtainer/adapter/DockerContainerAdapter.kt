@@ -29,7 +29,7 @@ class DockerContainerAdapter(
 ) :
     RecyclerView.Adapter<DockerContainerAdapter.ContainerViewHolder>() {
 
-    val bUrl: String = baseUrl!!
+    val bUrl: String = baseUrl!! // todo:: remove this
     val bJwt: String = jwt!!
 
 
@@ -252,7 +252,6 @@ class DockerContainerAdapter(
             }
 
             override fun onFailure(call: Call<Unit?>, t: Throwable) {
-                // todo:: snackbar to logout manually!!
                 setCardStyle(containerState = ContainerStateType.errored,
                     statusText = "Refresh by swiping down",
                     statusTextColor = R.color.disText3,
@@ -315,134 +314,6 @@ class DockerContainerAdapter(
             holder.statusIconView.setImageResource(statusIconImage)
             holder.statusIconView.setColorFilter(ContextCompat.getColor(contekst,
                 statusIconColor))
-        }
-    }
-
-    private fun setStateForExited(
-        statusText: String,
-        currentItemNum: Int,
-        holder: ContainerViewHolder,
-    ) {
-        pContainerList[currentItemNum].state = ContainerStateType.exited
-        pContainerList[currentItemNum].status = statusText
-        val currentItem = pContainerList[currentItemNum]
-
-
-        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim()
-                .capitalize()
-        ) {
-            // change cardHolderLayout background
-            holder.cardHolderLayout.background.colorFilter =
-                BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.disRed), BlendMode.SRC)
-            holder.dockerStatusView.text = currentItem.status.capitalize()
-            holder.dockerButton.text = ContainerActionType.START.name
-            holder.dockerButton.isEnabled = true
-            holder.dockerStatusView.setTextColor(ContextCompat.getColor(contekst,
-                R.color.disText1))
-
-            // change button background
-            val btnBackground = holder.dockerButton.background
-            btnBackground.mutate()
-            btnBackground.colorFilter =
-                BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.btn_lister), BlendMode.SRC)
-            holder.dockerButton.background = btnBackground
-        }
-    }
-
-    private fun setStateForRunning(
-        statusText: String,
-        currentItemNum: Int,
-        holder: ContainerViewHolder,
-    ) {
-        pContainerList[currentItemNum].state = ContainerStateType.running
-        pContainerList[currentItemNum].status = statusText
-        val currentItem = pContainerList[currentItemNum]
-
-        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim()
-                .capitalize()
-        ) {
-            holder.cardHolderLayout.background.colorFilter =
-                BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.disGreen), BlendMode.SRC)
-            holder.dockerStatusView.text = currentItem.status.capitalize()
-            holder.dockerButton.text = ContainerActionType.STOP.name
-            holder.dockerButton.isEnabled = true
-            holder.dockerStatusView.setTextColor(ContextCompat.getColor(contekst,
-                R.color.disText1))
-
-            // change button background
-            val btnBackground = holder.dockerButton.background
-            btnBackground.mutate()
-            btnBackground.colorFilter =
-                BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.btn_lister), BlendMode.SRC)
-            holder.dockerButton.background = btnBackground
-
-        }
-    }
-
-    private fun setStateForTransitioning(
-        statusText: String,
-        currentItemNum: Int,
-        holder: ContainerViewHolder,
-    ) {
-        pContainerList[currentItemNum].state = ContainerStateType.transitioning
-        pContainerList[currentItemNum].status = statusText
-        val currentItem = pContainerList[currentItemNum]
-
-        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim()
-                .capitalize()
-        ) {
-            holder.cardHolderLayout.background.colorFilter =
-                BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.dis6), BlendMode.SRC)
-            holder.dockerStatusView.text = currentItem.status.capitalize()
-            holder.dockerButton.text = statusText
-            holder.dockerButton.isEnabled = false
-            holder.dockerStatusView.setTextColor(ContextCompat.getColor(contekst,
-                R.color.disText1))
-
-            // change button background
-            val btnBackground = holder.dockerButton.background
-            btnBackground.mutate()
-            btnBackground.colorFilter =
-                BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.dis6), BlendMode.SRC)
-            holder.dockerButton.background = btnBackground
-        }
-    }
-
-    private fun setStateForError(
-        // todo:: add to class the API logo
-        statusText: String,
-        currentItemNum: Int,
-        holder: ContainerViewHolder,
-    ) {
-        pContainerList[currentItemNum].state = ContainerStateType.errored
-        pContainerList[currentItemNum].status = statusText
-        val currentItem = pContainerList[currentItemNum]
-
-        if (holder.dockerNameView.text.toString().trim().capitalize() == currentItem.name.trim()
-                .capitalize()
-        ) {
-            holder.cardHolderLayout.background.colorFilter =
-                BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.disYellow), BlendMode.SRC)
-            holder.dockerStatusView.text = currentItem.status.capitalize()
-            holder.dockerButton.text = "Error"
-            holder.dockerButton.isEnabled = false
-            holder.dockerStatusView.setTextColor(ContextCompat.getColor(contekst,
-                R.color.disText3))
-
-            // change button background
-            val btnBackground = holder.dockerButton.background
-            btnBackground.mutate()
-            btnBackground.colorFilter =
-                BlendModeColorFilter(ContextCompat.getColor(contekst,
-                    R.color.disYellow), BlendMode.SRC)
-            holder.dockerButton.background = btnBackground
         }
     }
 

@@ -1,7 +1,12 @@
 package com.dokeraj.androtainer
 
+import android.content.Context
 import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.globalvars.PermaVals.JWT_NAME
 import com.dokeraj.androtainer.globalvars.PermaVals.JWT_VALID_UNTIL
@@ -9,10 +14,44 @@ import com.dokeraj.androtainer.globalvars.PermaVals.PWD_NAME
 import com.dokeraj.androtainer.globalvars.PermaVals.SP_NAME
 import com.dokeraj.androtainer.globalvars.PermaVals.URL_NAME
 import com.dokeraj.androtainer.globalvars.PermaVals.USR_NAME
+import com.google.android.material.snackbar.Snackbar
 import java.time.Instant
 
 
 class MainActiviy : AppCompatActivity() {
+
+    private var logoutMsg: String? = null
+    fun getLogoutMsg() = logoutMsg
+    fun setLogoutMsg(msg: String?) {
+        logoutMsg = msg
+    }
+
+    fun showGenericSnack(
+        context: Context,
+        view: View,
+        snackbarText: String,
+        textColor: Int,
+        snackBckColor: Int,
+    ) {
+        val snackbar = Snackbar.make(
+            view,
+            snackbarText,
+            Snackbar.LENGTH_SHORT
+        )
+
+        val snackbarView: View = snackbar.view
+        val snackbarTextId: Int = R.id.snackbar_text
+
+        val textView = snackbarView.findViewById<View>(snackbarTextId) as TextView
+        textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
+        //textView.setGravity(Gravity.CENTER_HORIZONTAL);
+        textView.setTextColor(ContextCompat.getColor(context, textColor))
+
+        snackbarView.setBackgroundColor(ContextCompat.getColor(context, snackBckColor))
+
+        snackbar.show()
+    }
+
 
     private fun savePermaData(
         url: String,
