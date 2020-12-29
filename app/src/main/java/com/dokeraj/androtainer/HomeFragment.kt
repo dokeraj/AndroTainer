@@ -7,7 +7,6 @@ import android.util.Patterns
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -28,7 +27,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.dis4)
+        requireActivity().window.statusBarColor =
+            ContextCompat.getColor(requireContext(), R.color.dis4)
+
+        val globActivity: MainActiviy = (activity as MainActiviy?)!!
+        val globalVars = (globActivity.application as GlobalApp)
 
         etUrl.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
@@ -42,7 +45,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val background = etUrl.background
                         background.mutate()
                         background.colorFilter =
-                            PorterDuffColorFilter(ContextCompat.getColor(requireContext(), R.color.blue_main),
+                            PorterDuffColorFilter(ContextCompat.getColor(requireContext(),
+                                R.color.blue_main),
                                 PorterDuff.Mode.SRC_ATOP)
                         etUrl.background = background
                     }
@@ -54,7 +58,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val background = etUrl.background
                         background.mutate()
                         background.colorFilter =
-                            PorterDuffColorFilter(ContextCompat.getColor(requireContext(), R.color.yellow_warning),
+                            PorterDuffColorFilter(ContextCompat.getColor(requireContext(),
+                                R.color.orange_warning),
                                 PorterDuff.Mode.SRC_ATOP)
                         etUrl.background = background
                     }
@@ -67,33 +72,40 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
                 authenticate(etUrl.text.toString(),
                     etUser.text.toString(),
-                    etPass.text.toString(), btnLogin, true)
+                    etPass.text.toString(), btnLogin, globActivity)
             } else {
                 changeBtnState(btnLogin, true)
-                println("crush onhyou e ${activity?.applicationContext}") // todo:: add the generic snack
-                //val aktivnost: FragmentActivity? = activity
-                //Toast.makeText(aktivnost!!.baseContext, "Invalid URL", Toast.LENGTH_SHORT).show()
-
+                globActivity.showGenericSnack(requireContext(),
+                    (getView())!!,
+                    "Invalid URL!",
+                    R.color.white,
+                    R.color.orange_warning)
             }
         }
 
-        val globActivity: MainActiviy = (activity as MainActiviy?)!!
-        val globalVars = (globActivity.application as GlobalApp)
+        if (globActivity.getLogoutMsg() != null) {
+            globActivity.showGenericSnack(requireContext(),
+                (getView())!!,
+                globActivity.getLogoutMsg()!!,
+                R.color.white,
+                R.color.orange_warning)
+            globActivity.setLogoutMsg(null)
+        }
 
         globalVars.url?.let { etUrl.setText(it) }
         globalVars.user?.let { etUser.setText(it) }
         globalVars.pwd?.let { etPass.setText(it) }
 
-        if(globActivity.hasJwt() && globActivity.isJwtValid()) {
+
+        if (globActivity.hasJwt() && globActivity.isJwtValid()) {
             println("JWT IS VALID")
-            getPortainerContainers(globalVars.url!!, globalVars.jwt!!)
-        } else if (globActivity.hasJwt() && !globActivity.isJwtValid()){
+            getPortainerContainers(globalVars.url!!, globalVars.jwt!!, globActivity)
+        } else if (globActivity.hasJwt() && !globActivity.isJwtValid()) {
             println("JWT NEEDS REFRESHING")
             authenticate(etUrl.text.toString(),
                 etUser.text.toString(),
                 etPass.text.toString(),
-                null,
-                true)
+                null, globActivity)
         } else {
             println("First Time user / or logged out")
         }
@@ -105,7 +117,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         usr: String,
         pwd: String,
         btn: Button?,
-        login: Boolean,
+        mainActiviy: MainActiviy,
     ) {
         val cred = UserCredentials(usr, pwd)
 
@@ -129,21 +141,22 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val globActivity: MainActiviy = (activity as MainActiviy?)!!
                         globActivity.setAllMasterVals(url, usr, pwd, it, jwtValidUntil)
 
-                        if (login)
-                            getPortainerContainers(url, it)
+                        getPortainerContainers(url, it, mainActiviy)
                     }
                 }
 
                 override fun onFailure(call: retrofit2.Call<Jwt?>, t: Throwable) {
                     btn?.let { changeBtnState(it, true) }
-                    Toast.makeText(activity,
-                        "Server not permitting communication!",
-                        Toast.LENGTH_SHORT).show()
+                    mainActiviy.showGenericSnack(requireContext(),
+                        view!!,
+                        "Server not permitting communication! Check URL.",
+                        R.color.red,
+                        R.color.white)
                 }
+
             })
     }
 
-    // todo:: add new showSnack method for displaying generic messages
     fun showResponseSnack(responseStatus: String, btn: Button?) {
         data class SnackStyle(val text: String, val textColor: Int, val bckColor: Int)
         // colors
@@ -152,10 +165,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val cRed = context?.let { ContextCompat.getColor(it, R.color.red) }
         val cWhite = context?.let { ContextCompat.getColor(it, R.color.white) }
         val cOrange = context?.let { ContextCompat.getColor(it, R.color.orange_warning) }
-        val cGreen = context?.let { ContextCompat.getColor(it, R.color.green_success) }
 
         val sbStyle = when (responseStatus) {
-            "200" -> SnackStyle("nothing", cWhite!!, cGreen!!)
             "502", "404" -> {
                 btn?.let { changeBtnState(it, true) }
                 SnackStyle("Wrong URL or service is down", cWhite!!, cRed!!)
@@ -203,6 +214,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun getPortainerContainers(
         url: String,
         jwt: String,
+        mainActiviy: MainActiviy,
     ) {
         println("PRVOOOOOOOOOOOOOOOOOOOOOOOOO")
         val fullUrl = "${url.removeSuffix("/")}/api/endpoints/1/docker/containers/json"
@@ -216,8 +228,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     call: Call<PContainersResponse?>,
                     response: Response<PContainersResponse?>,
                 ) {
-
-
                     val pcResponse: PContainersResponse? = response.body()
                     println("eve bodi::::: $pcResponse")
                     println("EVE KOD:--- ${response.code()}")
@@ -227,11 +237,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
                         // remap from retrofit model to regular data class
                         val pcs: List<PContainer> = it.mapNotNull { pcr ->
-                            ContainerStateType.values().firstOrNull {xx -> xx.name == pcr.State}?.let{cst ->
-                                PContainer(pcr.Id, pcr.Names[0].drop(1).capitalize(),
-                                    pcr.Status, cst
-                                )
-                            }
+                            ContainerStateType.values().firstOrNull { xx -> xx.name == pcr.State }
+                                ?.let { cst ->
+                                    PContainer(pcr.Id, pcr.Names[0].drop(1).capitalize(),
+                                        pcr.Status, cst
+                                    )
+                                }
 
                         }
 
@@ -245,10 +256,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
 
                 override fun onFailure(call: Call<PContainersResponse?>, t: Throwable) {
-                    println("U EROROROOOOOOXOXOXOXOXOXOXOOXOX: ${t.message}")
-                    Toast.makeText(activity,
-                        "Server not permitting communication! Please Log in manually",
-                        Toast.LENGTH_SHORT).show()
+                    mainActiviy.showGenericSnack(requireContext(),
+                        view!!,
+                        "Server not permitting communication! Check URL.",
+                        R.color.red,
+                        R.color.white)
                 }
             })
     }

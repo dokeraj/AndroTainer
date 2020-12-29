@@ -28,6 +28,8 @@
             app:argType="com.dokeraj.androtainer.models.PContainers" />
         <action
             android:id="@+id/action_dockerListerFragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/slide_out_left"
+            app:exitAnim="@anim/slide_in_right" />
     </fragment>
 </navigation>

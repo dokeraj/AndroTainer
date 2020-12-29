@@ -3,7 +3,6 @@ package com.dokeraj.androtainer
 import android.os.Bundle
 import android.text.util.Linkify
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -16,7 +15,6 @@ import com.dokeraj.androtainer.adapter.DockerContainerAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.PContainer
 import com.dokeraj.androtainer.models.ContainerStateType
-import com.dokeraj.androtainer.models.PContainers
 import com.dokeraj.androtainer.models.PContainersResponse
 import com.dokeraj.androtainer.network.RetrofitInstance
 import io.noties.markwon.Markwon
@@ -75,11 +73,9 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         recycler_view.setHasFixedSize(true)
 
 
-        btnLogout.setOnClickListener(View.OnClickListener {
-            globActivity.invalidateJwt()
-            val action = DockerListerFragmentDirections.actionDockerListerFragmentToHomeFragment()
-            findNavController().navigate(action)
-        })
+        btnLogout.setOnClickListener {
+            logout(globActivity)
+        }
 
 
         btnAbout.setOnClickListener(View.OnClickListener {
@@ -87,24 +83,29 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 tvAboutInfo.visibility = View.INVISIBLE
             else
                 tvAboutInfo.visibility = View.VISIBLE
-
         })
 
 
 
         swiperLayout.setOnRefreshListener {
-
-            //todo:: check if jwt is not valid anymore - and if yes: kick the user to login page
-            //todo:: after kicking to login page - display a snackbar explaining that the session has exiperd
-
-            // don't refresh if there are any items that are transitioning between states
-            if (recyclerAdapterC.areItemsInTransitioningState())
-                swiperLayout.isRefreshing = false
-            else {
-                getPortainerContainers(globalVars.url!!,
-                    globalVars.jwt!!,
-                    recyclerAdapterC,
-                    swiperLayout)
+            if (globActivity.isJwtValid()) {
+                // don't refresh if there are any items that are transitioning between states
+                if (recyclerAdapterC.areItemsInTransitioningState())
+                    swiperLayout.isRefreshing = false
+                else {
+                    getPortainerContainers(globalVars.url!!,
+                        globalVars.jwt!!,
+                        recyclerAdapterC,
+                        swiperLayout,
+                        globActivity)
+                }
+            } else {
+                logout(globActivity, "Session has expired! Please log in again.")
+                /*globActivity.invalidateJwt()
+                globActivity.setLogoutMsg("Session has expired! Please log in again.")
+                val action =
+                    DockerListerFragmentDirections.actionDockerListerFragmentToHomeFragment()
+                findNavController().navigate(action)*/
             }
         }
     }
@@ -114,6 +115,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         jwt: String,
         recyclerAdapter: DockerContainerAdapter,
         swiperLayout: SwipeRefreshLayout,
+        mainActivity: MainActiviy,
     ) {
         val fullUrl = "${url.removeSuffix("/")}/api/endpoints/1/docker/containers/json"
         val header = "Bearer $jwt"
@@ -129,7 +131,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 ) {
                     val pcResponse: PContainersResponse? = response.body()
 
-                    if(pcResponse != null){
+                    if (pcResponse != null) {
                         println("ODGOVOR OD Swiper retrofit")
                         // remap from retrofit model to regular data class
                         val pcs: List<PContainer> = pcResponse.mapNotNull { pcr ->
@@ -145,36 +147,14 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                         recyclerAdapter.notifyDataSetChanged()
                         swiperLayout.isRefreshing = false
                     } else {
-                        // todo:: kick back to login and display snackbar
                         swiperLayout.isRefreshing = false
+                        logout(mainActivity,"Issue with Portainer! Please login again.")
                     }
-
-                    /*pcResponse?.let {
-
-                        println("ODGOVOR OD Swiper retrofit")
-
-                        // remap from retrofit model to regular data class
-                        val pcs: List<PContainer> = it.mapNotNull { pcr ->
-                            ContainerStateType.values().firstOrNull { xx -> xx.name == pcr.State }
-                                ?.let { cst ->
-                                    PContainer(pcr.Id, pcr.Names[0].drop(1),
-                                        pcr.Status, cst
-                                    )
-                                }
-                        }
-
-                        recyclerAdapter.setItems(pcs)
-                        recyclerAdapter.notifyDataSetChanged()
-                        swiperLayout.isRefreshing = false
-                    }*/
                 }
 
                 override fun onFailure(call: Call<PContainersResponse?>, t: Throwable) {
-                    println("U EROROROOOOOOXOXOXOXOXOXOXOOXOX: ${t.message}") // todo:: kick back to login and display snackbar
-                    Toast.makeText(activity,
-                        "Server not permitting communication! Please Log in manually",
-                        Toast.LENGTH_SHORT).show()
                     swiperLayout.isRefreshing = false
+                    logout(mainActivity,"Issue with Portainer! Please login again.")
                 }
             })
     }
@@ -198,5 +178,12 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         markwon.setMarkdown(tvAboutInfo, getString(R.string.about_app, appVersion))
     }
 
+    private fun logout(mainActiviy: MainActiviy, logoutMsg: String? = null) {
+        mainActiviy.invalidateJwt()
+        mainActiviy.setLogoutMsg(logoutMsg)
+        val action =
+            DockerListerFragmentDirections.actionDockerListerFragmentToHomeFragment()
+        findNavController().navigate(action)
+    }
 
 }
