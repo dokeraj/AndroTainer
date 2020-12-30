@@ -28,17 +28,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/ubuntu"
-        android:textSize="10.8sp"
         android:gravity="end"
         android:paddingEnd="6dp"
         android:text="https://numsivacha.com/portainerX/cant/"
         android:textColor="@color/disText1"
+        android:textSize="10.8sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.76" />
+        app:layout_constraintVertical_bias="0.73" />
 
     <TextView
         android:id="@+id/tvLoggedUsername"
@@ -57,13 +57,13 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toBottomOf="@+id/tvLoggedUrl"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.93" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/zilah_modern_narrow"
-        android:paddingStart="36dp"
+        android:paddingStart="32dp"
         android:text="AndroTainer"
         android:textColor="@color/blue_main"
         android:textSize="27sp"

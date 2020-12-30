@@ -68,13 +68,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         btnLogin.setOnClickListener {
-            changeBtnState(btnLogin, false)
+            changeBtnState(false)
             if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
                 authenticate(etUrl.text.toString(),
                     etUser.text.toString(),
-                    etPass.text.toString(), btnLogin, globActivity)
+                    etPass.text.toString(), globActivity)
             } else {
-                changeBtnState(btnLogin, true)
+                changeBtnState(true)
                 globActivity.showGenericSnack(requireContext(),
                     (getView())!!,
                     "Invalid URL!",
@@ -98,16 +98,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
 
         if (globActivity.hasJwt() && globActivity.isJwtValid()) {
-            println("JWT IS VALID")
+            changeBtnState(false)
             getPortainerContainers(globalVars.url!!, globalVars.jwt!!, globActivity)
         } else if (globActivity.hasJwt() && !globActivity.isJwtValid()) {
-            println("JWT NEEDS REFRESHING")
+            changeBtnState(false)
             authenticate(etUrl.text.toString(),
                 etUser.text.toString(),
                 etPass.text.toString(),
-                null, globActivity)
-        } else {
-            println("First Time user / or logged out")
+                globActivity)
         }
     }
 
@@ -116,21 +114,20 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         url: String,
         usr: String,
         pwd: String,
-        btn: Button?,
         mainActiviy: MainActiviy,
     ) {
         val cred = UserCredentials(usr, pwd)
 
-        val fixedBaseUrl: String = url.removeSuffix("/")
+        val fullPath = getString(R.string.authenticate).replace("{baseUrl}", url.removeSuffix("/"))
         val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
-        api.loginRequest(cred, "$fixedBaseUrl/api/auth")
+        api.loginRequest(cred, fullPath)
             .enqueue(object : retrofit2.Callback<Jwt?> {
                 override fun onResponse(
                     call: retrofit2.Call<Jwt?>,
                     response: retrofit2.Response<Jwt?>,
                 ) {
                     val jwtResponse: String? = response.body()?.jwt
-                    showResponseSnack(response.code().toString(), btn)
+                    showResponseSnack(response.code().toString())
 
                     jwtResponse?.let {
                         val jwtValidUntil: Long =
@@ -146,7 +143,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
 
                 override fun onFailure(call: retrofit2.Call<Jwt?>, t: Throwable) {
-                    btn?.let { changeBtnState(it, true) }
+                    changeBtnState(true)
                     mainActiviy.showGenericSnack(requireContext(),
                         view!!,
                         "Server not permitting communication! Check URL.",
@@ -157,7 +154,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             })
     }
 
-    fun showResponseSnack(responseStatus: String, btn: Button?) {
+    fun showResponseSnack(responseStatus: String) {
         data class SnackStyle(val text: String, val textColor: Int, val bckColor: Int)
         // colors
         val cBlueMain = context?.let { ContextCompat.getColor(it, R.color.blue_main) }
@@ -166,20 +163,23 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val cWhite = context?.let { ContextCompat.getColor(it, R.color.white) }
         val cOrange = context?.let { ContextCompat.getColor(it, R.color.orange_warning) }
 
-        val sbStyle = when (responseStatus) {
+        val sbStyle: SnackStyle = when (responseStatus) {
+            "200" -> SnackStyle("", cWhite!!, cRed!!)
             "502", "404" -> {
-                btn?.let { changeBtnState(it, true) }
+                changeBtnState(true)
                 SnackStyle("Wrong URL or service is down", cWhite!!, cRed!!)
             }
             "422" -> {
-                btn?.let { changeBtnState(it, true) }
+                changeBtnState(true)
                 SnackStyle("Invalid Credentials", cWhite!!, cOrange!!)
             }
             else -> {
-                btn?.let { changeBtnState(it, true) }
+                changeBtnState(true)
                 SnackStyle("Server response: Unknown error", cBlueMain!!, cDiscordGray!!)
             }
+
         }
+
 
         val v: View? = activity?.findViewById(android.R.id.content)
         val snackbar = Snackbar.make(
@@ -193,7 +193,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         val textView = snackbarView.findViewById<View>(snackbarTextId) as TextView
         textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
-        //textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setTextColor(sbStyle.textColor)
 
         snackbarView.setBackgroundColor(sbStyle.bckColor)
@@ -202,12 +201,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             snackbar.show()
     }
 
-    fun changeBtnState(btn: Button, enable: Boolean) {
-        btn.isEnabled = enable
-        if (enable)
-            btn.text = "Login"
-        else
-            btn.text = "Logging in.."
+    fun changeBtnState(enable: Boolean) {
+        if (enable != btnLogin.isEnabled) {
+            btnLogin.isEnabled = enable
+            if (enable)
+                btnLogin.text = "Login"
+            else
+                btnLogin.text = "Logging in.."
+        }
     }
 
 
@@ -216,11 +217,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         jwt: String,
         mainActiviy: MainActiviy,
     ) {
-        println("PRVOOOOOOOOOOOOOOOOOOOOOOOOO")
-        val fullUrl = "${url.removeSuffix("/")}/api/endpoints/1/docker/containers/json"
+        val fullUrl =
+            getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
         val header = "Bearer $jwt"
 
-        println("EVE tukakaka")
         val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
         api.listDockerContainers(header, fullUrl, 1)
             .enqueue(object : Callback<PContainersResponse?> {
@@ -229,12 +229,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     response: Response<PContainersResponse?>,
                 ) {
                     val pcResponse: PContainersResponse? = response.body()
-                    println("eve bodi::::: $pcResponse")
-                    println("EVE KOD:--- ${response.code()}")
 
                     pcResponse?.let {
-                        println("INJUNUIN")
-
                         // remap from retrofit model to regular data class
                         val pcs: List<PContainer> = it.mapNotNull { pcr ->
                             ContainerStateType.values().firstOrNull { xx -> xx.name == pcr.State }
@@ -243,7 +239,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                                         pcr.Status, cst
                                     )
                                 }
-
                         }
 
                         // go to the ListerFragment and transfer all found docker files
@@ -256,6 +251,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
 
                 override fun onFailure(call: Call<PContainersResponse?>, t: Throwable) {
+                    changeBtnState(false)
                     mainActiviy.showGenericSnack(requireContext(),
                         view!!,
                         "Server not permitting communication! Check URL.",

@@ -57,7 +57,7 @@ class DockerContainerAdapter(
                     cardBckColor = R.color.disGreen,
                     buttonText = "STOP",
                     buttonIsEnabled = true,
-                    buttonColor = R.color.btn_lister,
+                    buttonColor = R.color.blue_main,
                     statusIconImage = R.drawable.docker_status_icon,
                     statusIconColor = R.color.disText1,
                     currentItemNum = position,
@@ -76,7 +76,7 @@ class DockerContainerAdapter(
                     cardBckColor = R.color.disRed,
                     buttonText = "START",
                     buttonIsEnabled = true,
-                    buttonColor = R.color.btn_lister,
+                    buttonColor = R.color.blue_main,
                     statusIconImage = R.drawable.docker_status_icon,
                     statusIconColor = R.color.disText1,
                     currentItemNum = position,
@@ -163,8 +163,10 @@ class DockerContainerAdapter(
     ) {
         val header = "Bearer $jwt"
 
-        val urlToCall =
-            "${url.removeSuffix("/")}/api/endpoints/1/docker/containers/$containerId/${actionType.name.toLowerCase()}"
+        val urlToCall = contekst.getString(R.string.StartStopContainer)
+            .replace("{baseUrl}", url.removeSuffix("/"))
+            .replace("{containerId}", containerId)
+            .replace("{actionType}", actionType.name.toLowerCase())
 
         println("URL TO CALL: ${urlToCall}")
         val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
@@ -205,7 +207,7 @@ class DockerContainerAdapter(
                                     cardBckColor = R.color.disGreen,
                                     buttonText = "STOP",
                                     buttonIsEnabled = true,
-                                    buttonColor = R.color.btn_lister,
+                                    buttonColor = R.color.blue_main,
                                     statusIconImage = R.drawable.docker_status_icon,
                                     statusIconColor = R.color.disText1,
                                     currentItemNum = currentItemNum,
@@ -222,7 +224,7 @@ class DockerContainerAdapter(
                                     cardBckColor = R.color.disRed,
                                     buttonText = "START",
                                     buttonIsEnabled = true,
-                                    buttonColor = R.color.btn_lister,
+                                    buttonColor = R.color.blue_main,
                                     statusIconImage = R.drawable.docker_status_icon,
                                     statusIconColor = R.color.disText1,
                                     currentItemNum = currentItemNum,

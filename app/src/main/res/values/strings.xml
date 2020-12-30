@@ -9,5 +9,11 @@
     <string name="navigation_drawer_open">Open Navigation Drawer</string>
     <string name="navigation_drawer_close">Close Navigation Drawer</string>
     <string name="welcome_messages">My First Heading My <i>first</i> paragraph.</string>
-    <string name="about_app">**AndroTainer** is an open source app. This *SERVICE* is provided by Dokeraj at no cost and is intended for use as is.\nSource code can be found here: https://github.com/dokeraj/AndroTainer\n\nFor any further inquiries: dokeraj87@gmail.com\n\n Privacy policy: https://sites.google.com/view/androtainer/privacy-stuff\n\n`Current version: %1$s`</string>
+    <string name="about_app">**AndroTainer** is an open source app. This *SERVICE* is provided by Dokeraj at no cost and is intended for use as is.\nSource code can be found here: https://github.com/dokeraj/AndroTainer\n\nFor any further inquiries: dokeraj87@gmail.com\n\n Privacy policy: [find it here](https://sites.google.com/view/androtainer/privacy-stuff)\n\n`Current version: %1$s`</string>
+    <!--
+     URLs to portainer
+     -->
+    <string name="authenticate">{baseUrl}/api/auth</string>
+    <string name="getDockerContainers">{baseUrl}/api/endpoints/1/docker/containers/json</string>
+    <string name="StartStopContainer">{baseUrl}/api/endpoints/1/docker/containers/{containerId}/{actionType}</string>
 </resources>
