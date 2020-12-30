@@ -29,4 +29,6 @@
     <color name="btn_disabled">#a4d1db</color>
     <color name="btn_lister">#32c5e6</color>
     <color name="disYellow">#998233</color>
+    <color name="loginText">#C8CEDA</color>
+    <color name="loginDisabledText">#82C8CEDA</color>
 </resources>

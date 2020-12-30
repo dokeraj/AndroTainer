@@ -2,18 +2,18 @@
     <!-- Base application theme. -->
     <style name="Theme.AndroTainer" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/design_default_color_error</item>
-        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorPrimary">#38DAFF</item>
+        <item name="colorPrimaryVariant">#36393F</item>
+        <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorSecondaryVariant">@color/white</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:itemBackground">@color/blue_main</item>
         <item name="android:actionMenuTextColor">@color/blue_main</item>
         <item name="android:textColorPrimary">@color/blue_main</item>
-
+        <item name="android:windowBackground">@color/dis2</item>
         <!-- Customize your theme here. -->
     </style>
 

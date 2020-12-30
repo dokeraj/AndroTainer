@@ -8,6 +8,7 @@
     android:background="@color/dis4"
     android:fitsSystemWindows="true"
     tools:context=".DockerListerFragment"
+    tools:openDrawer="start"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -93,6 +94,7 @@
                 android:backgroundTint="@color/dis3"
                 android:fontFamily="@font/ubuntu"
                 android:textSize="15sp"
+                android:drawablePadding="9dp"
                 app:drawableTint="@color/disText2"
                 android:drawableLeft="@drawable/ic_logout_icon"
                 android:gravity="start|center_vertical"
@@ -118,7 +120,9 @@
                 android:fontFamily="@font/ubuntu"
                 app:drawableTint="@color/disText2"
                 android:drawableLeft="@drawable/info_logo"
-                android:gravity="start|center_vertical"
+                android:drawablePadding="9dp"
+                android:textAlignment="textStart"
+                android:lineHeight="15dp"
                 style="?android:attr/borderlessButtonStyle"
                 android:textAllCaps="false"
                 android:text="About" />

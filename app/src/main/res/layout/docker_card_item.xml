@@ -62,7 +62,7 @@
             android:layout_marginEnd="16dp"
             android:enabled="true"
             android:fontFamily="@font/ubuntu_bold"
-            android:textColor="@color/disText2"
+            android:textColor="@color/dis4"
             android:text="stop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
