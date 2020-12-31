@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dokeraj.androtainer.Interfaces.ApiInterface
 import com.dokeraj.androtainer.adapter.DockerContainerAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
@@ -27,7 +26,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
 class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
     private val args: DockerListerFragmentArgs by navArgs()
 
@@ -42,60 +40,51 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
 
         setDrawerInfo(globalVars)
 
-
         val hamburgerMenu = ActionBarDrawerToggle(activity,
-            drawerMoj,
+            drawerLister,
             toolbarMenu,
             R.string.nav_app_bar_open_drawer_description,
             R.string.navigation_drawer_close)
-        val ss = context?.let { ContextCompat.getColor(it, R.color.disText2) }
-        hamburgerMenu.drawerArrowDrawable.color = ss!!
-        drawerMoj.addDrawerListener(hamburgerMenu)
+
+        hamburgerMenu.drawerArrowDrawable.color =
+            ContextCompat.getColor(requireContext(), R.color.disText2)
+        drawerLister.addDrawerListener(hamburgerMenu)
         hamburgerMenu.syncState()
 
         // transfer data from login
         val containers: List<PContainer> = args.dContainers.containers
 
-        val recyclerAdapterC =
-            DockerContainerAdapter(containers, globalVars.url, globalVars.jwt, requireContext())
-        recycler_view.adapter = recyclerAdapterC
+        val recyclerAdapter =
+            DockerContainerAdapter(containers, globalVars.url!!, globalVars.jwt!!, requireContext())
+        recycler_view.adapter = recyclerAdapter
         recycler_view.layoutManager = LinearLayoutManager(activity)
         recycler_view.setHasFixedSize(true)
-
 
         btnLogout.setOnClickListener {
             logout(globActivity)
         }
 
-
-        btnAbout.setOnClickListener(View.OnClickListener {
+        btnAbout.setOnClickListener {
             if (tvAboutInfo.visibility == View.VISIBLE)
                 tvAboutInfo.visibility = View.INVISIBLE
             else
                 tvAboutInfo.visibility = View.VISIBLE
-        })
-
-
+        }
 
         swiperLayout.setOnRefreshListener {
             if (globActivity.isJwtValid()) {
+
                 // don't refresh if there are any items that are transitioning between states
-                if (recyclerAdapterC.areItemsInTransitioningState())
+                if (recyclerAdapter.areItemsInTransitioningState())
                     swiperLayout.isRefreshing = false
                 else {
                     getPortainerContainers(globalVars.url!!,
                         globalVars.jwt!!,
-                        recyclerAdapterC,
-                        swiperLayout,
+                        recyclerAdapter,
                         globActivity)
                 }
             } else {
                 logout(globActivity, "Session has expired! Please log in again.")
-                /*globActivity.invalidateJwt()
-                globActivity.setLogoutMsg("Session has expired! Please log in again.")
-                val action =
-                    DockerListerFragmentDirections.actionDockerListerFragmentToHomeFragment()
-                findNavController().navigate(action)*/
             }
         }
     }
@@ -104,14 +93,11 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         url: String,
         jwt: String,
         recyclerAdapter: DockerContainerAdapter,
-        swiperLayout: SwipeRefreshLayout,
         mainActivity: MainActiviy,
     ) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
         val header = "Bearer $jwt"
-
-        println("POVIK DO GET DOKER KONTEJNERI OD SWIPERo!")
 
         val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
         api.listDockerContainers(header, fullUrl, 1)
@@ -123,12 +109,12 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     val pcResponse: PContainersResponse? = response.body()
 
                     if (pcResponse != null) {
-                        println("ODGOVOR OD Swiper retrofit")
-                        // remap from retrofit model to regular data class
+                        // remap from retrofit model to regular data class / filter out containers in unknown state
                         val pcs: List<PContainer> = pcResponse.mapNotNull { pcr ->
-                            ContainerStateType.values().firstOrNull { xx -> xx.name == pcr.State }
+                            // return null if state of container is not one of the listed in ContainerStateType enum
+                            ContainerStateType.values().firstOrNull { cst -> cst.name == pcr.State }
                                 ?.let { cst ->
-                                    PContainer(pcr.Id, pcr.Names[0].drop(1).capitalize(),
+                                    PContainer(pcr.Id, pcr.Names[0].drop(1).trim().capitalize(),
                                         pcr.Status, cst
                                     )
                                 }
@@ -161,7 +147,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         val appVersion: String = pInfo.versionName
 
         // use Markwon to format the text
-        val markwonx = Markwon.builder(requireContext())
+        val markwon = Markwon.builder(requireContext())
             .usePlugin(object : AbstractMarkwonPlugin() {
                 override fun configureTheme(builder: MarkwonTheme.Builder) {
                     builder
@@ -173,7 +159,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             .build()
 
         // get the text from the string resources and add the version number
-        markwonx.setMarkdown(tvAboutInfo, getString(R.string.about_app, appVersion))
+        markwon.setMarkdown(tvAboutInfo, getString(R.string.about_app, appVersion))
     }
 
     private fun logout(mainActiviy: MainActiviy, logoutMsg: String? = null) {

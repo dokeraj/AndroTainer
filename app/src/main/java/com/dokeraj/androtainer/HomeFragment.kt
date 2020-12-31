@@ -235,7 +235,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val pcs: List<PContainer> = it.mapNotNull { pcr ->
                             ContainerStateType.values().firstOrNull { xx -> xx.name == pcr.State }
                                 ?.let { cst ->
-                                    PContainer(pcr.Id, pcr.Names[0].drop(1).capitalize(),
+                                    PContainer(pcr.Id, pcr.Names[0].drop(1).trim().capitalize(),
                                         pcr.Status, cst
                                     )
                                 }
