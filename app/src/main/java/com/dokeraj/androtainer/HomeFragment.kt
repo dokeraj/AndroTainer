@@ -144,9 +144,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
                 override fun onFailure(call: retrofit2.Call<Jwt?>, t: Throwable) {
                     changeBtnState(true)
+                    println(t.message)
                     mainActiviy.showGenericSnack(requireContext(),
                         view!!,
-                        "Server not permitting communication! Check URL.",
+                        "Server not permitting communication! Check URL. ${t.message}",
                         R.color.red,
                         R.color.white)
                 }
