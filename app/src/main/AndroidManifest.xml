@@ -12,6 +12,7 @@
         android:name=".globalvars.GlobalApp"
         android:icon="@mipmap/launcher_icon"
         android:label="@string/app_name"
+        android:usesCleartextTraffic="true"
         android:roundIcon="@mipmap/launcher_icon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroTainer">
