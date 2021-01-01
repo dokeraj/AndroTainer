@@ -10,8 +10,8 @@ import kotlinx.android.synthetic.main.login_btn.view.*
 
 class BtnLogin(val ct: Context, val view: View) {
     fun changeBtnState(enable: Boolean) {
-        val fadeIn = AnimationUtils.loadAnimation(ct,R.anim.fade_in_btn)
-        val colorTransition =  view.clLogin.background as TransitionDrawable
+        val fadeIn = AnimationUtils.loadAnimation(ct, R.anim.fade_in_btn)
+        val colorTransition = view.clLogin.background as TransitionDrawable
 
         if (enable != view.isClickable) {
             view.isClickable = enable
@@ -20,18 +20,12 @@ class BtnLogin(val ct: Context, val view: View) {
                 view.tvLogin.visibility = View.VISIBLE
                 view.pbLogin.visibility = View.GONE
                 colorTransition.reverseTransition(200)
-                /*view.clLogin.background.colorFilter =
-                    BlendModeColorFilter(ContextCompat.getColor(ct,
-                        R.color.blue_main), BlendMode.SRC)*/
             } else {
                 view.pbLogin.animation = fadeIn
                 colorTransition.startTransition(200)
                 view.tvLogin.visibility = View.GONE
                 view.tvLogin.setTextColor(ContextCompat.getColor(ct, R.color.dis6))
                 view.pbLogin.visibility = View.VISIBLE
-                /*view.clLogin.background.colorFilter =
-                    BlendModeColorFilter(ContextCompat.getColor(ct,
-                        R.color.btn_disabled), BlendMode.SRC)*/
             }
         }
     }
