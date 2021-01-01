@@ -87,4 +87,14 @@
         android:textColor="@color/button_state_text_colors"
         tools:text="Login" />
 
+    <include
+        android:id="@+id/lgnBtn"
+        layout="@layout/login_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnLogin"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="30dp" />
+
 </RelativeLayout>
