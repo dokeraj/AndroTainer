@@ -72,29 +72,14 @@
         android:textColor="@color/loginText"
         />
 
-    <Button
-        android:id="@+id/btnLogin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/etPass"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
-        android:width="155dip"
-        android:backgroundTint="@color/button_state_bck_colors"
-        android:fontFamily="@font/ubuntu_bold"
-        android:gravity="center"
-        android:text="Login"
-        android:textColor="@color/button_state_text_colors"
-        tools:text="Login" />
-
     <include
         android:id="@+id/lgnBtn"
         layout="@layout/login_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/btnLogin"
+        android:layout_below="@+id/etPass"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="30dp" />
+        android:layout_marginTop="45dp" />
 
 </RelativeLayout>

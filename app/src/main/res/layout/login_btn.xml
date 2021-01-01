@@ -8,8 +8,8 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cwLogin"
-        android:layout_width="160dp"
-        android:layout_height="40dp"
+        android:layout_width="155dp"
+        android:layout_height="38dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -17,7 +17,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clLogin"
-            android:background="@color/blue_main"
+            android:background="@drawable/btn_login_transition"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -30,6 +30,7 @@
                 android:textAllCaps="true"
                 android:textColor="@color/dis4"
                 android:textSize="15sp"
+                android:letterSpacing="0.08"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

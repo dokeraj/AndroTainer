@@ -86,22 +86,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
 
-        /*btnLogin.setOnClickListener {
-            btnLoginState.changeBtnState(false)
-            if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
-                authenticate(etUrl.text.toString(),
-                    etUser.text.toString(),
-                    etPass.text.toString(), globActivity,btnLoginState)
-            } else {
-                btnLoginState.changeBtnState(true)
-                globActivity.showGenericSnack(requireContext(),
-                    (getView())!!,
-                    "Invalid URL!",
-                    R.color.white,
-                    R.color.orange_warning)
-            }
-        }*/
-
         if (globActivity.getLogoutMsg() != null) {
             globActivity.showGenericSnack(requireContext(),
                 (getView())!!,
@@ -164,10 +148,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
                 override fun onFailure(call: retrofit2.Call<Jwt?>, t: Throwable) {
                     btnLoginState.changeBtnState(true)
-                    println(t.message)
                     mainActiviy.showGenericSnack(requireContext(),
                         view!!,
-                        "Server not permitting communication! Check URL. ${t.message}",
+                        "Server not permitting communication! Check URL.",
                         R.color.red,
                         R.color.white)
                 }
@@ -221,17 +204,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (responseStatus != "200")
             snackbar.show()
     }
-
-    /*fun changeBtnState(enable: Boolean) {
-        if (enable != btnLogin.isEnabled) {
-            btnLogin.isEnabled = enable
-            if (enable)
-                btnLogin.text = "Login"
-            else
-                btnLogin.text = "Logging in.."
-        }
-    }*/
-
 
     private fun getPortainerContainers(
         url: String,
