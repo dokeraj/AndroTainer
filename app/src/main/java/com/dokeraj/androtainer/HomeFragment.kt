@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.dokeraj.androtainer.Interfaces.ApiInterface
+import com.dokeraj.androtainer.buttons.BtnLogin
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.*
 import com.dokeraj.androtainer.network.RetrofitInstance
@@ -67,14 +68,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
 
-        btnLogin.setOnClickListener {
-            changeBtnState(false)
+        val btnLoginState = BtnLogin(requireContext(), lgnBtn)
+
+        lgnBtn.setOnClickListener{
+            btnLoginState.changeBtnState(false)
             if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
                 authenticate(etUrl.text.toString(),
                     etUser.text.toString(),
-                    etPass.text.toString(), globActivity)
+                    etPass.text.toString(), globActivity,btnLoginState)
             } else {
-                changeBtnState(true)
+                btnLoginState.changeBtnState(true)
                 globActivity.showGenericSnack(requireContext(),
                     (getView())!!,
                     "Invalid URL!",
@@ -98,14 +101,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
 
         if (globActivity.hasJwt() && globActivity.isJwtValid()) {
-            changeBtnState(false)
-            getPortainerContainers(globalVars.url!!, globalVars.jwt!!, globActivity)
+            btnLoginState.changeBtnState(false)
+            getPortainerContainers(globalVars.url!!, globalVars.jwt!!, globActivity,btnLoginState)
         } else if (globActivity.hasJwt() && !globActivity.isJwtValid()) {
-            changeBtnState(false)
+            btnLoginState.changeBtnState(false)
             authenticate(etUrl.text.toString(),
                 etUser.text.toString(),
                 etPass.text.toString(),
-                globActivity)
+                globActivity,btnLoginState)
         }
     }
 
@@ -115,6 +118,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         usr: String,
         pwd: String,
         mainActiviy: MainActiviy,
+        btnLoginState: BtnLogin
     ) {
         val cred = UserCredentials(usr, pwd)
 
@@ -127,7 +131,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     response: retrofit2.Response<Jwt?>,
                 ) {
                     val jwtResponse: String? = response.body()?.jwt
-                    showResponseSnack(response.code().toString())
+                    showResponseSnack(response.code().toString(),btnLoginState)
 
                     jwtResponse?.let {
                         val jwtValidUntil: Long =
@@ -138,16 +142,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val globActivity: MainActiviy = (activity as MainActiviy?)!!
                         globActivity.setAllMasterVals(url, usr, pwd, it, jwtValidUntil)
 
-                        getPortainerContainers(url, it, mainActiviy)
+                        getPortainerContainers(url, it, mainActiviy,btnLoginState)
                     }
                 }
 
                 override fun onFailure(call: retrofit2.Call<Jwt?>, t: Throwable) {
-                    changeBtnState(true)
-                    println(t.message)
+                    btnLoginState.changeBtnState(true)
                     mainActiviy.showGenericSnack(requireContext(),
                         view!!,
-                        "Server not permitting communication! Check URL. ${t.message}",
+                        "Server not permitting communication! Check URL.",
                         R.color.red,
                         R.color.white)
                 }
@@ -155,7 +158,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             })
     }
 
-    fun showResponseSnack(responseStatus: String) {
+    fun showResponseSnack(responseStatus: String, btnLoginState:BtnLogin) {
         data class SnackStyle(val text: String, val textColor: Int, val bckColor: Int)
         // colors
         val cBlueMain = context?.let { ContextCompat.getColor(it, R.color.blue_main) }
@@ -167,15 +170,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val sbStyle: SnackStyle = when (responseStatus) {
             "200" -> SnackStyle("", cWhite!!, cRed!!)
             "502", "404" -> {
-                changeBtnState(true)
+                btnLoginState.changeBtnState(true)
                 SnackStyle("Wrong URL or service is down", cWhite!!, cRed!!)
             }
             "422" -> {
-                changeBtnState(true)
+                btnLoginState.changeBtnState(true)
                 SnackStyle("Invalid Credentials", cWhite!!, cOrange!!)
             }
             else -> {
-                changeBtnState(true)
+                btnLoginState.changeBtnState(true)
                 SnackStyle("Server response: Unknown error", cBlueMain!!, cDiscordGray!!)
             }
 
@@ -202,21 +205,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             snackbar.show()
     }
 
-    fun changeBtnState(enable: Boolean) {
-        if (enable != btnLogin.isEnabled) {
-            btnLogin.isEnabled = enable
-            if (enable)
-                btnLogin.text = "Login"
-            else
-                btnLogin.text = "Logging in.."
-        }
-    }
-
-
     private fun getPortainerContainers(
         url: String,
         jwt: String,
         mainActiviy: MainActiviy,
+        btnLoginState:BtnLogin
     ) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
@@ -252,7 +245,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
 
                 override fun onFailure(call: Call<PContainersResponse?>, t: Throwable) {
-                    changeBtnState(false)
+                    btnLoginState.changeBtnState(false)
                     mainActiviy.showGenericSnack(requireContext(),
                         view!!,
                         "Server not permitting communication! Check URL.",

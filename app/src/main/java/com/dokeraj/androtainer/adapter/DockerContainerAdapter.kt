@@ -6,8 +6,8 @@ import android.graphics.BlendModeColorFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -120,7 +120,10 @@ class DockerContainerAdapter(
     class ContainerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val dockerNameView: TextView = itemView.etDockerName
         val dockerStatusView: TextView = itemView.etDockerStatus
-        val dockerButton: Button = itemView.btnStartStop
+        val dockerButton: View = itemView.btnStartStop
+        val btnBackgroundView: ConstraintLayout = itemView.findViewById(R.id.clLister)
+        val btnProgressBar: ProgressBar = itemView.findViewById(R.id.pbLister)
+        val btnTextView: TextView = itemView.findViewById(R.id.tvLister)
         val cardHolderLayout: ConstraintLayout = itemView.cardHolderLayout
         val statusIconView: ImageView = itemView.statusIcon
     }
@@ -257,19 +260,23 @@ class DockerContainerAdapter(
                 statusTextColor))
 
             // change button background
-            holder.dockerButton.text = buttonText
-            holder.dockerButton.isEnabled = buttonIsEnabled
-            val btnBackground = holder.dockerButton.background
+            holder.btnTextView.text = buttonText
+            holder.dockerButton.isClickable = buttonIsEnabled
+            val btnBackground = holder.btnBackgroundView.background
             btnBackground.mutate()
             btnBackground.colorFilter =
                 BlendModeColorFilter(ContextCompat.getColor(context,
                     buttonColor), BlendMode.SRC)
-            holder.dockerButton.background = btnBackground
+            holder.btnBackgroundView.background = btnBackground
 
             // Status Icon
             holder.statusIconView.setImageResource(statusIconImage)
             holder.statusIconView.setColorFilter(ContextCompat.getColor(context,
                 statusIconColor))
+
+            // Progress Bar
+            holder.btnProgressBar.visibility =
+                if (containerState == ContainerStateType.transitioning) View.VISIBLE else View.GONE
         }
     }
 

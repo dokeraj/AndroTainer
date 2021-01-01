@@ -44,7 +44,6 @@ class MainActiviy : AppCompatActivity() {
 
         val textView = snackbarView.findViewById<View>(snackbarTextId) as TextView
         textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
-        //textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setTextColor(ContextCompat.getColor(context, textColor))
 
         snackbarView.setBackgroundColor(ContextCompat.getColor(context, snackBckColor))
@@ -62,7 +61,7 @@ class MainActiviy : AppCompatActivity() {
     ) {
         val sharedPrefs = this.getSharedPreferences(SP_NAME, MODE_PRIVATE)
         val editor = sharedPrefs?.edit()
-        println("U PERMA SME SEGAxxxxxx")
+
         editor?.putString(URL_NAME, url)
         editor?.putString(USR_NAME, usr)
         editor?.putString(PWD_NAME, pwd)
