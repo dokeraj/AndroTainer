@@ -1,13 +1,16 @@
 package com.dokeraj.androtainer
 
+import android.annotation.SuppressLint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.util.Patterns
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.GestureDetectorCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.dokeraj.androtainer.Interfaces.ApiInterface
@@ -22,14 +25,19 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import kotlin.math.abs
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         requireActivity().window.statusBarColor =
             ContextCompat.getColor(requireContext(), R.color.dis4)
+
+        val detector = GestureDetectorCompat(requireContext(), UsersGestureListener())
 
         val globActivity: MainActiviy = (activity as MainActiviy?)!!
         val globalVars = (globActivity.application as GlobalApp)
@@ -70,16 +78,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         val btnLoginState = BtnLogin(requireContext(), lgnBtn)
 
-        lgnBtn.setOnClickListener{
+        lgnBtn.setOnClickListener {
             btnLoginState.changeBtnState(false)
             if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
                 authenticate(etUrl.text.toString(),
                     etUser.text.toString(),
-                    etPass.text.toString(), globActivity,btnLoginState)
+                    etPass.text.toString(), globActivity, btnLoginState)
             } else {
                 btnLoginState.changeBtnState(true)
                 globActivity.showGenericSnack(requireContext(),
-                    (getView())!!,
+                    requireView(),
                     "Invalid URL!",
                     R.color.white,
                     R.color.orange_warning)
@@ -88,7 +96,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         if (globActivity.getLogoutMsg() != null) {
             globActivity.showGenericSnack(requireContext(),
-                (getView())!!,
+                requireView(),
                 globActivity.getLogoutMsg()!!,
                 R.color.white,
                 R.color.orange_warning)
@@ -102,23 +110,27 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         if (globActivity.hasJwt() && globActivity.isJwtValid()) {
             btnLoginState.changeBtnState(false)
-            getPortainerContainers(globalVars.url!!, globalVars.jwt!!, globActivity,btnLoginState)
+            getPortainerContainers(globalVars.url!!, globalVars.jwt!!, globActivity, btnLoginState)
         } else if (globActivity.hasJwt() && !globActivity.isJwtValid()) {
             btnLoginState.changeBtnState(false)
             authenticate(etUrl.text.toString(),
                 etUser.text.toString(),
                 etPass.text.toString(),
-                globActivity,btnLoginState)
+                globActivity, btnLoginState)
+        }
+
+        view.setOnTouchListener { v, event ->
+            detector.onTouchEvent(event)
+            true
         }
     }
-
 
     private fun authenticate(
         url: String,
         usr: String,
         pwd: String,
         mainActiviy: MainActiviy,
-        btnLoginState: BtnLogin
+        btnLoginState: BtnLogin,
     ) {
         val cred = UserCredentials(usr, pwd)
 
@@ -131,7 +143,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     response: retrofit2.Response<Jwt?>,
                 ) {
                     val jwtResponse: String? = response.body()?.jwt
-                    showResponseSnack(response.code().toString(),btnLoginState)
+                    showResponseSnack(response.code().toString(), btnLoginState)
 
                     jwtResponse?.let {
                         val jwtValidUntil: Long =
@@ -142,14 +154,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val globActivity: MainActiviy = (activity as MainActiviy?)!!
                         globActivity.setAllMasterVals(url, usr, pwd, it, jwtValidUntil)
 
-                        getPortainerContainers(url, it, mainActiviy,btnLoginState)
+                        getPortainerContainers(url, it, mainActiviy, btnLoginState)
                     }
                 }
 
                 override fun onFailure(call: retrofit2.Call<Jwt?>, t: Throwable) {
                     btnLoginState.changeBtnState(true)
                     mainActiviy.showGenericSnack(requireContext(),
-                        view!!,
+                        requireView(),
                         "Server not permitting communication! Check URL.",
                         R.color.red,
                         R.color.white)
@@ -158,7 +170,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             })
     }
 
-    fun showResponseSnack(responseStatus: String, btnLoginState:BtnLogin) {
+    fun showResponseSnack(responseStatus: String, btnLoginState: BtnLogin) {
         data class SnackStyle(val text: String, val textColor: Int, val bckColor: Int)
         // colors
         val cBlueMain = context?.let { ContextCompat.getColor(it, R.color.blue_main) }
@@ -181,7 +193,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 btnLoginState.changeBtnState(true)
                 SnackStyle("Server response: Unknown error", cBlueMain!!, cDiscordGray!!)
             }
-
         }
 
 
@@ -209,7 +220,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         url: String,
         jwt: String,
         mainActiviy: MainActiviy,
-        btnLoginState:BtnLogin
+        btnLoginState: BtnLogin,
     ) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
@@ -247,11 +258,52 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 override fun onFailure(call: Call<PContainersResponse?>, t: Throwable) {
                     btnLoginState.changeBtnState(false)
                     mainActiviy.showGenericSnack(requireContext(),
-                        view!!,
+                        requireView(),
                         "Server not permitting communication! Check URL.",
                         R.color.red,
                         R.color.white)
                 }
             })
     }
+
+    private fun onSwipeRight() {
+        val globActivity: MainActiviy = (activity as MainActiviy?)!!
+        globActivity.showGenericSnack(requireContext(),
+            requireView(),
+            "SWIPRE RIGHT.",
+            R.color.white,
+            R.color.black)
+    }
+
+    inner class UsersGestureListener : GestureDetector.SimpleOnGestureListener() {
+        private val SWIPE_THRESHOLD = 100
+        private val SWIPE_VELOCITY_THRESHOLD = 100
+
+        override fun onFling(
+            downEvent: MotionEvent?,
+            moveEvent: MotionEvent?,
+            velocityX: Float,
+            velocityY: Float,
+        ): Boolean {
+            val diffx = moveEvent?.x?.minus(downEvent!!.x) ?: 0.0F
+            val diffy = moveEvent?.y?.minus(downEvent!!.y) ?: 0.0F
+
+            return if (abs(diffx) > abs(diffy)) {
+                // this is a left or right swipe
+                if (abs(diffx) > SWIPE_THRESHOLD && velocityX > SWIPE_VELOCITY_THRESHOLD) {
+                    // this is to differentiate between accidental and real swipe
+                    if (diffx > 0) {
+                        // this is a right swipe (from left to right)
+                        this@HomeFragment.onSwipeRight()
+                        true
+                    } else
+                        super.onFling(downEvent, moveEvent, velocityX, velocityY)
+                } else
+                    super.onFling(downEvent, moveEvent, velocityX, velocityY)
+            } else
+                super.onFling(downEvent, moveEvent, velocityX, velocityY)
+
+        }
+    }
+
 }

@@ -2,6 +2,7 @@ package com.dokeraj.androtainer
 
 import android.os.Bundle
 import android.text.util.Linkify
+import android.view.Gravity
 import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
@@ -50,6 +51,10 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             ContextCompat.getColor(requireContext(), R.color.disText2)
         drawerLister.addDrawerListener(hamburgerMenu)
         hamburgerMenu.syncState()
+
+/**
+        drawerLister.openDrawer(Gravity.LEFT)
+        drawerLister.close()*/
 
         // transfer data from login
         val containers: List<PContainer> = args.dContainers.containers
