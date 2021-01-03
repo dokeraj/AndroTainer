@@ -73,7 +73,7 @@
 
         <include
             android:id="@+id/ejHeder"
-            layout="@layout/drawer_header"
+            layout="@layout/drawer_lister_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

@@ -1,8 +1,8 @@
 package com.dokeraj.androtainer.Interfaces
 
-import com.dokeraj.androtainer.models.Jwt
-import com.dokeraj.androtainer.models.PContainersResponse
-import com.dokeraj.androtainer.models.UserCredentials
+import com.dokeraj.androtainer.models.retrofit.Jwt
+import com.dokeraj.androtainer.models.retrofit.PContainersResponse
+import com.dokeraj.androtainer.models.retrofit.UserCredentials
 import retrofit2.Call
 import retrofit2.http.*
 

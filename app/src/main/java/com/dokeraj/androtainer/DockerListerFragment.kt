@@ -2,7 +2,6 @@ package com.dokeraj.androtainer
 
 import android.os.Bundle
 import android.text.util.Linkify
-import android.view.Gravity
 import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
@@ -15,13 +14,13 @@ import com.dokeraj.androtainer.adapter.DockerContainerAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.ContainerStateType
 import com.dokeraj.androtainer.models.PContainer
-import com.dokeraj.androtainer.models.PContainersResponse
+import com.dokeraj.androtainer.models.retrofit.PContainersResponse
 import com.dokeraj.androtainer.network.RetrofitInstance
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.linkify.LinkifyPlugin
-import kotlinx.android.synthetic.main.drawer_header.*
+import kotlinx.android.synthetic.main.drawer_lister_header.*
 import kotlinx.android.synthetic.main.fragment_docker_lister.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -52,15 +51,13 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         drawerLister.addDrawerListener(hamburgerMenu)
         hamburgerMenu.syncState()
 
-/**
-        drawerLister.openDrawer(Gravity.LEFT)
-        drawerLister.close()*/
+        // todo:: when deleting the current user -> display popup and say if you delete the current user you will be logged out - and then log out
 
         // transfer data from login
         val containers: List<PContainer> = args.dContainers.containers
 
         val recyclerAdapter =
-            DockerContainerAdapter(containers, globalVars.url!!, globalVars.jwt!!, requireContext())
+            DockerContainerAdapter(containers, globalVars.currentUser!!.serverUrl, globalVars.currentUser!!.jwt!!, requireContext())
         recycler_view.adapter = recyclerAdapter
         recycler_view.layoutManager = LinearLayoutManager(activity)
         recycler_view.setHasFixedSize(true)
@@ -83,8 +80,8 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 if (recyclerAdapter.areItemsInTransitioningState())
                     swiperLayout.isRefreshing = false
                 else {
-                    getPortainerContainers(globalVars.url!!,
-                        globalVars.jwt!!,
+                    getPortainerContainers(globalVars.currentUser!!.serverUrl,
+                        globalVars.currentUser!!.jwt!!,
                         recyclerAdapter,
                         globActivity)
                 }
@@ -144,8 +141,8 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
 
     private fun setDrawerInfo(globalVars: GlobalApp) {
         // set the name of the logged in user and the server url
-        tvLoggedUsername.text = globalVars.user
-        tvLoggedUrl.text = globalVars.url
+        tvLoggedUsername.text = globalVars.currentUser!!.username
+        tvLoggedUrl.text = globalVars.currentUser!!.serverUrl
 
         //get version name of app
         val pInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)

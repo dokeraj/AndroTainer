@@ -6,19 +6,28 @@ import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.util.Patterns
 import android.view.GestureDetector
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.Interfaces.ApiInterface
+import com.dokeraj.androtainer.adapter.UsersLoginAdapter
 import com.dokeraj.androtainer.buttons.BtnLogin
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.*
+import com.dokeraj.androtainer.models.retrofit.Jwt
+import com.dokeraj.androtainer.models.retrofit.PContainersResponse
+import com.dokeraj.androtainer.models.retrofit.UserCredentials
 import com.dokeraj.androtainer.network.RetrofitInstance
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.fragment_docker_lister.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -28,8 +37,6 @@ import java.time.ZonedDateTime
 import kotlin.math.abs
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
-
-
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -103,14 +110,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             globActivity.setLogoutMsg(null)
         }
 
-        globalVars.url?.let { etUrl.setText(it) }
-        globalVars.user?.let { etUser.setText(it) }
-        globalVars.pwd?.let { etPass.setText(it) }
+        globalVars.currentUser?.serverUrl?.let { etUrl.setText(it) }
+        globalVars.currentUser?.username?.let { etUser.setText(it) }
+        globalVars.currentUser?.pwd?.let { etPass.setText(it) }
 
 
         if (globActivity.hasJwt() && globActivity.isJwtValid()) {
             btnLoginState.changeBtnState(false)
-            getPortainerContainers(globalVars.url!!, globalVars.jwt!!, globActivity, btnLoginState)
+            getPortainerContainers(globalVars.currentUser!!.serverUrl,
+                globalVars.currentUser!!.jwt!!,
+                globActivity,
+                btnLoginState)
         } else if (globActivity.hasJwt() && !globActivity.isJwtValid()) {
             btnLoginState.changeBtnState(false)
             authenticate(etUrl.text.toString(),
@@ -122,6 +132,24 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         view.setOnTouchListener { v, event ->
             detector.onTouchEvent(event)
             true
+        }
+
+        // on button back pressed - close the users drawer
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
+            users_lister.close()
+        }
+
+        // load the user credentials into the drawer recyclerview
+        val savedUsers: List<Credential> = globalVars.credentials.map { (k, v) -> v }
+
+        if (savedUsers.isNotEmpty()) {
+            val recyclerAdapter =
+                UsersLoginAdapter(savedUsers, users_lister, view, globActivity, requireContext())
+            users_recylcerView.adapter = recyclerAdapter
+            users_recylcerView.layoutManager = LinearLayoutManager(activity)
+            users_recylcerView.setHasFixedSize(true)
+        } else {
+            tvUsersNoContent.visibility = View.VISIBLE
         }
     }
 
@@ -195,7 +223,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
 
-
         val v: View? = activity?.findViewById(android.R.id.content)
         val snackbar = Snackbar.make(
             v!!,
@@ -266,15 +293,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             })
     }
 
-    private fun onSwipeRight() {
-        val globActivity: MainActiviy = (activity as MainActiviy?)!!
-        globActivity.showGenericSnack(requireContext(),
-            requireView(),
-            "SWIPRE RIGHT.",
-            R.color.white,
-            R.color.black)
-    }
-
     inner class UsersGestureListener : GestureDetector.SimpleOnGestureListener() {
         private val SWIPE_THRESHOLD = 100
         private val SWIPE_VELOCITY_THRESHOLD = 100
@@ -290,11 +308,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
             return if (abs(diffx) > abs(diffy)) {
                 // this is a left or right swipe
-                if (abs(diffx) > SWIPE_THRESHOLD && velocityX > SWIPE_VELOCITY_THRESHOLD) {
+                if (abs(diffx) > SWIPE_THRESHOLD && abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                     // this is to differentiate between accidental and real swipe
                     if (diffx > 0) {
-                        // this is a right swipe (from left to right)
-                        this@HomeFragment.onSwipeRight()
+                        // this is a right swipe (from left to right) - open the drawer
+                        users_lister.openDrawer(Gravity.LEFT)
+                        true
+                    } else if (diffx < 0) {
+                        // this is a left swipe - close the drawer
+                        users_lister.close()
                         true
                     } else
                         super.onFling(downEvent, moveEvent, velocityX, velocityY)
@@ -302,7 +324,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     super.onFling(downEvent, moveEvent, velocityX, velocityY)
             } else
                 super.onFling(downEvent, moveEvent, velocityX, velocityY)
-
         }
     }
 

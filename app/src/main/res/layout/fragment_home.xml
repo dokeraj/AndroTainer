@@ -1,85 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/users_lister"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient"
-    tools:context=".HomeFragment">
+    android:background="@color/dis4"
+    android:fitsSystemWindows="true"
+    tools:context=".HomeFragment"
+    tools:openDrawer="start">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/gradient"
+        tools:context=".HomeFragment">
 
 
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
-        app:srcCompat="@drawable/androtainerlogo_text" />
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="70dp"
+            app:srcCompat="@drawable/androtainerlogo_text" />
 
-    <EditText
-        android:id="@+id/etUrl"
-        style="@style/Widget.AppCompat.EditText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/imageView3"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        android:layout_marginTop="75dp"
-        android:width="300dip"
-        android:backgroundTint="#38daff"
-        android:drawableStart="@drawable/web_link_logo"
-        android:fontFamily="sans-serif-light"
-        android:gravity="center"
-        android:hint="https://mydomain.com/portainer"
-        android:inputType="textPersonName"
-        android:maxLength="760"
-        android:textColor="@color/loginText"
-        android:textColorHint="@color/loginDisabledText" />
+        <EditText
+            android:id="@+id/etUrl"
+            style="@style/Widget.AppCompat.EditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imageView3"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_marginTop="75dp"
+            android:width="300dip"
+            android:backgroundTint="#38daff"
+            android:drawableStart="@drawable/web_link_logo"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center"
+            android:hint="https://mydomain.com/portainer"
+            android:inputType="textPersonName"
+            android:maxLength="760"
+            android:textColor="@color/loginText"
+            android:textColorHint="@color/loginDisabledText" />
 
-    <EditText
-        android:id="@+id/etUser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/etUrl"
-        android:layout_marginTop="25dp"
-        android:drawableStart="@drawable/person_login"
-        android:width="250dip"
-        android:inputType="textPersonName"
-        android:backgroundTint="#38daff"
-        android:gravity="center"
-        android:layout_centerHorizontal="true"
-        android:fontFamily="sans-serif-light"
-        android:hint="UserName"
-        android:textColorHint="@color/loginDisabledText"
-        android:textColor="@color/loginText"/>
+        <EditText
+            android:id="@+id/etUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/etUrl"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="25dp"
+            android:width="250dip"
+            android:backgroundTint="#38daff"
+            android:drawableStart="@drawable/person_login"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center"
+            android:hint="UserName"
+            android:inputType="textPersonName"
+            android:textColor="@color/loginText"
+            android:textColorHint="@color/loginDisabledText" />
 
-    <EditText
-        android:id="@+id/etPass"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/etUser"
-        android:layout_marginTop="25dp"
-        android:drawableStart="@drawable/padlock_logo"
-        android:width="250dip"
-        android:inputType="textPassword"
-        android:backgroundTint="#38daff"
-        android:gravity="center"
-        android:layout_centerHorizontal="true"
-        android:fontFamily="sans-serif-light"
-        android:hint="Password"
-        android:textColorHint="@color/loginDisabledText"
-        android:textColor="@color/loginText"
-        />
+        <EditText
+            android:id="@+id/etPass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/etUser"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="25dp"
+            android:width="250dip"
+            android:backgroundTint="#38daff"
+            android:drawableStart="@drawable/padlock_logo"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:textColor="@color/loginText"
+            android:textColorHint="@color/loginDisabledText" />
 
-    <include
-        android:id="@+id/lgnBtn"
-        layout="@layout/login_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/etPass"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="45dp" />
+        <include
+            android:id="@+id/lgnBtn"
+            layout="@layout/login_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/etPass"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="45dp" />
 
-</RelativeLayout>
+    </RelativeLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nav_users_view"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/dis3"
+        android:clickable="true"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/users_header"
+            layout="@layout/drawer_users_header"
+            android:layout_width="match_parent"
+            android:layout_height="120dp" />
+
+        <TextView
+            android:id="@+id/tvUsersNoContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAllCaps="true"
+            android:fontFamily="@font/ubuntu_bold"
+            android:textColor="@color/dis5"
+            android:textSize="20sp"
+            android:paddingTop="20dp"
+            android:paddingHorizontal="10dp"
+            android:gravity="center"
+            android:text="No saved user credentials"
+
+            app:layout_constraintBottom_toTopOf="@id/users_recylcerView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/users_header" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/users_recylcerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="4dp"
+            android:paddingTop="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvUsersNoContent"
+            tools:listitem="@layout/users_card_item" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>
