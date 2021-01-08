@@ -4,7 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="5dp"
-    android:layout_marginTop="5dp">
+    android:layout_marginTop="5dp"
+    app:cardPreventCornerOverlap="false"
+    app:cardMaxElevation="0dp"
+    android:elevation="10dp"
+    app:cardUseCompatPadding="false"
+    app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -13,7 +18,7 @@
         android:background="@color/dis5">
 
         <TextView
-            android:id="@+id/etCardUsername"
+            android:id="@+id/tvCardUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/ubuntu"
@@ -25,7 +30,7 @@
             android:textColor="@color/disText2"
             android:textSize="20dp"
             app:layout_constraintStart_toEndOf="@+id/ivUser"
-            app:layout_constraintTop_toBottomOf="@+id/etServerUrl" />
+            app:layout_constraintTop_toBottomOf="@+id/tvServerUrl" />
 
         <ImageView
             android:id="@+id/ivLinkUrl"
@@ -39,7 +44,7 @@
             app:tint="@color/disText1" />
 
         <TextView
-            android:id="@+id/etServerUrl"
+            android:id="@+id/tvServerUrl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/ubuntu"
@@ -59,9 +64,42 @@
             android:layout_marginStart="12dp"
             android:layout_marginTop="9dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etServerUrl"
+            app:layout_constraintTop_toBottomOf="@+id/tvServerUrl"
             app:srcCompat="@drawable/person_login"
             app:tint="@color/disText2" />
+
+        <TextView
+            android:id="@+id/tvLoggedUserWarrning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/ubuntu"
+            android:layout_marginTop="5dp"
+            android:paddingBottom="9dp"
+            android:layout_marginStart="16dp"
+            android:textSize="16sp"
+            android:visibility="gone"
+            android:text="This is the currently logged in user!"
+            android:textColor="@color/blue_main"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvCardUsername"
+            />
+
+        <Button
+            android:id="@+id/btnUserDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:backgroundTint="@color/disRed"
+            android:width="110dp"
+            android:text="Delete"
+            android:textColor="@color/disText2"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvLoggedUserWarrning"
+            />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

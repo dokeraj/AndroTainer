@@ -113,22 +113,23 @@
             android:id="@+id/tvUsersNoContent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAllCaps="true"
             android:fontFamily="@font/ubuntu_bold"
+            android:gravity="center"
+            android:paddingHorizontal="10dp"
+            android:paddingTop="20dp"
+            android:text="No saved user credentials"
+            android:textAllCaps="true"
             android:textColor="@color/dis5"
             android:textSize="20sp"
-            android:paddingTop="20dp"
-            android:paddingHorizontal="10dp"
-            android:gravity="center"
-            android:text="No saved user credentials"
 
-            app:layout_constraintBottom_toTopOf="@id/users_recylcerView"
+            app:layout_constraintBottom_toTopOf="@id/rv_login_users"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/users_header" />
+            app:layout_constraintTop_toBottomOf="@+id/users_header"
+            app:layout_constraintVertical_bias="0.01999998" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/users_recylcerView"
+            android:id="@+id/rv_login_users"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_margin="4dp"

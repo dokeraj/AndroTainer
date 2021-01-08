@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ManageUsersListerFragment"
+    android:background="@color/dis4">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tbUsersLister"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/blue_main"
+        android:elevation="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/ubuntu_bold"
+            android:text="Manage Users"
+            android:textColor="@color/dis4"
+            android:textSize="22dp"
+            android:textStyle="bold" />
+    </androidx.appcompat.widget.Toolbar>
+
+    <TextView
+        android:id="@+id/tvUsersListerNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Insert text here"
+        android:fontFamily="@font/ubuntu"
+        android:textColor="@color/dis7"
+        android:textSize="13sp"
+        android:paddingTop="20dp"
+        android:paddingHorizontal="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tbUsersLister"
+         />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvManageUsers"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="4dp"
+        android:paddingTop="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvUsersListerNote"
+        tools:listitem="@layout/users_card_item" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+

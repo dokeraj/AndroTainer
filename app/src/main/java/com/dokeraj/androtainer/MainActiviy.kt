@@ -28,6 +28,12 @@ class MainActiviy : AppCompatActivity() {
         logoutMsg = msg
     }
 
+    private var backToDockerLister: Boolean = false
+    fun getIsBackToDockerLister() = backToDockerLister
+    fun setIsBackToDockerLister(msg: Boolean) {
+        backToDockerLister = msg
+    }
+
     fun showGenericSnack(
         context: Context,
         view: View,
@@ -89,6 +95,30 @@ class MainActiviy : AppCompatActivity() {
         savePermaData(global.credentials)
     }
 
+    fun deleteUser(credToDel: Credential) {
+        val global = (this.application as GlobalApp)
+
+        val keyToDelete = "${credToDel.serverUrl}.${credToDel.username}"
+
+        // remove the credential from the list of saved credentials
+        global.credentials.remove(keyToDelete)
+
+        // check to see if the current user is chosen to be deleted and if so set the currentUser to the latest other user that had activity
+        if ("${global.currentUser?.serverUrl}.${global.currentUser?.username}" == keyToDelete) {
+            global.currentUser = getLatestActivityUser(global.credentials.map { (k, v) -> v })
+        }
+
+        // save the mutable map to perma
+        savePermaData(global.credentials)
+    }
+
+    fun isUserCurrentlyLoggedIn(credToCheck: Credential): Boolean {
+        val global = (this.application as GlobalApp)
+
+        val keyToCheck = "${credToCheck.serverUrl}.${credToCheck.username}"
+        return "${global.currentUser?.serverUrl}.${global.currentUser?.username}" == keyToCheck
+    }
+
     fun invalidateJwt() {
         val global = (this.application as GlobalApp)
 
@@ -117,6 +147,11 @@ class MainActiviy : AppCompatActivity() {
         return jwtIsValid == true
     }
 
+    fun hasJwt(): Boolean {
+        val global = (this.application as GlobalApp)
+        return global.currentUser?.jwt != null
+    }
+
     private fun initializeGlobalVar(): Unit {
         val sharedPrefs = this.getSharedPreferences(SP_DB, AppCompatActivity.MODE_PRIVATE)
         val usersStr: String? = sharedPrefs?.getString(USERS_CREDENTIALS, null)
@@ -128,18 +163,17 @@ class MainActiviy : AppCompatActivity() {
             "${it.serverUrl}.${it.username}" to it
         }.toMap().toMutableMap()
 
-        val lastActivities: List<Credential> =
-            collectionCreds.map { (k, v) -> v }.filter { it.lastActivity != null }
-        val lastUsedCred: Credential? = lastActivities.maxByOrNull { it.lastActivity!! }
+        val lastUsedCred: Credential? = getLatestActivityUser(credentials)
 
         val global = (this.application as GlobalApp)
         global.credentials = collectionCreds
         global.currentUser = lastUsedCred
     }
 
-    fun hasJwt(): Boolean {
-        val global = (this.application as GlobalApp)
-        return global.currentUser?.jwt != null
+    private fun getLatestActivityUser(allCredentials: List<Credential>): Credential? {
+        val lastActivities: List<Credential> =
+            allCredentials.filter { it.lastActivity != null }
+        return lastActivities.maxByOrNull { it.lastActivity!! }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

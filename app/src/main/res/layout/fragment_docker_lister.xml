@@ -8,7 +8,6 @@
     android:background="@color/dis4"
     android:fitsSystemWindows="true"
     tools:context=".DockerListerFragment"
-    tools:openDrawer="start"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -102,6 +101,29 @@
                 android:textAllCaps="false"
                 android:text="Logout" />
 
+            <View
+                android:layout_marginTop="5dp"
+                android:layout_width="250dp"
+                android:layout_gravity="center"
+                android:layout_height="1dp"
+                android:background="@color/blue_main"/>
+
+            <Button
+                android:id="@+id/btnManageUsers"
+                android:layout_marginTop="3dp"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:backgroundTint="@color/dis3"
+                android:textSize="15sp"
+                android:fontFamily="@font/ubuntu"
+                app:drawableTint="@color/disText2"
+                android:drawableLeft="@drawable/usersgrouplogo"
+                android:drawablePadding="9dp"
+                android:textAlignment="textStart"
+                android:lineHeight="15dp"
+                style="?android:attr/borderlessButtonStyle"
+                android:textAllCaps="false"
+                android:text="Manage Users" />
 
             <View
                 android:layout_marginTop="5dp"

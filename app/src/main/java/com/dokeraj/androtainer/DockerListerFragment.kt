@@ -3,6 +3,7 @@ package com.dokeraj.androtainer
 import android.os.Bundle
 import android.text.util.Linkify
 import android.view.View
+import androidx.activity.addCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -51,13 +52,16 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         drawerLister.addDrawerListener(hamburgerMenu)
         hamburgerMenu.syncState()
 
-        // todo:: when deleting the current user -> display popup and say if you delete the current user you will be logged out - and then log out
 
+        // todo:: if the docker container list is empty - display a TEXTVIEW stating that there are no containers to show
         // transfer data from login
         val containers: List<PContainer> = args.dContainers.containers
 
         val recyclerAdapter =
-            DockerContainerAdapter(containers, globalVars.currentUser!!.serverUrl, globalVars.currentUser!!.jwt!!, requireContext())
+            DockerContainerAdapter(containers,
+                globalVars.currentUser!!.serverUrl,
+                globalVars.currentUser!!.jwt!!,
+                requireContext())
         recycler_view.adapter = recyclerAdapter
         recycler_view.layoutManager = LinearLayoutManager(activity)
         recycler_view.setHasFixedSize(true)
@@ -73,21 +77,48 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 tvAboutInfo.visibility = View.VISIBLE
         }
 
-        swiperLayout.setOnRefreshListener {
-            if (globActivity.isJwtValid()) {
+        btnManageUsers.setOnClickListener {
+            val action =
+                DockerListerFragmentDirections.actionDockerListerFragmentToUsersListerFragment()
+            findNavController().navigate(action)
+        }
 
-                // don't refresh if there are any items that are transitioning between states
-                if (recyclerAdapter.areItemsInTransitioningState())
-                    swiperLayout.isRefreshing = false
-                else {
-                    getPortainerContainers(globalVars.currentUser!!.serverUrl,
-                        globalVars.currentUser!!.jwt!!,
-                        recyclerAdapter,
-                        globActivity)
-                }
-            } else {
-                logout(globActivity, "Session has expired! Please log in again.")
+        swiperLayout.setOnRefreshListener {
+            callSwiperLogic(globActivity, globalVars, recyclerAdapter)
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
+            // hijack the back button press and don't allow going back to login page
+        }
+
+        if(globActivity.getIsBackToDockerLister()) {
+            globActivity.setIsBackToDockerLister(false)
+            swiperLayout.post{
+                swiperLayout.isRefreshing = true
+                callSwiperLogic(globActivity, globalVars, recyclerAdapter)
             }
+
+        }
+
+    }
+
+    private fun callSwiperLogic(
+        globActivity: MainActiviy,
+        globalVars: GlobalApp,
+        recyclerAdapter: DockerContainerAdapter,
+    ) {
+        if (globActivity.isJwtValid()) {
+            // don't refresh if there are any items that are transitioning between states
+            if (recyclerAdapter.areItemsInTransitioningState())
+                swiperLayout.isRefreshing = false
+            else {
+                getPortainerContainers(globalVars.currentUser!!.serverUrl,
+                    globalVars.currentUser!!.jwt!!,
+                    recyclerAdapter,
+                    globActivity)
+            }
+        } else {
+            logout(globActivity, "Session has expired! Please log in again.")
         }
     }
 
@@ -164,9 +195,9 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         markwon.setMarkdown(tvAboutInfo, getString(R.string.about_app, appVersion))
     }
 
-    private fun logout(mainActiviy: MainActiviy, logoutMsg: String? = null) {
-        mainActiviy.invalidateJwt()
-        mainActiviy.setLogoutMsg(logoutMsg)
+    private fun logout(mainActivity: MainActiviy, logoutMsg: String? = null) {
+        mainActivity.invalidateJwt()
+        mainActivity.setLogoutMsg(logoutMsg)
         val action =
             DockerListerFragmentDirections.actionDockerListerFragmentToHomeFragment()
         findNavController().navigate(action)

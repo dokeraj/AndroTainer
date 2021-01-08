@@ -13,7 +13,6 @@ import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,7 +26,6 @@ import com.dokeraj.androtainer.models.retrofit.PContainersResponse
 import com.dokeraj.androtainer.models.retrofit.UserCredentials
 import com.dokeraj.androtainer.network.RetrofitInstance
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.fragment_docker_lister.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -40,6 +38,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // TODO:: refactor the names of drawable icons to start with "ic_"
 
         requireActivity().window.statusBarColor =
             ContextCompat.getColor(requireContext(), R.color.dis4)
@@ -143,12 +143,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val savedUsers: List<Credential> = globalVars.credentials.map { (k, v) -> v }
 
         if (savedUsers.isNotEmpty()) {
+            tvUsersNoContent.visibility = View.GONE
             val recyclerAdapter =
                 UsersLoginAdapter(savedUsers, users_lister, view, globActivity, requireContext())
-            users_recylcerView.adapter = recyclerAdapter
-            users_recylcerView.layoutManager = LinearLayoutManager(activity)
-            users_recylcerView.setHasFixedSize(true)
+            rv_login_users.adapter = recyclerAdapter
+            rv_login_users.layoutManager = LinearLayoutManager(activity)
+            rv_login_users.setHasFixedSize(true)
         } else {
+            rv_login_users.visibility = View.GONE
             tvUsersNoContent.visibility = View.VISIBLE
         }
     }

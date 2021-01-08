@@ -11,8 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dokeraj.androtainer.MainActiviy
 import com.dokeraj.androtainer.R
 import com.dokeraj.androtainer.models.Credential
-import kotlinx.android.synthetic.main.docker_card_item.view.*
-import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.users_card_item.view.*
 
 class UsersLoginAdapter(
@@ -47,18 +45,15 @@ class UsersLoginAdapter(
             etPass.text = currentItem.pwd
 
             mainActiviy.showGenericSnack(context,homeView,"Loaded `${currentItem.username}` credentials!", R.color.blue_main, R.color.dis3)
-
             usersDrawerLayout.close()
         }
-
-
     }
 
     override fun getItemCount() = credentials.size
 
     class UsersViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val serverUrl: TextView = itemView.etServerUrl
-        val username: TextView = itemView.etCardUsername
+        val serverUrl: TextView = itemView.tvServerUrl
+        val username: TextView = itemView.tvCardUsername
         val cardLayout: ConstraintLayout = itemView.usersCardHolderLayout
     }
 }
