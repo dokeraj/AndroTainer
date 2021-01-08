@@ -7,7 +7,7 @@
     android:gravity="bottom"
     android:padding="10dp"
     android:elevation="5dp"
-    android:background="@drawable/grdient_drawer_header"
+    android:background="@drawable/grdient_lister_drawer_header"
 
     android:orientation="vertical">
 

@@ -2,20 +2,22 @@ package com.dokeraj.androtainer
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Spanned
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.dokeraj.androtainer.globalvars.GlobalApp
-import com.dokeraj.androtainer.globalvars.PermaVals.JWT_NAME
-import com.dokeraj.androtainer.globalvars.PermaVals.JWT_VALID_UNTIL
-import com.dokeraj.androtainer.globalvars.PermaVals.PWD_NAME
-import com.dokeraj.androtainer.globalvars.PermaVals.SP_NAME
-import com.dokeraj.androtainer.globalvars.PermaVals.URL_NAME
-import com.dokeraj.androtainer.globalvars.PermaVals.USR_NAME
+import com.dokeraj.androtainer.globalvars.PermaVals.SP_DB
+import com.dokeraj.androtainer.globalvars.PermaVals.USERS_CREDENTIALS
+import com.dokeraj.androtainer.models.Credential
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import io.noties.markwon.Markwon
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 
 class MainActiviy : AppCompatActivity() {
@@ -26,6 +28,12 @@ class MainActiviy : AppCompatActivity() {
         logoutMsg = msg
     }
 
+    private var backToDockerLister: Boolean = false
+    fun getIsBackToDockerLister() = backToDockerLister
+    fun setIsBackToDockerLister(msg: Boolean) {
+        backToDockerLister = msg
+    }
+
     fun showGenericSnack(
         context: Context,
         view: View,
@@ -33,9 +41,13 @@ class MainActiviy : AppCompatActivity() {
         textColor: Int,
         snackBckColor: Int,
     ) {
+
+        val markwon = Markwon.create(context);
+        val mardownFormattedText: Spanned = markwon.toMarkdown(snackbarText)
+
         val snackbar = Snackbar.make(
             view,
-            snackbarText,
+            mardownFormattedText,
             Snackbar.LENGTH_SHORT
         )
 
@@ -51,94 +63,117 @@ class MainActiviy : AppCompatActivity() {
         snackbar.show()
     }
 
-
-    private fun savePermaData(
-        url: String,
-        usr: String,
-        pwd: String,
-        jwt: String?,
-        validUntil: Long?,
+    fun savePermaData(
+        users: Map<String, Credential>,
     ) {
-        val sharedPrefs = this.getSharedPreferences(SP_NAME, MODE_PRIVATE)
+        val creds: List<Credential> = users.map { (_, v) -> v }
+
+        val jsArrayCreds: String = Gson().toJson(creds)
+
+        val sharedPrefs = this.getSharedPreferences(SP_DB, MODE_PRIVATE)
         val editor = sharedPrefs?.edit()
 
-        editor?.putString(URL_NAME, url)
-        editor?.putString(USR_NAME, usr)
-        editor?.putString(PWD_NAME, pwd)
-        editor?.putString(JWT_NAME, jwt)
-        if (validUntil != null) {
-            editor?.putLong(JWT_VALID_UNTIL, validUntil)
-        } else {
-            editor?.putLong(JWT_VALID_UNTIL, 0L)
-        }
+        editor?.putString(USERS_CREDENTIALS, jsArrayCreds)
 
         editor?.apply()
-    }
-
-    fun getPermaStringVal(paramName: String): String? {
-        val sharedPrefs =
-            this.getSharedPreferences(SP_NAME, AppCompatActivity.MODE_PRIVATE)
-        return sharedPrefs?.getString(paramName, null)
-    }
-
-    private fun getPermaLongVal(paramName: String): Long? {
-        val sharedPrefs =
-            this.getSharedPreferences(SP_NAME, AppCompatActivity.MODE_PRIVATE)
-        return sharedPrefs?.getLong(paramName, 0L)
-    }
-
-
-    private fun setGlobalVars(
-        url: String?,
-        usr: String?,
-        pwd: String?,
-        jwt: String?,
-        validUntil: Long?,
-    ) {
-        val global = (this.application as GlobalApp)
-        global.url = url
-        global.user = usr
-        global.pwd = pwd
-        global.jwt = jwt
-        global.jwtValidUntil = validUntil
     }
 
     fun setAllMasterVals(url: String, usr: String, pwd: String, jwt: String?, validUntil: Long?) {
-        savePermaData(url, usr, pwd, jwt, validUntil)
-        setGlobalVars(url, usr, pwd, jwt, validUntil)
+        val global = (this.application as GlobalApp)
+
+        // create new user cred
+        val lastActivity: Long = ZonedDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli()
+        val currentUser: Credential = Credential(url, usr, pwd, jwt, validUntil, lastActivity)
+
+        // set this user as current user
+        global.currentUser = currentUser
+
+        // add the user to the mutable map (it will be updated or new)
+        global.credentials["${currentUser.serverUrl}.${currentUser.username}"] = currentUser
+
+        // save the mutable map to perma
+        savePermaData(global.credentials)
+    }
+
+    fun deleteUser(credToDel: Credential) {
+        val global = (this.application as GlobalApp)
+
+        val keyToDelete = "${credToDel.serverUrl}.${credToDel.username}"
+
+        // remove the credential from the list of saved credentials
+        global.credentials.remove(keyToDelete)
+
+        // check to see if the current user is chosen to be deleted and if so set the currentUser to the latest other user that had activity
+        if ("${global.currentUser?.serverUrl}.${global.currentUser?.username}" == keyToDelete) {
+            global.currentUser = getLatestActivityUser(global.credentials.map { (k, v) -> v })
+        }
+
+        // save the mutable map to perma
+        savePermaData(global.credentials)
+    }
+
+    fun isUserCurrentlyLoggedIn(credToCheck: Credential): Boolean {
+        val global = (this.application as GlobalApp)
+
+        val keyToCheck = "${credToCheck.serverUrl}.${credToCheck.username}"
+        return "${global.currentUser?.serverUrl}.${global.currentUser?.username}" == keyToCheck
     }
 
     fun invalidateJwt() {
-        val sharedPrefs = this.getSharedPreferences(SP_NAME, MODE_PRIVATE)
-        val editor = sharedPrefs?.edit()
-        editor?.putString(JWT_NAME, null)
-        editor?.putLong(JWT_VALID_UNTIL, 0L)
-        editor?.apply()
-
         val global = (this.application as GlobalApp)
-        global.jwt = null
-        global.jwtValidUntil = 0L
+
+        // create new cred that has user's JWT to null and validUntil to 0 and updated lastActivity
+        val lastActivity: Long = ZonedDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli()
+        val curUser: Credential =
+            global.currentUser!!.copy(jwt = null, jwtValidUntil = 0L, lastActivity = lastActivity)
+
+        // add that user to globals current cred
+        global.currentUser = curUser
+
+        // return that user into the mutable map
+        global.credentials["${curUser.serverUrl}.${curUser.username}"] = curUser
+
+        // save the mutable map to perma
+        savePermaData(global.credentials)
     }
 
     fun isJwtValid(): Boolean {
         val global = (this.application as GlobalApp)
-        val jwtIsValid: Boolean? = global.jwtValidUntil?.let {
+        val jwtIsValid: Boolean? = global.currentUser?.jwtValidUntil?.let {
             val validUntilInstant: Instant = Instant.ofEpochMilli(it)
             val instantNow = Instant.now()
             instantNow.isBefore(validUntilInstant)
         }
-
         return jwtIsValid == true
-    }
-
-    fun fromPermaToGlobal(): Unit {
-        setGlobalVars(getPermaStringVal(URL_NAME), getPermaStringVal(USR_NAME), getPermaStringVal(
-            PWD_NAME), getPermaStringVal(JWT_NAME), getPermaLongVal(JWT_VALID_UNTIL))
     }
 
     fun hasJwt(): Boolean {
         val global = (this.application as GlobalApp)
-        return global.jwt != null
+        return global.currentUser?.jwt != null
+    }
+
+    private fun initializeGlobalVar(): Unit {
+        val sharedPrefs = this.getSharedPreferences(SP_DB, AppCompatActivity.MODE_PRIVATE)
+        val usersStr: String? = sharedPrefs?.getString(USERS_CREDENTIALS, null)
+        val credentials: List<Credential> = if (usersStr != null)
+            GsonBuilder().create().fromJson(usersStr, Array<Credential>::class.java).toList()
+        else listOf()
+
+        val collectionCreds: MutableMap<String, Credential> = credentials.map {
+            "${it.serverUrl}.${it.username}" to it
+        }.toMap().toMutableMap()
+
+        val lastUsedCred: Credential? = getLatestActivityUser(credentials)
+
+        val global = (this.application as GlobalApp)
+        global.credentials = collectionCreds
+        global.currentUser = lastUsedCred
+    }
+
+    private fun getLatestActivityUser(allCredentials: List<Credential>): Credential? {
+        val lastActivities: List<Credential> =
+            allCredentials.filter { it.lastActivity != null }
+        return lastActivities.maxByOrNull { it.lastActivity!! }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -146,7 +181,7 @@ class MainActiviy : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         /** Load saved data from storage to a global var */
-        fromPermaToGlobal()
+        initializeGlobalVar()
     }
 
 

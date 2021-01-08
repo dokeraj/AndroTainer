@@ -1,11 +1,9 @@
 package com.dokeraj.androtainer.globalvars
 
 import android.app.Application
+import com.dokeraj.androtainer.models.Credential
 
-class GlobalApp:Application() {
-    var url: String? = null
-    var user: String? = null
-    var pwd: String? = null
-    var jwt: String? = null
-    var jwtValidUntil: Long? = null
+class GlobalApp : Application() {
+    var credentials: MutableMap<String, Credential> = mutableMapOf()
+    var currentUser: Credential? = null
 }
