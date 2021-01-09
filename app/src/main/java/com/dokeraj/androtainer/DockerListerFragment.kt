@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.Interfaces.ApiInterface
 import com.dokeraj.androtainer.adapter.DockerContainerAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
-import com.dokeraj.androtainer.models.ContainerStateType
 import com.dokeraj.androtainer.models.PContainer
+import com.dokeraj.androtainer.models.PContainerHelper
 import com.dokeraj.androtainer.models.retrofit.PContainersResponse
 import com.dokeraj.androtainer.network.RetrofitInstance
 import io.noties.markwon.AbstractMarkwonPlugin
@@ -97,9 +97,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 swiperLayout.isRefreshing = true
                 callSwiperLogic(globActivity, globalVars, recyclerAdapter)
             }
-
         }
-
     }
 
     private fun callSwiperLogic(
@@ -142,16 +140,8 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     val pcResponse: PContainersResponse? = response.body()
 
                     if (pcResponse != null) {
-                        // remap from retrofit model to regular data class / filter out containers in unknown state
-                        val pcs: List<PContainer> = pcResponse.mapNotNull { pcr ->
-                            // return null if state of container is not one of the listed in ContainerStateType enum
-                            ContainerStateType.values().firstOrNull { cst -> cst.name == pcr.State }
-                                ?.let { cst ->
-                                    PContainer(pcr.Id, pcr.Names[0].drop(1).trim().capitalize(),
-                                        pcr.Status, cst
-                                    )
-                                }
-                        }
+                        // remap PContainerResponse to List of PContainer
+                        val pcs: List<PContainer> = PContainerHelper.toListPContainer(pcResponse)
 
                         recyclerAdapter.setItems(pcs)
                         recyclerAdapter.notifyDataSetChanged()

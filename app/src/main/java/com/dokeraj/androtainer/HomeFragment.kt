@@ -21,11 +21,10 @@ import com.dokeraj.androtainer.adapter.UsersLoginAdapter
 import com.dokeraj.androtainer.buttons.BtnLogin
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.*
-import com.dokeraj.androtainer.models.retrofit.Jwt
-import com.dokeraj.androtainer.models.retrofit.PContainersResponse
-import com.dokeraj.androtainer.models.retrofit.UserCredentials
+import com.dokeraj.androtainer.models.retrofit.*
 import com.dokeraj.androtainer.network.RetrofitInstance
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.fragment_home.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -39,7 +38,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // TODO:: refactor the names of drawable icons to start with "ic_"
+        // TODO:: REFACTOR the names of drawable icons to start with "ic_"
+        // TOOD:: REFACTOR try to use just one
 
         requireActivity().window.statusBarColor =
             ContextCompat.getColor(requireContext(), R.color.dis4)
@@ -265,18 +265,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     val pcResponse: PContainersResponse? = response.body()
 
                     pcResponse?.let {
-                        // remap from retrofit model to regular data class
-                        val pcs: List<PContainer> = it.mapNotNull { pcr ->
-                            ContainerStateType.values().firstOrNull { xx -> xx.name == pcr.State }
-                                ?.let { cst ->
-                                    PContainer(pcr.Id, pcr.Names[0].drop(1).trim().capitalize(),
-                                        pcr.Status, cst
-                                    )
-                                }
-                        }
+                        // remap PContainerResponse to List of PContainer
+                        val pcs: List<PContainer> = PContainerHelper.toListPContainer(it)
 
                         // go to the ListerFragment and transfer all found docker files
-                        val transferContainer = PContainers(pcs)
+                        val transferContainer: PContainers = PContainers(pcs)
                         val action =
                             HomeFragmentDirections.actionHomeFragmentToDockerListerFragment(
                                 transferContainer)
