@@ -62,6 +62,6 @@ class Port(
 
 @Parcelize
 class MaintainerInfo(
-    @SerializedName("maintainer") var privatePort: String,
-    @SerializedName("url") var publicPort: String,
+    @SerializedName("maintainer") var maintainer: String?,
+    @SerializedName("url") var url: String?,
 ) : Parcelable

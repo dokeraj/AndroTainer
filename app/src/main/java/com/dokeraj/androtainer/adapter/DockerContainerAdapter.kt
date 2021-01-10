@@ -11,7 +11,9 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.dokeraj.androtainer.DockerListerFragmentDirections
 import com.dokeraj.androtainer.Interfaces.ApiInterface
 import com.dokeraj.androtainer.R
 import com.dokeraj.androtainer.models.ContainerActionType
@@ -22,12 +24,14 @@ import kotlinx.android.synthetic.main.docker_card_item.view.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import com.dokeraj.androtainer.DockerListerFragment
 
 class DockerContainerAdapter(
     private var pContainerList: List<PContainer>,
     private val baseUrl: String,
     private val jwt: String,
     private val context: Context,
+    private val frag: DockerListerFragment
 ) :
     RecyclerView.Adapter<DockerContainerAdapter.ContainerViewHolder>() {
 
@@ -116,8 +120,8 @@ class DockerContainerAdapter(
         }
 
         holder.cardHolderLayout.setOnClickListener{
-            println("KLIK NA KARRTATA")
-        // todo:: add the logic to go to the docker container detail fragment
+            val action =DockerListerFragmentDirections.actionDockerListerFragmentToDockerContainerDetailsFragment(currentItem)
+            findNavController(frag).navigate(action)
         }
     }
 

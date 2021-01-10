@@ -51,7 +51,6 @@ class ManageUsersAdapter(
             holder.tvCurrentUser.visibility = View.GONE
 
         holder.btnDelete.setOnClickListener {
-
             if (mainActivity.isUserCurrentlyLoggedIn(currentItem)) {
                 val dialog = DeleteCurrentUserDiag(currentItem)
                 dialog.show(fragmentManager, "Choose wisely")

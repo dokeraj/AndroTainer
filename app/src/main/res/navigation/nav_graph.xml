@@ -32,6 +32,9 @@
         <action
             android:id="@+id/action_dockerListerFragment_to_usersListerFragment"
             app:destination="@id/usersListerFragment" />
+        <action
+            android:id="@+id/action_dockerListerFragment_to_dockerContainerDetailsFragment"
+            app:destination="@id/dockerContainerDetailsFragment" />
     </fragment>
     <fragment
         android:id="@+id/usersListerFragment"
@@ -41,5 +44,14 @@
         <action
             android:id="@+id/action_usersListerFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/dockerContainerDetailsFragment"
+        android:name="com.dokeraj.androtainer.DockerContainerDetailsFragment"
+        android:label="fragment_docker_container_details"
+        tools:layout="@layout/fragment_docker_container_details" >
+        <argument
+            android:name="dContainer"
+            app:argType="com.dokeraj.androtainer.models.PContainer" />
     </fragment>
 </navigation>

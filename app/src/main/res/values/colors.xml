@@ -25,6 +25,7 @@
     <color name="green_success">#237826</color>
     <color name="disGreen">#236845</color>
     <color name="disRed">#993341</color>
+    <color name="disRedDisabled">#c86876</color>
     <color name="gradientBlue">#2A3c58</color>
     <color name="toolbarBLue">#253041</color>
     <color name="btn_disabled">#a4d1db</color>

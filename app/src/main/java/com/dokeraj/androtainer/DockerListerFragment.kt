@@ -30,6 +30,8 @@ import retrofit2.Response
 class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
     private val args: DockerListerFragmentArgs by navArgs()
 
+    // todo:: add animations on going to manage users and container details
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -61,7 +63,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             DockerContainerAdapter(containers,
                 globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
-                requireContext())
+                requireContext(), this)
         recycler_view.adapter = recyclerAdapter
         recycler_view.layoutManager = LinearLayoutManager(activity)
         recycler_view.setHasFixedSize(true)
@@ -88,7 +90,8 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
-            // hijack the back button press and don't allow going back to login page
+            // hijack the back button press and don't allow going back to login page (only close the drawer)
+            drawerLister.close()
         }
 
         if(globActivity.getIsBackToDockerLister()) {

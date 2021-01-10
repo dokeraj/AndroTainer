@@ -39,7 +39,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         super.onViewCreated(view, savedInstanceState)
 
         // TODO:: REFACTOR the names of drawable icons to start with "ic_"
-        // TOOD:: REFACTOR try to use just one
+        // TODO:: REFACTOR try to use just one
 
         requireActivity().window.statusBarColor =
             ContextCompat.getColor(requireContext(), R.color.dis4)
@@ -49,7 +49,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val globActivity: MainActiviy = (activity as MainActiviy?)!!
         val globalVars = (globActivity.application as GlobalApp)
 
-        etUrl.setOnFocusChangeListener { v, hasFocus ->
+        etUrl.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
 
                 when (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
@@ -129,7 +129,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 globActivity, btnLoginState)
         }
 
-        view.setOnTouchListener { v, event ->
+        view.setOnTouchListener { _, event ->
             detector.onTouchEvent(event)
             true
         }
@@ -140,7 +140,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         // load the user credentials into the drawer recyclerview
-        val savedUsers: List<Credential> = globalVars.credentials.map { (k, v) -> v }
+        val savedUsers: List<Credential> = globalVars.credentials.map { (_, v) -> v }
 
         if (savedUsers.isNotEmpty()) {
             tvUsersNoContent.visibility = View.GONE
