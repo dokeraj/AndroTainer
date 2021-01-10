@@ -1,6 +1,7 @@
 package com.dokeraj.androtainer
 
 import android.os.Bundle
+import android.text.util.Linkify
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -17,6 +18,7 @@ import com.squareup.picasso.Picasso
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.linkify.LinkifyPlugin
 import kotlinx.android.synthetic.main.fragment_docker_container_details.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -30,6 +32,7 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
         val args: DockerContainerDetailsFragmentArgs by navArgs()
 
         val selectedContainer: PContainer = args.dContainer
+        // todo:: don't let back navigation until the container is deleted
 
         tbContainerDetails.navigationIcon =
             ContextCompat.getDrawable(requireActivity(), R.drawable.backlogo)
@@ -95,9 +98,11 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
             .usePlugin(object : AbstractMarkwonPlugin() {
                 override fun configureTheme(builder: MarkwonTheme.Builder) {
                     builder
-                        .codeTextColor(ContextCompat.getColor(requireContext(), R.color.dis6))
+                        .codeTextColor(ContextCompat.getColor(requireContext(), R.color.blue_main))
+                        .linkColor(ContextCompat.getColor(requireContext(), R.color.teal_200))
                 }
             })
+            .usePlugin(LinkifyPlugin.create(Linkify.EMAIL_ADDRESSES or Linkify.WEB_URLS))
             .build()
 
         // todo:: ikonata za lets encrypt
@@ -114,17 +119,14 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
         val maintainer: String = container.maintainerInfo.maintainer?.let {
             val maintainerUrl: String =
                 container.maintainerInfo.url?.let { url -> "- url: ${url}\n" } ?: ""
-            "### Maintainer Info\n- name: `${container.maintainerInfo.maintainer}`\n${maintainerUrl}"
+            "### Maintainer Info\n- name: ${container.maintainerInfo.maintainer}\n${maintainerUrl}"
         } ?: ""
 
         val hostConfig = "### Host Config\n- Network Mode: `${container.hostConfig.networkMode}`\n"
 
-        println("KONJE: ${container.mounts.map{x -> x.type}}")
-
         val allMounts: String =
             if (container.mounts.isNotEmpty() && container.mounts.any { m -> m.type == "bind" }) {
-                val mount = "### Mounts *[External:Internal]*\n"
-                println("EVEOSOSOSOS")
+                val mount = "### Mounts [*External* : *Internal*]\n"
                 val mounts: String = container.mounts.filter { m -> m.type == "bind" }.map { m ->
                     "- `${m.source}`:`${m.destination}`\n"
                 }.joinToString("\n")
@@ -133,9 +135,24 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
             } else
                 ""
 
+        val allPorts: String =
+            if (container.ports.isNotEmpty()) {
+                val port = "### Ports [*PublicPort* : *PrivatePort* - protocol]\n"
+                val ports: String = container.ports.map { p ->
+                    "> `${p.publicPort.let { it } ?: "none"}`:`${p.privatePort}` - **${p.type}**\n"
+                }.joinToString("\n")
+
+                "$port$ports"
+            } else
+                ""
+
+        val state = "### State\n- ***${container.state.name.toLowerCase().capitalize()}***\n"
+
+        val status = "### Status\n- ***${container.status.toLowerCase().capitalize()}***\n"
+
         val completeInfo =
             StringBuilder().append(id).append(formattedDate).append(imageName).append(maintainer)
-                .append(hostConfig).append(allMounts)
+                .append(hostConfig).append(allMounts).append(allPorts).append(state).append(status)
         markwon.setMarkdown(tvContainerDetailsInfo,
             "${completeInfo}")
 

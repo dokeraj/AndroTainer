@@ -35,7 +35,10 @@ enum class ContainerStateType {
     @SerializedName("exited")
     EXITED,
     TRANSITIONING,
-    ERRORED
+    ERRORED,
+
+    @SerializedName("created")
+    CREATED
 }
 
 enum class ContainerActionType {
@@ -56,7 +59,7 @@ class Mount(
 @Parcelize
 class Port(
     @SerializedName("PrivatePort") var privatePort: String,
-    @SerializedName("PublicPort") var publicPort: String,
+    @SerializedName("PublicPort") var publicPort: String?,
     @SerializedName("Type") var type: String,
 ) : Parcelable
 

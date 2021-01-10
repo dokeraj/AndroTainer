@@ -179,7 +179,6 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     builder
                         .codeTextColor(ContextCompat.getColor(requireContext(), R.color.blue_main))
                         .linkColor(ContextCompat.getColor(requireContext(), R.color.teal_200))
-
                 }
             }).usePlugin(LinkifyPlugin.create(Linkify.EMAIL_ADDRESSES or Linkify.WEB_URLS))
             .build()

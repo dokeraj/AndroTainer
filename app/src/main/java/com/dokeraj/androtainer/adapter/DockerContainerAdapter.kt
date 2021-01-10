@@ -47,6 +47,8 @@ class DockerContainerAdapter(
 
         holder.dockerNameView.text = currentItem.name
 
+        // todo:: there is another state CREATED - handle it!!
+
         when (currentItem.state) {
             ContainerStateType.RUNNING -> {
                 /** set style for running docker container */
