@@ -83,10 +83,10 @@
             android:layout_marginTop="41dp"
             android:fontFamily="@font/ubuntu"
             android:maxWidth="230dp"
-            android:text="Long press the remove button to delete the container"
+            android:text="will get it from strings res"
+            android:visibility="gone"
             android:textColor="@color/loginDisabledText"
             android:textSize="12dp"
-            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btnContainerDelete"
             app:layout_constraintTop_toBottomOf="@+id/tvContainerDetailsInfo" />

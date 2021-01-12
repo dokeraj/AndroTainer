@@ -3,8 +3,10 @@ package com.dokeraj.androtainer
 import android.os.Bundle
 import android.text.util.Linkify
 import android.view.View
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.dokeraj.androtainer.Interfaces.ApiInterface
 import com.dokeraj.androtainer.buttons.BtnDeleteContainer
@@ -20,6 +22,7 @@ import io.noties.markwon.Markwon
 import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.linkify.LinkifyPlugin
 import kotlinx.android.synthetic.main.fragment_docker_container_details.*
+import kotlinx.android.synthetic.main.fragment_docker_lister.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -28,11 +31,12 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_container_details) {
+    var isDeletingNow: Boolean = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val args: DockerContainerDetailsFragmentArgs by navArgs()
 
         val selectedContainer: PContainer = args.dContainer
-        // todo:: don't let back navigation until the container is deleted
 
         tbContainerDetails.navigationIcon =
             ContextCompat.getDrawable(requireActivity(), R.drawable.backlogo)
@@ -40,7 +44,7 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
         val btnDeleteState: BtnDeleteContainer =
             BtnDeleteContainer(requireContext(), btnContainerDelete)
 
-        tvContainerDetailsTitle.text = "${selectedContainer.name}"
+        tvContainerDetailsTitle.text = selectedContainer.name
 
         val globActivity: MainActiviy = (activity as MainActiviy?)!!
         val globalVars: GlobalApp = (globActivity.application as GlobalApp)
@@ -56,6 +60,18 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
             }
         }
 
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
+            // Only allow to go back to docker lister only when we get any kind of response from the API (or timeout)
+            if (!isDeletingNow)
+                findNavController().popBackStack()
+            else
+                globActivity.showGenericSnack(requireContext(),
+                    requireView(),
+                    "Please wait until the ${selectedContainer.name} is deleted",
+                    R.color.dis4,
+                    R.color.blue_main)
+        }
+
         logoToDisplay?.let {
             Picasso.get().load(it.url)
                 .resize(it.width, it.height)
@@ -69,12 +85,18 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
 
         // show textview telling to do a long press in order to delete the container
         btnContainerDelete.setOnClickListener {
-            // todo:: let it say - Long press to delete <CONTAINER NAME>
+            val markwon = Markwon.builder(requireContext()).build()
+
+            markwon.setMarkdown(tv_btn_remove_container_description,
+                getString(R.string.deletingContainerNote).replace("{containerName}",
+                    selectedContainer.name))
+
             tv_btn_remove_container_description.visibility = View.VISIBLE
         }
 
         // on long press - delete the docker container and go back to docker lister
         btnContainerDelete.setOnLongClickListener {
+            isDeletingNow = true
             btnDeleteState.changeBtnState(false)
             tv_btn_remove_container_description.visibility = View.GONE
 
@@ -104,8 +126,6 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
             })
             .usePlugin(LinkifyPlugin.create(Linkify.EMAIL_ADDRESSES or Linkify.WEB_URLS))
             .build()
-
-        // todo:: ikonata za lets encrypt
 
         val id = "### ID\n- *${container.id}*\n"
 
@@ -177,9 +197,11 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
                 override fun onResponse(call: Call<Unit?>, response: Response<Unit?>) {
                     when (response.code()) {
                         204 -> {
+                            isDeletingNow = false
                             backToDockerLister(globActivity)
                         }
                         else -> {
+                            isDeletingNow = false
                             btnDeleteState.changeBtnState(true)
 
                             globActivity.showGenericSnack(requireContext(),
@@ -192,6 +214,7 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
                 }
 
                 override fun onFailure(call: Call<Unit?>, t: Throwable) {
+                    isDeletingNow = false
                     btnDeleteState.changeBtnState(true)
                     globActivity.showGenericSnack(requireContext(),
                         requireView(),
