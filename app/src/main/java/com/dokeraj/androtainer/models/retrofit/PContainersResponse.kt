@@ -1,5 +1,5 @@
 package com.dokeraj.androtainer.models.retrofit
 
-import com.dokeraj.androtainer.models.retrofit.PContainerResponse
+import com.dokeraj.androtainer.models.PContainer
 
-class PContainersResponse : ArrayList<PContainerResponse>()
+class PContainersResponse : ArrayList<PContainer>()

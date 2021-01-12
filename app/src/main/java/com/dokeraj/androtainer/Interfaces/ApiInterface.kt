@@ -21,4 +21,12 @@ interface ApiInterface {
     @POST
     fun startStopContainer(@Header("Authorization") jwt: String?, @Url fullPath: String): Call<Unit>
 
+    @DELETE
+    fun removeDockerContainer(
+        @Header("Authorization") jwt: String?,
+        @Url fullPath: String,
+        @Query("force") force: Boolean,
+        @Query("v") deleteVolumes: Int,
+    ): Call<Unit>
+
 }

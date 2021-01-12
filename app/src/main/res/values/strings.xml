@@ -12,10 +12,18 @@
     <string name="about_app">**AndroTainer** is an open source app. This *SERVICE* is provided by Dokeraj at no cost and is intended for use as is.\nSource code can be found here: https://github.com/dokeraj/AndroTainer\n\nFor any further inquiries: dokeraj87@gmail.com\n\n Privacy policy: [find it here](https://sites.google.com/view/androtainer/privacy-stuff)\n\n`Current version: %1$s`</string>
     <string name="users_manage_note">`ANY DELETED CREDENTIAL WILL ONLY BE REMOVED FROM ANDROTAINER`\n\nPro tip: You can find the stored credentials by swiping right on the login screen.</string>
     <string name="dialogWarning">If `CONTINUE` is chosen, you will be logged out and pushed back to the login screen.</string>
+    <string name="deletingContainerNote">Long press the remove button to delete the container **{containerName}**</string>
     <!--
      URLs to portainer
      -->
     <string name="authenticate">{baseUrl}/api/auth</string>
     <string name="getDockerContainers">{baseUrl}/api/endpoints/1/docker/containers/json</string>
     <string name="StartStopContainer">{baseUrl}/api/endpoints/1/docker/containers/{containerId}/{actionType}</string>
+    <string name="removeDockerContainer">{baseUrl}/api/endpoints/1/docker/containers/{containerId}</string>
+    <!--
+    URLs to logos for docker details fragment (json format)
+    -->
+    <string name="allServicesLogos">[{\"names\":[\"letsencrypt\"],\"url\":\"https://i.imgur.com/9VduOLN.png\",\"width\":800,\"height\":185},{\"names\":[\"wikijs\",\"requarks/wiki\"],\"url\":\"https://i.imgur.com/2yfdYWt.png\",\"width\":800,\"height\":233},{\"names\":[\"bazarr\"],\"url\":\"https://i.imgur.com/reWArsB.png\",\"width\":512,\"height\":512},{\"names\":[\"booksonic\"],\"url\":\"https://i.imgur.com/87KtEu1.png\",\"width\":512,\"height\":512},{\"names\":[\"jackett\"],\"url\":\"https://i.imgur.com/Lz06x5b.png\",\"width\":800,\"height\":185},{\"names\":[\"mariadb\"],\"url\":\"https://i.imgur.com/rpInfpg.png\",\"width\":628,\"height\":512},{\"names\":[\"netdata\"],\"url\":\"https://i.imgur.com/kzLB8ou.png\",\"width\":800,\"height\":132},{\"names\":[\"nextcloud\"],\"url\":\"https://i.imgur.com/n0sUUPo.png\",\"width\":782,\"height\":512},{\"names\":[\"ombi\"],\"url\":\"https://i.imgur.com/dKJ3ECe.png\",\"width\":512,\"height\":512},{\"names\":[\"organizr\"],\"url\":\"https://i.imgur.com/qJZ1kP5.png\",\"width\":512,\"height\":512},{\"names\":[\"pihole\"],\"url\":\"https://i.imgur.com/IvLTuKF.png\",\"width\":800,\"height\":189},{\"names\":[\"plex\"],\"url\":\"https://i.imgur.com/KtLTu8y.png\",\"width\":800,\"height\":259},{\"names\":[\"portainer\"],\"url\":\"https://i.imgur.com/61ODRl3.png\",\"width\":800,\"height\":234},{\"names\":[\"postgres\"],\"url\":\"https://i.imgur.com/GhkyvuT.png\",\"width\":408,\"height\":512},{\"names\":[\"qbittorrent\"],\"url\":\"https://i.imgur.com/SmDt1PA.png\",\"width\":512,\"height\":512},{\"names\":[\"radarr\"],\"url\":\"https://i.imgur.com/C4usmjf.png\",\"width\":512,\"height\":512},{\"names\":[\"sonarr\"],\"url\":\"https://i.imgur.com/e4qj98C.png\",\"width\":512,\"height\":512},{\"names\":[\"tautulli\"],\"url\":\"https://i.imgur.com/8XCuIQ8.png\",\"width\":800,\"height\":225},{\"names\":[\"watchtower\"],\"url\":\"https://i.imgur.com/kiALl1f.png\",\"width\":512,\"height\":512}]</string>
+
+
 </resources>

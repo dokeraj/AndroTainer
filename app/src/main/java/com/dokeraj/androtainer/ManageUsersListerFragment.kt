@@ -23,7 +23,7 @@ class ManageUsersListerFragment : Fragment(R.layout.fragment_users_lister) {
         val globalVars: GlobalApp = (globActivity.application as GlobalApp)
 
         // load the user credentials into the drawer recyclerview
-        val savedUsers: List<Credential> = globalVars.credentials.map { (k, v) -> v }
+        val savedUsers: List<Credential> = globalVars.credentials.map { (_, v) -> v }
         val curLoggedUserKey =
             "${globalVars.currentUser!!.serverUrl}.${globalVars.currentUser!!.username}"
 

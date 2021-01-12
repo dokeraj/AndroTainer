@@ -14,8 +14,8 @@ android {
         applicationId "com.dokeraj.androtainer"
         minSdkVersion 29
         targetSdkVersion 30
-        versionCode 2
-        versionName "0.95"
+        versionCode 6
+        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -52,6 +52,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "io.noties.markwon:core:$markwon_version"
     implementation "io.noties.markwon:linkify:$markwon_version"
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

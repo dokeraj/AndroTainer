@@ -9,7 +9,7 @@ object RetrofitInstance {
     private var retrofit: Retrofit? = null
 
     private val okClient = OkHttpClient().newBuilder().readTimeout(1, TimeUnit.MINUTES)
-        .connectTimeout(1, TimeUnit.MINUTES)
+        .connectTimeout(45, TimeUnit.SECONDS)
         .build()
 
     val retrofitInstance: Retrofit?

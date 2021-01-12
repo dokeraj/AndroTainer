@@ -105,7 +105,7 @@ class MainActiviy : AppCompatActivity() {
 
         // check to see if the current user is chosen to be deleted and if so set the currentUser to the latest other user that had activity
         if ("${global.currentUser?.serverUrl}.${global.currentUser?.username}" == keyToDelete) {
-            global.currentUser = getLatestActivityUser(global.credentials.map { (k, v) -> v })
+            global.currentUser = getLatestActivityUser(global.credentials.map { (_, v) -> v })
         }
 
         // save the mutable map to perma

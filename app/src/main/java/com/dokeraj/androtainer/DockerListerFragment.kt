@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.Interfaces.ApiInterface
 import com.dokeraj.androtainer.adapter.DockerContainerAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
-import com.dokeraj.androtainer.models.ContainerStateType
 import com.dokeraj.androtainer.models.PContainer
+import com.dokeraj.androtainer.models.PContainerHelper
 import com.dokeraj.androtainer.models.retrofit.PContainersResponse
 import com.dokeraj.androtainer.network.RetrofitInstance
 import io.noties.markwon.AbstractMarkwonPlugin
@@ -29,6 +29,8 @@ import retrofit2.Response
 
 class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
     private val args: DockerListerFragmentArgs by navArgs()
+
+    // todo:: add animations on going to manage users and container details
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -61,7 +63,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             DockerContainerAdapter(containers,
                 globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
-                requireContext())
+                requireContext(), this)
         recycler_view.adapter = recyclerAdapter
         recycler_view.layoutManager = LinearLayoutManager(activity)
         recycler_view.setHasFixedSize(true)
@@ -88,7 +90,8 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
-            // hijack the back button press and don't allow going back to login page
+            // hijack the back button press and don't allow going back to login page (only close the drawer)
+            drawerLister.close()
         }
 
         if(globActivity.getIsBackToDockerLister()) {
@@ -97,9 +100,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 swiperLayout.isRefreshing = true
                 callSwiperLogic(globActivity, globalVars, recyclerAdapter)
             }
-
         }
-
     }
 
     private fun callSwiperLogic(
@@ -142,16 +143,8 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     val pcResponse: PContainersResponse? = response.body()
 
                     if (pcResponse != null) {
-                        // remap from retrofit model to regular data class / filter out containers in unknown state
-                        val pcs: List<PContainer> = pcResponse.mapNotNull { pcr ->
-                            // return null if state of container is not one of the listed in ContainerStateType enum
-                            ContainerStateType.values().firstOrNull { cst -> cst.name == pcr.State }
-                                ?.let { cst ->
-                                    PContainer(pcr.Id, pcr.Names[0].drop(1).trim().capitalize(),
-                                        pcr.Status, cst
-                                    )
-                                }
-                        }
+                        // remap PContainerResponse to List of PContainer
+                        val pcs: List<PContainer> = PContainerHelper.toListPContainer(pcResponse)
 
                         recyclerAdapter.setItems(pcs)
                         recyclerAdapter.notifyDataSetChanged()
@@ -186,7 +179,6 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     builder
                         .codeTextColor(ContextCompat.getColor(requireContext(), R.color.blue_main))
                         .linkColor(ContextCompat.getColor(requireContext(), R.color.teal_200))
-
                 }
             }).usePlugin(LinkifyPlugin.create(Linkify.EMAIL_ADDRESSES or Linkify.WEB_URLS))
             .build()
