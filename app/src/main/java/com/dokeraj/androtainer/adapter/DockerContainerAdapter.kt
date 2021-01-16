@@ -110,6 +110,21 @@ class DockerContainerAdapter(
                     holder = holder
                 )
             }
+            ContainerStateType.CREATED -> {
+                /** set style for docker container that is in the created state */
+                setCardStyle(containerState = ContainerStateType.CREATED,
+                    statusText = currentItem.status.capitalize(),
+                    statusTextColor = R.color.disText2,
+                    cardBckColor = R.color.teal_700,
+                    buttonText = "START",
+                    buttonIsEnabled = true,
+                    buttonColor = R.color.blue_main,
+                    statusIconImage = R.drawable.ic_created,
+                    statusIconColor = R.color.disText2,
+                    currentItemNum = position,
+                    holder = holder
+                )
+            }
         }
 
         holder.dockerButton.setOnClickListener {
