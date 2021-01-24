@@ -16,5 +16,4 @@ sealed class DataState<out R> {
     data class DeleteLoading<out T>(val data: T, val item: Kontainer): DataState<T>()
 
     object None: DataState<Nothing>()
-
 }

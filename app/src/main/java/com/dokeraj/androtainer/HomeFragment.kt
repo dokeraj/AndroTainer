@@ -17,7 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.dokeraj.androtainer.Interfaces.ApiInterface
+import com.dokeraj.androtainer.interfaces.ApiInterface
 import com.dokeraj.androtainer.adapter.UsersLoginAdapter
 import com.dokeraj.androtainer.buttons.BtnLogin
 import com.dokeraj.androtainer.globalvars.GlobalApp
@@ -45,8 +45,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // TODO:: REFACTOR the names of drawable icons to start with "ic_"
-
         requireActivity().window.statusBarColor =
             ContextCompat.getColor(requireContext(), R.color.dis4)
 
@@ -60,7 +58,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
                 when (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
                     true -> {
-                        etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.web_link_logo,
+                        etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_web_link,
                             0,
                             0,
                             0)
@@ -73,7 +71,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         etUrl.background = background
                     }
                     else -> {
-                        etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.warning_logo,
+                        etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_warning,
                             0,
                             0,
                             0)
@@ -166,7 +164,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         model.dataState.observe(viewLifecycleOwner, { ds ->
             when (ds) {
                 is DataState.Success<List<Kontainer>> -> {
-                    println("HOMEFRAGMETN OBSERVER DATA success: ${ds.data}")
 
                     mainActivity.setIsLoginToDockerLister(true)
                     val action =
@@ -183,16 +180,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         "Server not permitting communication! Check URL.",
                         R.color.red,
                         R.color.white)
-
-                    println("HOME exception bre: ${ds.exception}")
-
                 }
                 is DataState.Loading -> {
-                    println("LOADING MOREEEEEEE!!")
                     disableDrawerSwipe = true
                     btnLoginState.changeBtnState(false)
                 }
-                else -> {}
             }
         })
     }
@@ -228,7 +220,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         val globActivity: MainActiviy = (activity as MainActiviy?)!!
                         globActivity.setAllMasterVals(baseUrl, usr, pwd, it, jwtValidUntil)
 
-                        //getPortainerContainers(url, it, mainActiviy, btnLoginState)
                         callGetContainers(baseUrl, it)
                     }
                 }
@@ -297,51 +288,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (responseStatus != "200")
             snackbar.show()
     }
-
-    /*private fun getPortainerContainers(
-        url: String,
-        jwt: String,
-        mainActiviy: MainActiviy,
-        btnLoginState: BtnLogin,
-    ) {
-        val fullUrl =
-            getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
-        val header = "Bearer $jwt"
-
-        val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
-        api.listDockerContainers(header, fullUrl, 1)
-            .enqueue(object : Callback<PContainersResponse?> {
-                override fun onResponse(
-                    call: Call<PContainersResponse?>,
-                    response: Response<PContainersResponse?>,
-                ) {
-                    disableDrawerSwipe = false
-                    val pcResponse: PContainersResponse? = response.body()
-
-                    pcResponse?.let {
-                        // remap PContainerResponse to List of PContainer
-                        val pcs: List<PContainerResponse> = PContainerHelper.toListPContainer(it)
-
-                        // go to the ListerFragment and transfer all found docker files
-                        val transferContainer: PContainers = PContainers(pcs)
-                        val action =
-                            HomeFragmentDirections.actionHomeFragmentToDockerListerFragment(
-                                transferContainer)
-                        findNavController().navigate(action)
-                    }
-                }
-
-                override fun onFailure(call: Call<PContainersResponse?>, t: Throwable) {
-                    disableDrawerSwipe = false
-                    btnLoginState.changeBtnState(false)
-                    mainActiviy.showGenericSnack(requireContext(),
-                        requireView(),
-                        "Server not permitting communication! Check URL.",
-                        R.color.red,
-                        R.color.white)
-                }
-            })
-    }*/
 
     inner class UsersGestureListener : GestureDetector.SimpleOnGestureListener() {
         private val SWIPE_THRESHOLD = 100

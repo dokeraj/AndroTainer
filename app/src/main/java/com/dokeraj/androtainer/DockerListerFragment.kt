@@ -30,8 +30,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
     private val args: DockerListerFragmentArgs by navArgs()
 
-    // todo:: add animations on going to manage users and container details
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -58,13 +56,14 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         drawerLister.addDrawerListener(hamburgerMenu)
         hamburgerMenu.syncState()
 
-        // transfer data from login
-        val containers: List<Kontainer> = listOf()
-
         if (globActivity.getIsLoginToDockerLister()) {
             globActivity.setIsLoginToDockerLister(false)
             model.setStateEvent(MainStateEvent.InitializeView(args.dContainers.containers))
         }
+
+        // just give an empty list of containers when initializing the recyclerAdapter
+        // we will fill the adapter when the modelview is initialized
+        val containers: List<Kontainer> = listOf()
 
         val recyclerAdapter =
             DockerContainerAdapter(containers,
@@ -101,15 +100,6 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             drawerLister.close()
         }
 
-        // todo:: maybe not needed now??
-        /*if (globActivity.getIsBackToDockerLister()) {
-            globActivity.setIsBackToDockerLister(false)
-            swiperLayout.post {
-                swiperLayout.isRefreshing = true
-                //callSwiperLogic(model, globActivity, globalVars, recyclerAdapter)
-            }
-        }*/
-
         subscribeObservers(model, recyclerAdapter, globActivity)
     }
 
@@ -121,37 +111,28 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         dataViewModel.dataState.observe(viewLifecycleOwner, { ds ->
             when (ds) {
                 is DataState.Success<List<Kontainer>> -> {
-                    println("swajper vrati: ${ds.data}")
-
                     recyclerAdapter.setItems(ds.data)
                     recyclerAdapter.notifyDataSetChanged()
                     swiperLayout.isRefreshing = false
                 }
                 is DataState.Error -> {
                     swiperLayout.isRefreshing = false
-
                     logout(mainActivity, "Issue with Portainer! Please login again.")
-
-                    println("EXPCEPTIONSIOSDO:${ds.exception}")
                 }
                 is DataState.Loading -> {
-                    println("SWIPINGGGGGG!!")
                     swiperLayout.isRefreshing = true
                 }
-                /** below these are the logic for handling the idividual cards*/
+                /** below these is the logic for handling the idividual cards*/
                 is DataState.CardLoading -> {
-                    println("********************U KARD loding!!!!!!!!!")
                     recyclerAdapter.setItems(ds.data)
                     recyclerAdapter.notifyItemChanged(ds.itemIndex)
                 }
                 is DataState.CardSuccess -> {
-                    println("*******************U KARD uspeho...........................!")
                     swiperLayout.isRefreshing = false
                     recyclerAdapter.setItems(ds.data)
                     recyclerAdapter.notifyItemChanged(ds.itemIndex)
                 }
                 is DataState.CardError -> {
-                    println("*******************U kartinka GRESKOSX...........................!")
                     recyclerAdapter.setItems(ds.data)
                     recyclerAdapter.notifyItemChanged(ds.itemIndex)
                 }
@@ -179,10 +160,6 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             if (recyclerAdapter.areItemsInTransitioningState())
                 swiperLayout.isRefreshing = false
             else {
-                /*getPortainerContainers(globalVars.currentUser!!.serverUrl,
-                    globalVars.currentUser!!.jwt!!,
-                    recyclerAdapter,
-                    globActivity)*/
                 callGetContainers(dataViewModel,
                     globalVars.currentUser!!.serverUrl,
                     globalVars.currentUser!!.jwt!!)
@@ -191,46 +168,6 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             logout(globActivity, "Session has expired! Please log in again.")
         }
     }
-
-    /*private fun getPortainerContainers(
-        url: String,
-        jwt: String,
-        recyclerAdapter: DockerContainerAdapter,
-        mainActivity: MainActiviy,
-    ) {
-        val fullUrl =
-            getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
-        val header = "Bearer $jwt"
-
-        val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
-        api.listDockerContainers(header, fullUrl, 1)
-            .enqueue(object : Callback<PContainersResponse?> {
-                override fun onResponse(
-                    call: Call<PContainersResponse?>,
-                    response: Response<PContainersResponse?>,
-                ) {
-                    val pcResponse: PContainersResponse? = response.body()
-
-                    if (pcResponse != null) {
-                        // remap PContainerResponse to List of PContainer
-                        val pcs: List<Kontainer> = PContainerHelper.toListPContainer(pcResponse)
-
-                        recyclerAdapter.setItems(pcs)
-                        recyclerAdapter.notifyDataSetChanged()
-                        swiperLayout.isRefreshing = false
-                    } else {
-                        swiperLayout.isRefreshing = false
-                        logout(mainActivity, "Issue with Portainer! Please login again.")
-                    }
-                }
-
-                override fun onFailure(call: Call<PContainersResponse?>, t: Throwable) {
-                    swiperLayout.isRefreshing = false
-                    logout(mainActivity, "Issue with Portainer! Please login again.")
-                }
-            })
-    }*/
-
 
     private fun setDrawerInfo(globalVars: GlobalApp) {
         // set the name of the logged in user and the server url

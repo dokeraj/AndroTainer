@@ -1,11 +1,6 @@
 package com.dokeraj.androtainer.di
 
-import com.dokeraj.androtainer.Interfaces.KontainerRetrofit
-import com.dokeraj.androtainer.models.Kontainer
-import com.dokeraj.androtainer.models.retrofit.NetworkMapper
-import com.dokeraj.androtainer.models.retrofit.PContainerResponse
-import com.dokeraj.androtainer.network.RetrofitInstance
-import com.dokeraj.androtainer.util.EntityMapper
+import com.dokeraj.androtainer.interfaces.KontainerRetrofit
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module

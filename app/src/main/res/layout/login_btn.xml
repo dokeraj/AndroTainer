@@ -17,7 +17,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clLogin"
-            android:background="@drawable/btn_login_transition"
+            android:background="@drawable/transition_btn_login"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

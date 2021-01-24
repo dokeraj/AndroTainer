@@ -1,7 +1,6 @@
-package com.dokeraj.androtainer.Interfaces
+package com.dokeraj.androtainer.interfaces
 
 import com.dokeraj.androtainer.models.retrofit.PContainersResponse
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
 

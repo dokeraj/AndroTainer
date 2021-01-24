@@ -71,7 +71,7 @@
         android:orientation="vertical">
 
         <include
-            android:id="@+id/ejHeder"
+            android:id="@+id/listerHeder"
             layout="@layout/drawer_lister_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -82,7 +82,7 @@
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ejHeder"
+            app:layout_constraintTop_toBottomOf="@+id/listerHeder"
             app:layout_constraintVertical_bias="0.005">
 
             <Button
@@ -117,7 +117,7 @@
                 android:textSize="15sp"
                 android:fontFamily="@font/ubuntu"
                 app:drawableTint="@color/disText2"
-                android:drawableLeft="@drawable/usersgrouplogo"
+                android:drawableLeft="@drawable/ic_users_group"
                 android:drawablePadding="9dp"
                 android:textAlignment="textStart"
                 android:lineHeight="15dp"
@@ -141,7 +141,7 @@
                 android:textSize="15sp"
                 android:fontFamily="@font/ubuntu"
                 app:drawableTint="@color/disText2"
-                android:drawableLeft="@drawable/info_logo"
+                android:drawableLeft="@drawable/ic_info"
                 android:drawablePadding="9dp"
                 android:textAlignment="textStart"
                 android:lineHeight="15dp"

@@ -21,7 +21,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clContainerDelete"
-            android:background="@drawable/btn_delete_container_transition"
+            android:background="@drawable/transition_btn_delete_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

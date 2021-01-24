@@ -1,6 +1,6 @@
 package com.dokeraj.androtainer.repositories
 
-import com.dokeraj.androtainer.Interfaces.KontainerRetrofit
+import com.dokeraj.androtainer.interfaces.KontainerRetrofit
 import com.dokeraj.androtainer.models.*
 import com.dokeraj.androtainer.models.retrofit.NetworkMapper
 import com.dokeraj.androtainer.util.DataState
@@ -29,16 +29,12 @@ class DockerListerRepo constructor(
     ): Flow<DataState<List<Kontainer>>> = flow {
         emit(DataState.CardLoading(listOf<Kontainer>(), currentItemIndex))
         try {
-            println("PRIJE!?!?")
             val so = kontainerRetrofit.startStopContainer(jwt, url)
-            println("ZAVRSI?!?!")
             if (so.code() != 204) {
-                println("EVE dupla komanda!!")
                 emit(DataState.CardError(listOf<Kontainer>(), currentItemIndex))
             } else
                 emit(DataState.CardSuccess(listOf<Kontainer>(), currentItemIndex))
         } catch (e: Exception) {
-            println("AJDE U GRESKOS?!?!??!?!?!?! ${e.message}")
             emit(DataState.CardError(listOf<Kontainer>(), currentItemIndex))
         }
     }
@@ -52,12 +48,10 @@ class DockerListerRepo constructor(
         try {
             val res = kontainerRetrofit.deleteDockerContainer(jwt, url, true, 1)
             if (res.code() != 204) {
-                println("e so e greskata? kod: ${res.code()} i greska: ${res.errorBody()} i obdi: ${res.body()}")
                 emit(DataState.Error(java.lang.Exception("cannot delete container!")))
             } else
                 emit(DataState.DeleteSuccess(listOf<Kontainer>(), selectedItem))
         } catch (e: Exception) {
-            println("FATAL ERORR!? : ${e}")
             emit(DataState.Error(java.lang.Exception("cannot delete container!")))
         }
     }
