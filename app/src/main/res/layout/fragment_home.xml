@@ -15,7 +15,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/gradient"
+        android:background="@drawable/gradient_login"
         tools:context=".HomeFragment">
 
 
@@ -26,7 +26,7 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="70dp"
-            app:srcCompat="@drawable/androtainerlogo_text" />
+            app:srcCompat="@drawable/ic_androtainerlogo_text" />
 
         <EditText
             android:id="@+id/etUrl"
@@ -39,7 +39,7 @@
             android:layout_marginTop="75dp"
             android:width="300dip"
             android:backgroundTint="#38daff"
-            android:drawableStart="@drawable/web_link_logo"
+            android:drawableStart="@drawable/ic_web_link"
             android:fontFamily="sans-serif-light"
             android:gravity="center"
             android:hint="https://mydomain.com/portainer"
@@ -57,7 +57,7 @@
             android:layout_marginTop="25dp"
             android:width="250dip"
             android:backgroundTint="#38daff"
-            android:drawableStart="@drawable/person_login"
+            android:drawableStart="@drawable/ic_person_login"
             android:fontFamily="sans-serif-light"
             android:gravity="center"
             android:hint="UserName"
@@ -74,7 +74,7 @@
             android:layout_marginTop="25dp"
             android:width="250dip"
             android:backgroundTint="#38daff"
-            android:drawableStart="@drawable/padlock_logo"
+            android:drawableStart="@drawable/ic_padlock"
             android:fontFamily="sans-serif-light"
             android:gravity="center"
             android:hint="Password"

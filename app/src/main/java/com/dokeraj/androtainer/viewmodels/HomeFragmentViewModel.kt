@@ -22,10 +22,6 @@ class HomeFragmentViewModel
     val dataState: LiveData<DataState<List<Kontainer>>>
         get() = _dataState
 
-    init {
-        println("VO homeFramment INIT funkcijata")
-    }
-
     @ExperimentalCoroutinesApi
     fun setStateEvent(homeMainStateEvent: HomeMainStateEvent) {
         viewModelScope.launch {

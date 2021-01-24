@@ -40,7 +40,7 @@
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/web_link_logo"
+            app:srcCompat="@drawable/ic_web_link"
             app:tint="@color/disText1" />
 
         <TextView
@@ -65,7 +65,7 @@
             android:layout_marginTop="9dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvServerUrl"
-            app:srcCompat="@drawable/person_login"
+            app:srcCompat="@drawable/ic_person_login"
             app:tint="@color/disText2" />
 
         <TextView

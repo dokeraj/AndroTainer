@@ -17,7 +17,7 @@ class ManageUsersListerFragment : Fragment(R.layout.fragment_users_lister) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         tbUsersLister.navigationIcon =
-            ContextCompat.getDrawable(requireActivity(), R.drawable.backlogo)
+            ContextCompat.getDrawable(requireActivity(), R.drawable.ic_back)
 
         val globActivity: MainActiviy = (activity as MainActiviy?)!!
         val globalVars: GlobalApp = (globActivity.application as GlobalApp)

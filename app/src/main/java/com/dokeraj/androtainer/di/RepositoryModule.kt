@@ -1,6 +1,6 @@
 package com.dokeraj.androtainer.di
 
-import com.dokeraj.androtainer.Interfaces.KontainerRetrofit
+import com.dokeraj.androtainer.interfaces.KontainerRetrofit
 import com.dokeraj.androtainer.models.retrofit.NetworkMapper
 import com.dokeraj.androtainer.repositories.DockerListerRepo
 import dagger.Module

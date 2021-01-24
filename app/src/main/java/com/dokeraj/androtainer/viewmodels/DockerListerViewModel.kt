@@ -10,7 +10,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 class DockerListerViewModel
 @ViewModelInject constructor(
@@ -31,7 +30,6 @@ class DockerListerViewModel
                 is MainStateEvent.GetosKontejneri ->
                     dockerListerRepo.getDokeri(mainStateEvent.jwt, mainStateEvent.url)
                         .onEach { dlDataState ->
-
                             when (dlDataState) {
                                 is DataState.Success -> {
                                     currentList = dlDataState.data
@@ -44,8 +42,6 @@ class DockerListerViewModel
                                     _dataState.value = dlDataState
                                 }
                             }
-
-
                         }.launchIn(viewModelScope)
 
 
@@ -53,15 +49,9 @@ class DockerListerViewModel
                     dockerListerRepo.startStopDokerContainer(mainStateEvent.jwt,
                         mainStateEvent.url, mainStateEvent.currentItem)
                         .onEach { ssDataState ->
-
-                            println("BURN FOR ME i dataSostojba e = ${ssDataState}")
-
                             when (ssDataState) {
+
                                 is DataState.CardLoading -> {
-
-                                    println("U LOADING ind: ${mainStateEvent.currentItem}, ${mainStateEvent.containerActionType}")
-
-
                                     /** change the state and status to transitioning */
                                     val modifiedKontainers: List<Kontainer> =
                                         currentList.mapIndexed { ind, itemToChange ->
@@ -73,16 +63,12 @@ class DockerListerViewModel
                                         }
 
                                     currentList = modifiedKontainers
-
                                     /** result back to View */
                                     _dataState.value = DataState.CardLoading(modifiedKontainers,
                                         ssDataState.itemIndex)
                                 }
 
                                 is DataState.CardSuccess -> {
-                                    println("U successss ind: ${mainStateEvent.currentItem}, ${mainStateEvent.containerActionType}")
-
-
                                     val modifiedKontainers: List<Kontainer> =
                                         currentList.mapIndexed { ind, itemToChange ->
                                             if (ind == mainStateEvent.currentItem)
@@ -93,15 +79,11 @@ class DockerListerViewModel
                                         }
 
                                     currentList = modifiedKontainers
-
                                     /** result back to View */
                                     _dataState.value = DataState.CardSuccess(
                                         modifiedKontainers, ssDataState.itemIndex)
                                 }
                                 is DataState.CardError -> {
-
-                                    println("U >ERO< ind: ${mainStateEvent.currentItem}, ${mainStateEvent.containerActionType}")
-
                                     val modifiedKontainers: List<Kontainer> =
                                         currentList.mapIndexed { ind, curItem ->
                                             if (ind == mainStateEvent.currentItem)
@@ -112,21 +94,17 @@ class DockerListerViewModel
                                         }
 
                                     currentList = modifiedKontainers
-
                                     /** result back to View */
                                     _dataState.value = DataState.CardError(modifiedKontainers,
                                         mainStateEvent.currentItem)
                                 }
-                                else -> {
-                                    println("VLEzE U elsaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-                                }
+                                else -> { }
                             }
 
                         }.launchIn(viewModelScope)
                 }
 
                 is MainStateEvent.InitializeView -> {
-                    println("---------------- smeni _datastate.value u inicijalizirano")
                     currentList = mainStateEvent.lista
                     _dataState.value = DataState.Success(mainStateEvent.lista)
                 }
@@ -136,13 +114,14 @@ class DockerListerViewModel
                         mainStateEvent.url,
                         mainStateEvent.selectedItem)
                         .onEach { ssState ->
-
                             when (ssState) {
+
                                 is DataState.DeleteLoading -> {
                                     /** result back to View */
                                     _dataState.value =
                                         DataState.DeleteLoading(currentList, ssState.item)
                                 }
+
                                 is DataState.DeleteSuccess -> {
                                     val modifiedKontainers: List<Kontainer> =
                                         currentList.filterNot { i ->
@@ -150,12 +129,10 @@ class DockerListerViewModel
                                         }
 
                                     currentList = modifiedKontainers
-
                                     /** result back to View */
                                     _dataState.value = DataState.Success(modifiedKontainers)
                                 }
                                 is DataState.Error -> {
-
                                     /** result back to View */
                                     _dataState.value = DataState.Error(ssState.exception)
                                 }
@@ -164,7 +141,6 @@ class DockerListerViewModel
                 }
 
                 is MainStateEvent.SetNone -> {
-                    println("KOJ E SEGA BE NONE TAKA LI!>!>!>!>")
                     _dataState.value = DataState.None
                 }
                 is MainStateEvent.SetSuccess -> {
@@ -191,5 +167,4 @@ sealed class MainStateEvent {
 
     object SetNone : MainStateEvent()
     object SetSuccess : MainStateEvent()
-
 }

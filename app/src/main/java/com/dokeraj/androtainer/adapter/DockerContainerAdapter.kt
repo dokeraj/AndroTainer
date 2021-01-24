@@ -14,15 +14,10 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.dokeraj.androtainer.DockerListerFragmentDirections
-import com.dokeraj.androtainer.Interfaces.ApiInterface
 import com.dokeraj.androtainer.R
 import com.dokeraj.androtainer.models.ContainerActionType
 import com.dokeraj.androtainer.models.ContainerStateType
-import com.dokeraj.androtainer.network.RetrofitInstance
 import kotlinx.android.synthetic.main.docker_card_item.view.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import com.dokeraj.androtainer.DockerListerFragment
 import com.dokeraj.androtainer.models.Kontainer
 import com.dokeraj.androtainer.viewmodels.DockerListerViewModel
@@ -55,13 +50,12 @@ class DockerContainerAdapter(
             ContainerStateType.RUNNING -> {
                 /** set style for running docker container */
                 setCardStyle(containerState = ContainerStateType.RUNNING,
-                    //statusText = currentItem.status.capitalize(),
                     statusTextColor = R.color.disText1,
                     cardBckColor = R.color.disGreen,
                     buttonText = "STOP",
                     buttonIsEnabled = true,
                     buttonColor = R.color.blue_main,
-                    statusIconImage = R.drawable.docker_status_icon,
+                    statusIconImage = R.drawable.ic_docker_status,
                     statusIconColor = R.color.disText1,
                     currentItemNum = position,
                     holder = holder
@@ -70,13 +64,12 @@ class DockerContainerAdapter(
             ContainerStateType.EXITED -> {
                 /** set style for stopped docker container */
                 setCardStyle(containerState = ContainerStateType.EXITED,
-                    //statusText = currentItem.status.capitalize(),
                     statusTextColor = R.color.disText1,
                     cardBckColor = R.color.disRed,
                     buttonText = "START",
                     buttonIsEnabled = true,
                     buttonColor = R.color.blue_main,
-                    statusIconImage = R.drawable.docker_status_icon,
+                    statusIconImage = R.drawable.ic_docker_status,
                     statusIconColor = R.color.disText1,
                     currentItemNum = position,
                     holder = holder
@@ -84,15 +77,13 @@ class DockerContainerAdapter(
             }
             ContainerStateType.TRANSITIONING -> {
                 /** set style for container that is either starting or stopping */
-                println("TRANZICIONIRANJE!?")
                 setCardStyle(containerState = ContainerStateType.TRANSITIONING,
-                    //statusText = currentItem.status,
                     statusTextColor = R.color.disText1,
                     cardBckColor = R.color.dis6,
                     buttonText = currentItem.status,
                     buttonIsEnabled = false,
                     buttonColor = R.color.dis6,
-                    statusIconImage = R.drawable.docker_status_icon,
+                    statusIconImage = R.drawable.ic_docker_status,
                     statusIconColor = R.color.disText1,
                     currentItemNum = position,
                     holder = holder
@@ -101,13 +92,12 @@ class DockerContainerAdapter(
             ContainerStateType.ERRORED -> {
                 /** set style for docker container that has received error from portainer api */
                 setCardStyle(containerState = ContainerStateType.ERRORED,
-                    //statusText = "Refresh by swiping down",
                     statusTextColor = R.color.disText3,
                     cardBckColor = R.color.disYellow,
                     buttonText = "ERROR",
                     buttonIsEnabled = false,
                     buttonColor = R.color.disYellow,
-                    statusIconImage = R.drawable.warning_logo,
+                    statusIconImage = R.drawable.ic_warning,
                     statusIconColor = R.color.disText3,
                     currentItemNum = position,
                     holder = holder
@@ -116,7 +106,6 @@ class DockerContainerAdapter(
             ContainerStateType.CREATED -> {
                 /** set style for docker container that is in the created state */
                 setCardStyle(containerState = ContainerStateType.CREATED,
-                    //statusText = currentItem.status.capitalize(),
                     statusTextColor = R.color.disText2,
                     cardBckColor = R.color.teal_700,
                     buttonText = "START",
@@ -134,13 +123,6 @@ class DockerContainerAdapter(
             callStartStopContainer(currentItemIndex = position,
                 containerId =  currentItem.id,
                 actionType =  if (pContainerList[position].state == ContainerStateType.RUNNING) ContainerActionType.STOP else ContainerActionType.START)
-
-        /*startStopDockerContainer(baseUrl,
-                jwt,
-                currentItem.id,
-                if (pContainerList[position].state == ContainerStateType.RUNNING) ContainerActionType.STOP else ContainerActionType.START,
-                holder,
-                position)*/
         }
 
         holder.cardHolderLayout.setOnClickListener {
@@ -165,109 +147,6 @@ class DockerContainerAdapter(
         val statusIconView: ImageView = itemView.statusIcon
     }
 
-    /*private fun startStopDockerContainer(
-        baseUrl: String,
-        jwt: String,
-        containerId: String,
-        actionType: ContainerActionType,
-        holder: ContainerViewHolder,
-        currentItemNum: Int,
-    ) {
-        val header = "Bearer $jwt"
-
-        val urlToCall = context.getString(R.string.StartStopContainer)
-            .replace("{baseUrl}", baseUrl.removeSuffix("/"))
-            .replace("{containerId}", containerId)
-            .replace("{actionType}", actionType.name.toLowerCase())
-
-        val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
-
-        // change the style and disable button
-        val transitioningText =
-            if (actionType == ContainerActionType.START) "Starting" else "Exiting"
-
-        setCardStyle(containerState = ContainerStateType.TRANSITIONING,
-            statusText = transitioningText,
-            statusTextColor = R.color.disText1,
-            cardBckColor = R.color.dis6,
-            buttonText = transitioningText,
-            buttonIsEnabled = false,
-            buttonColor = R.color.dis6,
-            statusIconImage = R.drawable.docker_status_icon,
-            statusIconColor = R.color.disText1,
-            currentItemNum = currentItemNum,
-            holder = holder
-        )
-
-        api.startStopContainer(header, urlToCall).enqueue(object : Callback<Unit?> {
-            override fun onResponse(call: Call<Unit?>, response: Response<Unit?>) {
-                when (response.code()) {
-                    204 -> {
-                        when (actionType) {
-                            ContainerActionType.START -> {
-                                setCardStyle(containerState = ContainerStateType.RUNNING,
-                                    statusText = "Started just now",
-                                    statusTextColor = R.color.disText1,
-                                    cardBckColor = R.color.disGreen,
-                                    buttonText = "STOP",
-                                    buttonIsEnabled = true,
-                                    buttonColor = R.color.blue_main,
-                                    statusIconImage = R.drawable.docker_status_icon,
-                                    statusIconColor = R.color.disText1,
-                                    currentItemNum = currentItemNum,
-                                    holder = holder
-                                )
-                            }
-                            ContainerActionType.STOP -> {
-                                setCardStyle(containerState = ContainerStateType.EXITED,
-                                    statusText = "Exited just now",
-                                    statusTextColor = R.color.disText1,
-                                    cardBckColor = R.color.disRed,
-                                    buttonText = "START",
-                                    buttonIsEnabled = true,
-                                    buttonColor = R.color.blue_main,
-                                    statusIconImage = R.drawable.docker_status_icon,
-                                    statusIconColor = R.color.disText1,
-                                    currentItemNum = currentItemNum,
-                                    holder = holder
-                                )
-                            }
-                        }
-                    }
-                    else -> {
-                        setCardStyle(containerState = ContainerStateType.ERRORED,
-                            statusText = "Refresh by swiping down",
-                            statusTextColor = R.color.disText3,
-                            cardBckColor = R.color.disYellow,
-                            buttonText = "ERROR",
-                            buttonIsEnabled = false,
-                            buttonColor = R.color.disYellow,
-                            statusIconImage = R.drawable.warning_logo,
-                            statusIconColor = R.color.disText3,
-                            currentItemNum = currentItemNum,
-                            holder = holder
-                        )
-                    }
-                }
-            }
-
-            override fun onFailure(call: Call<Unit?>, t: Throwable) {
-                setCardStyle(containerState = ContainerStateType.ERRORED,
-                    statusText = "Refresh by swiping down",
-                    statusTextColor = R.color.disText3,
-                    cardBckColor = R.color.disYellow,
-                    buttonText = "ERROR",
-                    buttonIsEnabled = false,
-                    buttonColor = R.color.disYellow,
-                    statusIconImage = R.drawable.warning_logo,
-                    statusIconColor = R.color.disText3,
-                    currentItemNum = currentItemNum,
-                    holder = holder
-                )
-            }
-        })
-    }*/
-
     @ExperimentalCoroutinesApi
     private fun callStartStopContainer(currentItemIndex: Int, containerId: String, actionType: ContainerActionType) {
         val fullUrl = context.getString(R.string.StartStopContainer)
@@ -275,13 +154,11 @@ class DockerContainerAdapter(
             .replace("{containerId}", containerId)
             .replace("{actionType}", actionType.name.toLowerCase())
 
-        println("ACTION TYPE od funkcijata: ${actionType}")
         dataViewModel.setStateEvent(MainStateEvent.StartStopKontejneri(jwt = jwt, url = fullUrl, currentItem = currentItemIndex, containerActionType = actionType ))
     }
 
     private fun setCardStyle(
         containerState: ContainerStateType,
-        //statusText: String,
         statusTextColor: Int,
         cardBckColor: Int,
         buttonText: String,
@@ -292,8 +169,6 @@ class DockerContainerAdapter(
         currentItemNum: Int,
         holder: ContainerViewHolder,
     ) {
-        //pContainerList[currentItemNum].state = containerState
-        //pContainerList[currentItemNum].status = statusText
         val currentItem = pContainerList[currentItemNum]
 
         if (holder.dockerNameView.text.toString() == currentItem.name) {

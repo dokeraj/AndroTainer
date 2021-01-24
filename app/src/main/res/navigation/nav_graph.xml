@@ -31,10 +31,18 @@
             app:exitAnim="@anim/slide_out_right" />
         <action
             android:id="@+id/action_dockerListerFragment_to_usersListerFragment"
-            app:destination="@id/usersListerFragment" />
+            app:destination="@id/usersListerFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
         <action
             android:id="@+id/action_dockerListerFragment_to_dockerContainerDetailsFragment"
-            app:destination="@id/dockerContainerDetailsFragment" />
+            app:destination="@id/dockerContainerDetailsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/usersListerFragment"
@@ -43,7 +51,9 @@
         tools:layout="@layout/fragment_users_lister" >
         <action
             android:id="@+id/action_usersListerFragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/dockerContainerDetailsFragment"
