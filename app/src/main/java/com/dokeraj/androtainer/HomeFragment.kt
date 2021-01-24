@@ -14,6 +14,7 @@ import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.Interfaces.ApiInterface
@@ -23,24 +24,28 @@ import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.*
 import com.dokeraj.androtainer.models.retrofit.*
 import com.dokeraj.androtainer.network.RetrofitInstance
+import com.dokeraj.androtainer.util.DataState
+import com.dokeraj.androtainer.viewmodels.HomeFragmentViewModel
+import com.dokeraj.androtainer.viewmodels.HomeMainStateEvent
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_home.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import kotlin.math.abs
 
+@AndroidEntryPoint
 class HomeFragment : Fragment(R.layout.fragment_home) {
-    var disableDrawerSwipe:Boolean = false
+    var disableDrawerSwipe: Boolean = false
+
+    /** how to instantiate a viewModel object*/
+    private val model: HomeFragmentViewModel by viewModels()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // TODO:: REFACTOR the names of drawable icons to start with "ic_"
-        // TODO:: REFACTOR try to use just one
 
         requireActivity().window.statusBarColor =
             ContextCompat.getColor(requireContext(), R.color.dis4)
@@ -86,23 +91,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         val btnLoginState = BtnLogin(requireContext(), lgnBtn)
 
-        lgnBtn.setOnClickListener {
-            disableDrawerSwipe = true
-            btnLoginState.changeBtnState(false)
-            if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
-                authenticate(etUrl.text.toString(),
-                    etUser.text.toString(),
-                    etPass.text.toString(), globActivity, btnLoginState)
-            } else {
-                btnLoginState.changeBtnState(true)
-                globActivity.showGenericSnack(requireContext(),
-                    requireView(),
-                    "Invalid URL!",
-                    R.color.white,
-                    R.color.orange_warning)
-            }
-        }
-
         if (globActivity.getLogoutMsg() != null) {
             globActivity.showGenericSnack(requireContext(),
                 requireView(),
@@ -119,10 +107,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         if (globActivity.hasJwt() && globActivity.isJwtValid()) {
             btnLoginState.changeBtnState(false)
-            getPortainerContainers(globalVars.currentUser!!.serverUrl,
-                globalVars.currentUser!!.jwt!!,
-                globActivity,
-                btnLoginState)
+            callGetContainers(globalVars.currentUser!!.serverUrl, globalVars.currentUser!!.jwt!!)
         } else if (globActivity.hasJwt() && !globActivity.isJwtValid()) {
             btnLoginState.changeBtnState(false)
             authenticate(etUrl.text.toString(),
@@ -155,10 +140,65 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             rv_login_users.visibility = View.GONE
             tvUsersNoContent.visibility = View.VISIBLE
         }
+
+
+        lgnBtn.setOnClickListener {
+            disableDrawerSwipe = true
+            btnLoginState.changeBtnState(false)
+            if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
+                authenticate(etUrl.text.toString(),
+                    etUser.text.toString(),
+                    etPass.text.toString(), globActivity, btnLoginState)
+            } else {
+                btnLoginState.changeBtnState(true)
+                globActivity.showGenericSnack(requireContext(),
+                    requireView(),
+                    "Invalid URL!",
+                    R.color.white,
+                    R.color.orange_warning)
+            }
+        }
+
+        subscribeObservers(btnLoginState, globActivity)
+    }
+
+    private fun subscribeObservers(btnLoginState: BtnLogin, mainActivity: MainActiviy) {
+        model.dataState.observe(viewLifecycleOwner, { ds ->
+            when (ds) {
+                is DataState.Success<List<Kontainer>> -> {
+                    println("HOMEFRAGMETN OBSERVER DATA success: ${ds.data}")
+
+                    mainActivity.setIsLoginToDockerLister(true)
+                    val action =
+                        HomeFragmentDirections.actionHomeFragmentToDockerListerFragment(
+                            Kontainers(ds.data))
+                    findNavController().navigate(action)
+
+                }
+                is DataState.Error -> {
+                    disableDrawerSwipe = false
+                    btnLoginState.changeBtnState(true)
+                    mainActivity.showGenericSnack(requireContext(),
+                        requireView(),
+                        "Server not permitting communication! Check URL.",
+                        R.color.red,
+                        R.color.white)
+
+                    println("HOME exception bre: ${ds.exception}")
+
+                }
+                is DataState.Loading -> {
+                    println("LOADING MOREEEEEEE!!")
+                    disableDrawerSwipe = true
+                    btnLoginState.changeBtnState(false)
+                }
+                else -> {}
+            }
+        })
     }
 
     private fun authenticate(
-        url: String,
+        baseUrl: String,
         usr: String,
         pwd: String,
         mainActiviy: MainActiviy,
@@ -166,7 +206,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     ) {
         val cred = UserCredentials(usr, pwd)
 
-        val fullPath = getString(R.string.authenticate).replace("{baseUrl}", url.removeSuffix("/"))
+        val fullPath =
+            getString(R.string.authenticate).replace("{baseUrl}", baseUrl.removeSuffix("/"))
         val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
         api.loginRequest(cred, fullPath)
             .enqueue(object : retrofit2.Callback<Jwt?> {
@@ -185,9 +226,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                                 .toEpochMilli()
 
                         val globActivity: MainActiviy = (activity as MainActiviy?)!!
-                        globActivity.setAllMasterVals(url, usr, pwd, it, jwtValidUntil)
+                        globActivity.setAllMasterVals(baseUrl, usr, pwd, it, jwtValidUntil)
 
-                        getPortainerContainers(url, it, mainActiviy, btnLoginState)
+                        //getPortainerContainers(url, it, mainActiviy, btnLoginState)
+                        callGetContainers(baseUrl, it)
                     }
                 }
 
@@ -202,6 +244,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
 
             })
+    }
+
+    private fun callGetContainers(url: String, jwt: String) {
+        val fullUrl =
+            getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
+
+        model.setStateEvent(HomeMainStateEvent.GetosKontejneri(jwt = jwt, url = fullUrl))
     }
 
     fun showResponseSnack(responseStatus: String, btnLoginState: BtnLogin) {
@@ -249,7 +298,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             snackbar.show()
     }
 
-    private fun getPortainerContainers(
+    /*private fun getPortainerContainers(
         url: String,
         jwt: String,
         mainActiviy: MainActiviy,
@@ -271,7 +320,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
                     pcResponse?.let {
                         // remap PContainerResponse to List of PContainer
-                        val pcs: List<PContainer> = PContainerHelper.toListPContainer(it)
+                        val pcs: List<PContainerResponse> = PContainerHelper.toListPContainer(it)
 
                         // go to the ListerFragment and transfer all found docker files
                         val transferContainer: PContainers = PContainers(pcs)
@@ -292,7 +341,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         R.color.white)
                 }
             })
-    }
+    }*/
 
     inner class UsersGestureListener : GestureDetector.SimpleOnGestureListener() {
         private val SWIPE_THRESHOLD = 100
@@ -329,7 +378,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun openDrawer() {
-        if(!disableDrawerSwipe)
+        if (!disableDrawerSwipe)
             users_lister.openDrawer(Gravity.LEFT)
     }
 }

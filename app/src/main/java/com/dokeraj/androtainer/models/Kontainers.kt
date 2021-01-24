@@ -4,6 +4,6 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class PContainers(
-    val containers: List<PContainer>,
+data class Kontainers(
+    val containers: List<Kontainer>,
 ) : Parcelable

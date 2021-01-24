@@ -6,17 +6,23 @@ import android.view.View
 import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.dokeraj.androtainer.Interfaces.ApiInterface
+import com.dokeraj.androtainer.adapter.DockerContainerAdapter
 import com.dokeraj.androtainer.buttons.BtnDeleteContainer
 import com.dokeraj.androtainer.globalvars.GlobalApp
-import com.dokeraj.androtainer.models.PContainer
+import com.dokeraj.androtainer.models.Kontainer
 import com.dokeraj.androtainer.models.logos.Logo
 import com.dokeraj.androtainer.models.logos.Logos
 import com.dokeraj.androtainer.network.RetrofitInstance
+import com.dokeraj.androtainer.util.DataState
+import com.dokeraj.androtainer.viewmodels.DockerListerViewModel
+import com.dokeraj.androtainer.viewmodels.MainStateEvent
 import com.google.gson.Gson
 import com.squareup.picasso.Picasso
+import dagger.hilt.android.AndroidEntryPoint
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.core.MarkwonTheme
@@ -30,13 +36,19 @@ import java.time.Instant.ofEpochSecond
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@AndroidEntryPoint
 class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_container_details) {
     var isDeletingNow: Boolean = false
+
+    // todo:: more padding on the Remove hint - and move the button a bit more left
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val args: DockerContainerDetailsFragmentArgs by navArgs()
 
-        val selectedContainer: PContainer = args.dContainer
+        /** how to instantiate a viewModel object*/
+        val model = ViewModelProvider(requireActivity()).get(DockerListerViewModel::class.java)
+
+        val selectedContainer: Kontainer = args.dContainer
 
         tbContainerDetails.navigationIcon =
             ContextCompat.getDrawable(requireActivity(), R.drawable.backlogo)
@@ -62,9 +74,9 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
             // Only allow to go back to docker lister only when we get any kind of response from the API (or timeout)
-            if (!isDeletingNow)
-                findNavController().popBackStack()
-            else
+            if (!isDeletingNow) {
+                    model.setStateEvent(MainStateEvent.SetSuccess)
+            } else
                 globActivity.showGenericSnack(requireContext(),
                     requireView(),
                     "Please wait until the ${selectedContainer.name} is deleted",
@@ -80,7 +92,7 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
 
         // on nav button back clicked set the global var that the swiperRefresh should be turned on
         tbContainerDetails.setNavigationOnClickListener {
-            backToDockerLister(globActivity)
+            requireActivity().onBackPressed()
         }
 
         // show textview telling to do a long press in order to delete the container
@@ -96,7 +108,7 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
 
         // on long press - delete the docker container and go back to docker lister
         btnContainerDelete.setOnLongClickListener {
-            isDeletingNow = true
+            /*isDeletingNow = true
             btnDeleteState.changeBtnState(false)
             tv_btn_remove_container_description.visibility = View.GONE
 
@@ -104,18 +116,66 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
                 globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
                 globActivity,
-                btnDeleteState)
+                btnDeleteState)*/
+
+            val fullUrl =
+                getString(R.string.removeDockerContainer).replace("{baseUrl}",
+                    globalVars.currentUser!!.serverUrl.removeSuffix("/"))
+                    .replace("{containerId}", selectedContainer.id)
+
+            model.setStateEvent(MainStateEvent.DeleteContaier(globalVars.currentUser!!.jwt!!,
+                fullUrl,
+                selectedContainer))
 
             true
         }
+
+        subscribeObserver(model, globActivity, btnDeleteState)
+
     }
 
-    private fun backToDockerLister(globActivity: MainActiviy) {
-        globActivity.setIsBackToDockerLister(true)
-        requireActivity().onBackPressed()
+    private fun subscribeObserver(
+        dataViewModel: DockerListerViewModel,
+        mainActivity: MainActiviy,
+        btnDeleteState: BtnDeleteContainer,
+    ) {
+        dataViewModel.dataState.observe(viewLifecycleOwner, { ds ->
+            when (ds) {
+                is DataState.Success<List<Kontainer>> -> {
+                    println("kompletno dobro brisenje: ${ds.data}")
+                    isDeletingNow = false
+
+                    findNavController().popBackStack()
+                }
+                is DataState.Error -> {
+                    isDeletingNow = false
+                    btnDeleteState.changeBtnState(true)
+
+                    mainActivity.showGenericSnack(requireContext(),
+                        requireView(),
+                        "Error deleting container! Please try again.",
+                        R.color.white,
+                        R.color.orange_warning)
+
+                    println("exception zs:${ds.exception}")
+                }
+                is DataState.DeleteLoading -> {
+                    isDeletingNow = true
+                    btnDeleteState.changeBtnState(false)
+                    tv_btn_remove_container_description.visibility = View.GONE
+
+                    println("Vo lodingooooooooooooooooooooooooooo")
+                }
+                is DataState.None -> {
+                    println("ULEGNA u NONE DETAILS - what ahve you done to me!?")
+                }
+
+
+            }
+        })
     }
 
-    private fun setContainerDetails(container: PContainer) {
+    private fun setContainerDetails(container: Kontainer) {
         val markwon = Markwon.builder(requireContext())
             .usePlugin(object : AbstractMarkwonPlugin() {
                 override fun configureTheme(builder: MarkwonTheme.Builder) {
@@ -178,52 +238,52 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
 
     }
 
-    private fun deleteDockerContainer(
-        selectedContainer: PContainer,
-        baseUrl: String,
-        jwt: String,
-        globActivity: MainActiviy,
-        btnDeleteState: BtnDeleteContainer,
-    ) {
-        val fullUrl =
-            getString(R.string.removeDockerContainer).replace("{baseUrl}",
-                baseUrl.removeSuffix("/"))
-                .replace("{containerId}", selectedContainer.id)
-        val header = "Bearer $jwt"
+    /* private fun deleteDockerContainer(
+         selectedContainer: Kontainer,
+         baseUrl: String,
+         jwt: String,
+         globActivity: MainActiviy,
+         btnDeleteState: BtnDeleteContainer,
+     ) {
+         val fullUrl =
+             getString(R.string.removeDockerContainer).replace("{baseUrl}",
+                 baseUrl.removeSuffix("/"))
+                 .replace("{containerId}", selectedContainer.id)
+         val header = "Bearer $jwt"
 
-        val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
-        api.removeDockerContainer(header, fullUrl, true, 1)
-            .enqueue(object : Callback<Unit?> {
-                override fun onResponse(call: Call<Unit?>, response: Response<Unit?>) {
-                    when (response.code()) {
-                        204 -> {
-                            isDeletingNow = false
-                            backToDockerLister(globActivity)
-                        }
-                        else -> {
-                            isDeletingNow = false
-                            btnDeleteState.changeBtnState(true)
+         val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
+         api.removeDockerContainer(header, fullUrl, true, 1)
+             .enqueue(object : Callback<Unit?> {
+                 override fun onResponse(call: Call<Unit?>, response: Response<Unit?>) {
+                     when (response.code()) {
+                         204 -> {
+                             isDeletingNow = false
+                             backToDockerLister(globActivity)
+                         }
+                         else -> {
+                             isDeletingNow = false
+                             btnDeleteState.changeBtnState(true)
 
-                            globActivity.showGenericSnack(requireContext(),
-                                requireView(),
-                                "Error deleting container ${selectedContainer.name}! Please try again.",
-                                R.color.white,
-                                R.color.orange_warning)
-                        }
-                    }
-                }
+                             globActivity.showGenericSnack(requireContext(),
+                                 requireView(),
+                                 "Error deleting container ${selectedContainer.name}! Please try again.",
+                                 R.color.white,
+                                 R.color.orange_warning)
+                         }
+                     }
+                 }
 
-                override fun onFailure(call: Call<Unit?>, t: Throwable) {
-                    isDeletingNow = false
-                    btnDeleteState.changeBtnState(true)
-                    globActivity.showGenericSnack(requireContext(),
-                        requireView(),
-                        "Error deleting container ${selectedContainer.name}! Please logout and login again.",
-                        R.color.white,
-                        R.color.disRed)
-                }
-            })
-    }
+                 override fun onFailure(call: Call<Unit?>, t: Throwable) {
+                     isDeletingNow = false
+                     btnDeleteState.changeBtnState(true)
+                     globActivity.showGenericSnack(requireContext(),
+                         requireView(),
+                         "Error deleting container ${selectedContainer.name}! Please logout and login again.",
+                         R.color.white,
+                         R.color.disRed)
+                 }
+             })
+     }*/
 
 
 }

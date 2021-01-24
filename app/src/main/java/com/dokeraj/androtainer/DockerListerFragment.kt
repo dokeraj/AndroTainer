@@ -7,26 +7,26 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.dokeraj.androtainer.Interfaces.ApiInterface
 import com.dokeraj.androtainer.adapter.DockerContainerAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
-import com.dokeraj.androtainer.models.PContainer
-import com.dokeraj.androtainer.models.PContainerHelper
-import com.dokeraj.androtainer.models.retrofit.PContainersResponse
-import com.dokeraj.androtainer.network.RetrofitInstance
+import com.dokeraj.androtainer.models.*
+import com.dokeraj.androtainer.util.DataState
+import com.dokeraj.androtainer.viewmodels.DockerListerViewModel
+import com.dokeraj.androtainer.viewmodels.MainStateEvent
+import dagger.hilt.android.AndroidEntryPoint
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.linkify.LinkifyPlugin
 import kotlinx.android.synthetic.main.drawer_lister_header.*
 import kotlinx.android.synthetic.main.fragment_docker_lister.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@AndroidEntryPoint
 class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
     private val args: DockerListerFragmentArgs by navArgs()
 
@@ -34,6 +34,10 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        /** how to instantiate a viewModel object*/
+        val model: DockerListerViewModel =
+            ViewModelProvider(requireActivity()).get(DockerListerViewModel::class.java)
 
         requireActivity().window.statusBarColor =
             ContextCompat.getColor(requireContext(), R.color.dis2)
@@ -54,16 +58,19 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         drawerLister.addDrawerListener(hamburgerMenu)
         hamburgerMenu.syncState()
 
-
-        // todo:: if the docker container list is empty - display a TEXTVIEW stating that there are no containers to show
         // transfer data from login
-        val containers: List<PContainer> = args.dContainers.containers
+        val containers: List<Kontainer> = listOf()
+
+        if (globActivity.getIsLoginToDockerLister()) {
+            globActivity.setIsLoginToDockerLister(false)
+            model.setStateEvent(MainStateEvent.InitializeView(args.dContainers.containers))
+        }
 
         val recyclerAdapter =
             DockerContainerAdapter(containers,
                 globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
-                requireContext(), this)
+                requireContext(), this, model)
         recycler_view.adapter = recyclerAdapter
         recycler_view.layoutManager = LinearLayoutManager(activity)
         recycler_view.setHasFixedSize(true)
@@ -86,7 +93,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         }
 
         swiperLayout.setOnRefreshListener {
-            callSwiperLogic(globActivity, globalVars, recyclerAdapter)
+            callSwiperLogic(model, globActivity, globalVars, recyclerAdapter)
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
@@ -94,16 +101,75 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             drawerLister.close()
         }
 
-        if(globActivity.getIsBackToDockerLister()) {
+        // todo:: maybe not needed now??
+        /*if (globActivity.getIsBackToDockerLister()) {
             globActivity.setIsBackToDockerLister(false)
-            swiperLayout.post{
+            swiperLayout.post {
                 swiperLayout.isRefreshing = true
-                callSwiperLogic(globActivity, globalVars, recyclerAdapter)
+                //callSwiperLogic(model, globActivity, globalVars, recyclerAdapter)
             }
-        }
+        }*/
+
+        subscribeObservers(model, recyclerAdapter, globActivity)
     }
 
+    private fun subscribeObservers(
+        dataViewModel: DockerListerViewModel,
+        recyclerAdapter: DockerContainerAdapter,
+        mainActivity: MainActiviy,
+    ) {
+        dataViewModel.dataState.observe(viewLifecycleOwner, { ds ->
+            when (ds) {
+                is DataState.Success<List<Kontainer>> -> {
+                    println("swajper vrati: ${ds.data}")
+
+                    recyclerAdapter.setItems(ds.data)
+                    recyclerAdapter.notifyDataSetChanged()
+                    swiperLayout.isRefreshing = false
+                }
+                is DataState.Error -> {
+                    swiperLayout.isRefreshing = false
+
+                    logout(mainActivity, "Issue with Portainer! Please login again.")
+
+                    println("EXPCEPTIONSIOSDO:${ds.exception}")
+                }
+                is DataState.Loading -> {
+                    println("SWIPINGGGGGG!!")
+                    swiperLayout.isRefreshing = true
+                }
+                /** below these are the logic for handling the idividual cards*/
+                is DataState.CardLoading -> {
+                    println("********************U KARD loding!!!!!!!!!")
+                    recyclerAdapter.setItems(ds.data)
+                    recyclerAdapter.notifyItemChanged(ds.itemIndex)
+                }
+                is DataState.CardSuccess -> {
+                    println("*******************U KARD uspeho...........................!")
+                    swiperLayout.isRefreshing = false
+                    recyclerAdapter.setItems(ds.data)
+                    recyclerAdapter.notifyItemChanged(ds.itemIndex)
+                }
+                is DataState.CardError -> {
+                    println("*******************U kartinka GRESKOSX...........................!")
+                    recyclerAdapter.setItems(ds.data)
+                    recyclerAdapter.notifyItemChanged(ds.itemIndex)
+                }
+            }
+        })
+    }
+
+    @ExperimentalCoroutinesApi
+    private fun callGetContainers(dataViewModel: DockerListerViewModel, url: String, jwt: String) {
+        val fullUrl =
+            getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
+
+        dataViewModel.setStateEvent(MainStateEvent.GetosKontejneri(jwt = jwt, url = fullUrl))
+    }
+
+    @ExperimentalCoroutinesApi
     private fun callSwiperLogic(
+        dataViewModel: DockerListerViewModel,
         globActivity: MainActiviy,
         globalVars: GlobalApp,
         recyclerAdapter: DockerContainerAdapter,
@@ -113,17 +179,20 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             if (recyclerAdapter.areItemsInTransitioningState())
                 swiperLayout.isRefreshing = false
             else {
-                getPortainerContainers(globalVars.currentUser!!.serverUrl,
+                /*getPortainerContainers(globalVars.currentUser!!.serverUrl,
                     globalVars.currentUser!!.jwt!!,
                     recyclerAdapter,
-                    globActivity)
+                    globActivity)*/
+                callGetContainers(dataViewModel,
+                    globalVars.currentUser!!.serverUrl,
+                    globalVars.currentUser!!.jwt!!)
             }
         } else {
             logout(globActivity, "Session has expired! Please log in again.")
         }
     }
 
-    private fun getPortainerContainers(
+    /*private fun getPortainerContainers(
         url: String,
         jwt: String,
         recyclerAdapter: DockerContainerAdapter,
@@ -144,7 +213,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
 
                     if (pcResponse != null) {
                         // remap PContainerResponse to List of PContainer
-                        val pcs: List<PContainer> = PContainerHelper.toListPContainer(pcResponse)
+                        val pcs: List<Kontainer> = PContainerHelper.toListPContainer(pcResponse)
 
                         recyclerAdapter.setItems(pcs)
                         recyclerAdapter.notifyDataSetChanged()
@@ -160,7 +229,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     logout(mainActivity, "Issue with Portainer! Please login again.")
                 }
             })
-    }
+    }*/
 
 
     private fun setDrawerInfo(globalVars: GlobalApp) {
@@ -190,6 +259,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
     private fun logout(mainActivity: MainActiviy, logoutMsg: String? = null) {
         mainActivity.invalidateJwt()
         mainActivity.setLogoutMsg(logoutMsg)
+
         val action =
             DockerListerFragmentDirections.actionDockerListerFragmentToHomeFragment()
         findNavController().navigate(action)

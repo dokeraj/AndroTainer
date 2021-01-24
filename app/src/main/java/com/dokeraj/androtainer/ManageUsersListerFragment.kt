@@ -41,7 +41,6 @@ class ManageUsersListerFragment : Fragment(R.layout.fragment_users_lister) {
 
         // on back pressed set the global var that the swiperRefresh should be turned on
         tbUsersLister.setNavigationOnClickListener {
-            globActivity.setIsBackToDockerLister(true)
             requireActivity().onBackPressed()
         }
     }
