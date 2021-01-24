@@ -18,20 +18,24 @@ import com.dokeraj.androtainer.Interfaces.ApiInterface
 import com.dokeraj.androtainer.R
 import com.dokeraj.androtainer.models.ContainerActionType
 import com.dokeraj.androtainer.models.ContainerStateType
-import com.dokeraj.androtainer.models.PContainer
 import com.dokeraj.androtainer.network.RetrofitInstance
 import kotlinx.android.synthetic.main.docker_card_item.view.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import com.dokeraj.androtainer.DockerListerFragment
+import com.dokeraj.androtainer.models.Kontainer
+import com.dokeraj.androtainer.viewmodels.DockerListerViewModel
+import com.dokeraj.androtainer.viewmodels.MainStateEvent
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class DockerContainerAdapter(
-    private var pContainerList: List<PContainer>,
+    private var pContainerList: List<Kontainer>,
     private val baseUrl: String,
     private val jwt: String,
     private val context: Context,
-    private val frag: DockerListerFragment
+    private val frag: DockerListerFragment,
+    private val dataViewModel: DockerListerViewModel
 ) :
     RecyclerView.Adapter<DockerContainerAdapter.ContainerViewHolder>() {
 
@@ -43,17 +47,15 @@ class DockerContainerAdapter(
     }
 
     override fun onBindViewHolder(holder: ContainerViewHolder, position: Int) {
-        val currentItem: PContainer = pContainerList[position]
+        val currentItem: Kontainer = pContainerList[position]
 
         holder.dockerNameView.text = currentItem.name
-
-        // todo:: there is another state CREATED - handle it!!
 
         when (currentItem.state) {
             ContainerStateType.RUNNING -> {
                 /** set style for running docker container */
                 setCardStyle(containerState = ContainerStateType.RUNNING,
-                    statusText = currentItem.status.capitalize(),
+                    //statusText = currentItem.status.capitalize(),
                     statusTextColor = R.color.disText1,
                     cardBckColor = R.color.disGreen,
                     buttonText = "STOP",
@@ -68,7 +70,7 @@ class DockerContainerAdapter(
             ContainerStateType.EXITED -> {
                 /** set style for stopped docker container */
                 setCardStyle(containerState = ContainerStateType.EXITED,
-                    statusText = currentItem.status.capitalize(),
+                    //statusText = currentItem.status.capitalize(),
                     statusTextColor = R.color.disText1,
                     cardBckColor = R.color.disRed,
                     buttonText = "START",
@@ -82,8 +84,9 @@ class DockerContainerAdapter(
             }
             ContainerStateType.TRANSITIONING -> {
                 /** set style for container that is either starting or stopping */
+                println("TRANZICIONIRANJE!?")
                 setCardStyle(containerState = ContainerStateType.TRANSITIONING,
-                    statusText = currentItem.status,
+                    //statusText = currentItem.status,
                     statusTextColor = R.color.disText1,
                     cardBckColor = R.color.dis6,
                     buttonText = currentItem.status,
@@ -98,7 +101,7 @@ class DockerContainerAdapter(
             ContainerStateType.ERRORED -> {
                 /** set style for docker container that has received error from portainer api */
                 setCardStyle(containerState = ContainerStateType.ERRORED,
-                    statusText = "Refresh by swiping down",
+                    //statusText = "Refresh by swiping down",
                     statusTextColor = R.color.disText3,
                     cardBckColor = R.color.disYellow,
                     buttonText = "ERROR",
@@ -113,7 +116,7 @@ class DockerContainerAdapter(
             ContainerStateType.CREATED -> {
                 /** set style for docker container that is in the created state */
                 setCardStyle(containerState = ContainerStateType.CREATED,
-                    statusText = currentItem.status.capitalize(),
+                    //statusText = currentItem.status.capitalize(),
                     statusTextColor = R.color.disText2,
                     cardBckColor = R.color.teal_700,
                     buttonText = "START",
@@ -128,16 +131,23 @@ class DockerContainerAdapter(
         }
 
         holder.dockerButton.setOnClickListener {
-            startStopDockerContainer(baseUrl,
+            callStartStopContainer(currentItemIndex = position,
+                containerId =  currentItem.id,
+                actionType =  if (pContainerList[position].state == ContainerStateType.RUNNING) ContainerActionType.STOP else ContainerActionType.START)
+
+        /*startStopDockerContainer(baseUrl,
                 jwt,
                 currentItem.id,
                 if (pContainerList[position].state == ContainerStateType.RUNNING) ContainerActionType.STOP else ContainerActionType.START,
                 holder,
-                position)
+                position)*/
         }
 
-        holder.cardHolderLayout.setOnClickListener{
-            val action =DockerListerFragmentDirections.actionDockerListerFragmentToDockerContainerDetailsFragment(currentItem)
+        holder.cardHolderLayout.setOnClickListener {
+            dataViewModel.setStateEvent(MainStateEvent.SetNone)
+            val action =
+                DockerListerFragmentDirections.actionDockerListerFragmentToDockerContainerDetailsFragment(
+                    currentItem)
             findNavController(frag).navigate(action)
         }
     }
@@ -155,7 +165,7 @@ class DockerContainerAdapter(
         val statusIconView: ImageView = itemView.statusIcon
     }
 
-    private fun startStopDockerContainer(
+    /*private fun startStopDockerContainer(
         baseUrl: String,
         jwt: String,
         containerId: String,
@@ -256,11 +266,22 @@ class DockerContainerAdapter(
                 )
             }
         })
+    }*/
+
+    @ExperimentalCoroutinesApi
+    private fun callStartStopContainer(currentItemIndex: Int, containerId: String, actionType: ContainerActionType) {
+        val fullUrl = context.getString(R.string.StartStopContainer)
+            .replace("{baseUrl}", baseUrl.removeSuffix("/"))
+            .replace("{containerId}", containerId)
+            .replace("{actionType}", actionType.name.toLowerCase())
+
+        println("ACTION TYPE od funkcijata: ${actionType}")
+        dataViewModel.setStateEvent(MainStateEvent.StartStopKontejneri(jwt = jwt, url = fullUrl, currentItem = currentItemIndex, containerActionType = actionType ))
     }
 
     private fun setCardStyle(
         containerState: ContainerStateType,
-        statusText: String,
+        //statusText: String,
         statusTextColor: Int,
         cardBckColor: Int,
         buttonText: String,
@@ -271,8 +292,8 @@ class DockerContainerAdapter(
         currentItemNum: Int,
         holder: ContainerViewHolder,
     ) {
-        pContainerList[currentItemNum].state = containerState
-        pContainerList[currentItemNum].status = statusText
+        //pContainerList[currentItemNum].state = containerState
+        //pContainerList[currentItemNum].status = statusText
         val currentItem = pContainerList[currentItemNum]
 
         if (holder.dockerNameView.text.toString() == currentItem.name) {
@@ -289,6 +310,7 @@ class DockerContainerAdapter(
             // change button background
             holder.btnTextView.text = buttonText
             holder.dockerButton.isClickable = buttonIsEnabled
+            holder.dockerButton.isEnabled = buttonIsEnabled
             val btnBackground = holder.btnBackgroundView.background
             btnBackground.mutate()
             btnBackground.colorFilter =
@@ -307,7 +329,7 @@ class DockerContainerAdapter(
         }
     }
 
-    fun setItems(newContainerList: List<PContainer>) {
+    fun setItems(newContainerList: List<Kontainer>) {
         this.pContainerList = newContainerList
     }
 

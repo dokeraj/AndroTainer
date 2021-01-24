@@ -14,12 +14,13 @@ import com.dokeraj.androtainer.models.Credential
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import dagger.hilt.android.AndroidEntryPoint
 import io.noties.markwon.Markwon
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
-
+@AndroidEntryPoint
 class MainActiviy : AppCompatActivity() {
 
     private var logoutMsg: String? = null
@@ -28,10 +29,10 @@ class MainActiviy : AppCompatActivity() {
         logoutMsg = msg
     }
 
-    private var backToDockerLister: Boolean = false
-    fun getIsBackToDockerLister() = backToDockerLister
-    fun setIsBackToDockerLister(msg: Boolean) {
-        backToDockerLister = msg
+    private var loginToDockerLister: Boolean = true
+    fun getIsLoginToDockerLister() = loginToDockerLister
+    fun setIsLoginToDockerLister(msg: Boolean) {
+        loginToDockerLister = msg
     }
 
     fun showGenericSnack(
