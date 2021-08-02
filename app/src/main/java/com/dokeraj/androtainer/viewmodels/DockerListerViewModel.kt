@@ -27,18 +27,18 @@ class DockerListerViewModel
     fun setStateEvent(mainStateEvent: MainStateEvent) {
         viewModelScope.launch {
             when (mainStateEvent) {
-                is MainStateEvent.GetosKontejneri ->
-                    dockerListerRepo.getDokeri(mainStateEvent.jwt, mainStateEvent.url)
+                is MainStateEvent.GetKontejneri ->
+                    dockerListerRepo.getDocContainers(mainStateEvent.jwt, mainStateEvent.url)
                         .onEach { dlDataState ->
                             when (dlDataState) {
                                 is DataState.Success -> {
                                     currentList = dlDataState.data
-
-                                    /** result back to View */
                                     _dataState.value = dlDataState
                                 }
                                 is DataState.Error -> {
-                                    /** result back to View */
+                                    _dataState.value = dlDataState
+                                }
+                                is DataState.Loading -> {
                                     _dataState.value = dlDataState
                                 }
                             }
@@ -152,7 +152,7 @@ class DockerListerViewModel
 }
 
 sealed class MainStateEvent {
-    data class GetosKontejneri(val jwt: String?, val url: String) : MainStateEvent()
+    data class GetKontejneri(val jwt: String?, val url: String) : MainStateEvent()
     data class StartStopKontejneri(
         val jwt: String?,
         val url: String,

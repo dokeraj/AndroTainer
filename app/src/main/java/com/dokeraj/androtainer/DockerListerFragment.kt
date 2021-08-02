@@ -145,7 +145,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
 
-        dataViewModel.setStateEvent(MainStateEvent.GetosKontejneri(jwt = jwt, url = fullUrl))
+        dataViewModel.setStateEvent(MainStateEvent.GetKontejneri(jwt = jwt, url = fullUrl))
     }
 
     @ExperimentalCoroutinesApi
