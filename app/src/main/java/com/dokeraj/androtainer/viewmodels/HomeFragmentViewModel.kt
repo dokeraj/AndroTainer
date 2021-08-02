@@ -27,7 +27,7 @@ class HomeFragmentViewModel
         viewModelScope.launch {
             when (homeMainStateEvent) {
                 is HomeMainStateEvent.GetosKontejneri ->
-                    dockerListerRepo.getDokeri(homeMainStateEvent.jwt, homeMainStateEvent.url)
+                    dockerListerRepo.getDocContainers(homeMainStateEvent.jwt, homeMainStateEvent.url)
                         .onEach { dataState ->
                             _dataState.value = dataState
                         }.launchIn(viewModelScope)

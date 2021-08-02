@@ -11,7 +11,7 @@ class DockerListerRepo constructor(
     private val kontainerRetrofit: KontainerRetrofit,
     private val networkMapper: NetworkMapper,
 ) {
-    suspend fun getDokeri(jwt: String?, url: String): Flow<DataState<List<Kontainer>>> = flow {
+    suspend fun getDocContainers(jwt: String?, url: String): Flow<DataState<List<Kontainer>>> = flow {
         emit(DataState.Loading)
         try {
             val networkKontainers = kontainerRetrofit.listDockerContainers(jwt, url, 1)
