@@ -8,9 +8,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.dokeraj.androtainer.globalvars.GlobalApp
+import com.dokeraj.androtainer.globalvars.PermaVals.LOG_SETTINGS
 import com.dokeraj.androtainer.globalvars.PermaVals.SP_DB
 import com.dokeraj.androtainer.globalvars.PermaVals.USERS_CREDENTIALS
 import com.dokeraj.androtainer.models.Credential
+import com.dokeraj.androtainer.models.LogSettings
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -64,7 +66,34 @@ class MainActiviy : AppCompatActivity() {
         snackbar.show()
     }
 
-    fun savePermaData(
+    fun setGlobalLoggingSettings(
+        autoRefresh: Boolean,
+        timestamp: Boolean,
+        wrapLines: Boolean,
+        linesCount: Int,
+    ) {
+        val global = (this.application as GlobalApp)
+
+        val logSettings = LogSettings(autoRefresh, timestamp, wrapLines, linesCount)
+        // set logging settings to global var
+        global.logSettings = logSettings
+
+        // save the logging settings to the perma val
+        saveLoggingSettingsToPerma(logSettings)
+    }
+
+    fun saveLoggingSettingsToPerma(
+        logSettings: LogSettings,
+    ) {
+        val sharedPrefs = this.getSharedPreferences(SP_DB, MODE_PRIVATE)
+        val editor = sharedPrefs?.edit()
+
+        editor?.putString(LOG_SETTINGS, Gson().toJson(logSettings))
+
+        editor?.apply()
+    }
+
+    fun saveCredentialsPermaData(
         users: Map<String, Credential>,
     ) {
         val creds: List<Credential> = users.map { (_, v) -> v }
@@ -79,7 +108,13 @@ class MainActiviy : AppCompatActivity() {
         editor?.apply()
     }
 
-    fun setAllMasterVals(url: String, usr: String, pwd: String, jwt: String?, validUntil: Long?) {
+    fun setGlobalCredentials(
+        url: String,
+        usr: String,
+        pwd: String,
+        jwt: String?,
+        validUntil: Long?,
+    ) {
         val global = (this.application as GlobalApp)
 
         // create new user cred
@@ -93,7 +128,7 @@ class MainActiviy : AppCompatActivity() {
         global.credentials["${currentUser.serverUrl}.${currentUser.username}"] = currentUser
 
         // save the mutable map to perma
-        savePermaData(global.credentials)
+        saveCredentialsPermaData(global.credentials)
     }
 
     fun deleteUser(credToDel: Credential) {
@@ -110,7 +145,7 @@ class MainActiviy : AppCompatActivity() {
         }
 
         // save the mutable map to perma
-        savePermaData(global.credentials)
+        saveCredentialsPermaData(global.credentials)
     }
 
     fun isUserCurrentlyLoggedIn(credToCheck: Credential): Boolean {
@@ -135,7 +170,7 @@ class MainActiviy : AppCompatActivity() {
         global.credentials["${curUser.serverUrl}.${curUser.username}"] = curUser
 
         // save the mutable map to perma
-        savePermaData(global.credentials)
+        saveCredentialsPermaData(global.credentials)
     }
 
     fun isJwtValid(): Boolean {
@@ -164,11 +199,17 @@ class MainActiviy : AppCompatActivity() {
             "${it.serverUrl}.${it.username}" to it
         }.toMap().toMutableMap()
 
+        val logSettingsStr: String? = sharedPrefs?.getString(LOG_SETTINGS, null)
+        val logSettings: LogSettings? = if (logSettingsStr != null)
+            GsonBuilder().create().fromJson(logSettingsStr, LogSettings::class.java)
+        else null
+
         val lastUsedCred: Credential? = getLatestActivityUser(credentials)
 
         val global = (this.application as GlobalApp)
         global.credentials = collectionCreds
         global.currentUser = lastUsedCred
+        global.logSettings = logSettings
     }
 
     private fun getLatestActivityUser(allCredentials: List<Credential>): Credential? {

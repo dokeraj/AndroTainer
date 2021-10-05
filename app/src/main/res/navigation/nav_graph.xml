@@ -75,5 +75,8 @@
         <argument
             android:name="containerId"
             app:argType="string" />
+        <argument
+            android:name="containerName"
+            app:argType="string" />
     </fragment>
 </navigation>

@@ -134,7 +134,7 @@ class DockerContainerAdapter(
         }
 
         holder.cardHolderLayout.setOnLongClickListener {
-            val action = DockerListerFragmentDirections.actionDockerListerFragmentToDockerLogging(currentItem.id)
+            val action = DockerListerFragmentDirections.actionDockerListerFragmentToDockerLogging(currentItem.id, currentItem.name)
             findNavController(frag).navigate(action)
             true
         }

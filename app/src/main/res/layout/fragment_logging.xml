@@ -28,74 +28,143 @@
 
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/linearLayoutChips"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:background="@color/dis1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tbContainerLogging">
 
-        <Switch
-            android:id="@+id/sw_autoRefresh"
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chpAutoRefresh"
+            style="@style/customChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
-            android:text="Auto Refresh" />
+            android:fontFamily="@font/ubuntu"
+            android:text="Auto Refresh"
+            android:textAlignment="center" />
 
-        <Switch
-            android:id="@+id/sw_wrapLines"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chpTimestamp"
+            style="@style/customChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
-            android:text="Wrap Lines" />
+            android:fontFamily="@font/ubuntu"
+            android:text="Timestamp"
+            android:textAlignment="center" />
 
-        <Switch
-            android:id="@+id/sw_timestamps"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chpWrapLines"
+            style="@style/customChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
-            android:text="Timestamp" />
-
+            android:text="Wrap Lines"
+            android:textAlignment="center" />
     </LinearLayout>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swiperLayoutLogging"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutChips">
 
-        <LinearLayout
-            android:id="@+id/ll"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/tvGetLogError"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/work_sans"
+                android:padding="20dp"
+                android:text="TextView"
+                android:textAlignment="center"
+                android:textColor="@color/disRedDisabled"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:typeface="monospace"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="gone" />
+
+
+            <ScrollView
+                android:id="@+id/svLoggingMaster"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="110dp"
+                android:padding="5dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvGetLogError"
+                app:layout_constraintVertical_bias="0.0">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:id="@+id/ll"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvNoWordWrap"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:fontFamily="@font/work_sans"
+                                android:gravity="top"
+                                android:paddingBottom="40dp"
+                                android:text="AJDE UNUTTTTTTT"
+                                android:typeface="monospace"
+                                android:visibility="gone" />
+                        </LinearLayout>
+                    </HorizontalScrollView>
+
                     <TextView
-                        android:id="@+id/textVju"
+                        android:id="@+id/tvWordWrap"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:gravity="top"
-                        android:text="AJDE UNUTTTTTTT"
-                        android:textSize="50sp" />
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/work_sans"
+                        android:paddingBottom="40dp"
+                        android:text="TextView"
+                        android:typeface="monospace"
+                        android:visibility="gone" />
+
                 </LinearLayout>
-            </HorizontalScrollView>
+            </ScrollView>
 
-            <TextView
-                android:id="@+id/textDirekto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textSize="50sp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </LinearLayout>
-    </ScrollView>
+
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
