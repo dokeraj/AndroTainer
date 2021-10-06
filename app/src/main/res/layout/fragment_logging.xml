@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/dis4"
     tools:context=".DockerLogging">
 
@@ -31,8 +31,8 @@
         android:id="@+id/linearLayoutChips"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:background="@color/dis1"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tbContainerLogging">
@@ -75,7 +75,7 @@
     </LinearLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swiperLayoutLogging"
+        android:id="@+id/srlLogging"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -88,7 +88,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/tvGetLogError"
+                android:id="@+id/tvLogError"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/work_sans"
@@ -106,62 +106,16 @@
                 tools:visibility="gone" />
 
 
-            <ScrollView
-                android:id="@+id/svLoggingMaster"
-                android:layout_width="wrap_content"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvLogging"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="110dp"
-                android:padding="5dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvGetLogError"
-                app:layout_constraintVertical_bias="0.0">
+                tools:listitem="@layout/logging_card_item">
 
-                <LinearLayout
-                    android:id="@+id/ll"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+            </androidx.recyclerview.widget.RecyclerView>
 
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/tvNoWordWrap"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:fontFamily="@font/work_sans"
-                                android:gravity="top"
-                                android:paddingBottom="40dp"
-                                android:text="AJDE UNUTTTTTTT"
-                                android:typeface="monospace"
-                                android:visibility="gone" />
-                        </LinearLayout>
-                    </HorizontalScrollView>
-
-                    <TextView
-                        android:id="@+id/tvWordWrap"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/work_sans"
-                        android:paddingBottom="40dp"
-                        android:text="TextView"
-                        android:typeface="monospace"
-                        android:visibility="gone" />
-
-                </LinearLayout>
-            </ScrollView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

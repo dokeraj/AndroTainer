@@ -2,17 +2,16 @@ package com.dokeraj.androtainer
 
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.dokeraj.androtainer.adapter.LoggingAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.interfaces.ApiInterface
+import com.dokeraj.androtainer.models.LogItem
 import com.dokeraj.androtainer.network.RetrofitBinaryInstance
-import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_docker_lister.*
 import kotlinx.android.synthetic.main.fragment_logging.*
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -37,28 +36,20 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         val token: String = globalVars.currentUser!!.jwt!!
 
         // pull from global var and setup the chips state
-        initChipsState(chpAutoRefresh, chpWrapLines, chpTimestamp, globalVars)
+        initChipsState(globalVars)
 
         /** how to instantiate a viewModel object*/
         //val model = ViewModelProvider(requireActivity()).get(DockerListerViewModel::class.java)
 
-        swiperLayoutLogging.isEnabled = true
-        swiperLayoutLogging.isRefreshing = true
+        srlLogging.isEnabled = true
+        srlLogging.isRefreshing = true
 
-        // enable / disable swiper based on where the scrollview is
-        svLoggingMaster.viewTreeObserver.addOnScrollChangedListener{
-            swiperLayoutLogging.isEnabled = svLoggingMaster.scrollY == 0 && chpAutoRefresh.isChecked == false
-        }
-
-        swiperLayoutLogging.setOnRefreshListener {
+        srlLogging.setOnRefreshListener {
             getLogFromRetro(baseUrl,
                 contId,
                 token,
-                tvWordWrap,
-                tvNoWordWrap,
-                tvGetLogError,
                 globalVars.logSettings?.linesCount ?: 1000,
-                chpTimestamp.isChecked, chpWrapLines.isChecked,swiperLayoutLogging)
+                chpTimestamp.isChecked)
 
             println("SWAJPAAAAAAAAAAAAAAA")
         }
@@ -73,11 +64,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         }
 
         chpWrapLines.setOnClickListener {
-            toggleErrorTextView(tvGetLogError,
-                tvNoWordWrap,
-                tvWordWrap,
-                false,
-                null, chpWrapLines.isChecked)
+            //toggleErrorTextView(tvGetLogError)
             setLogSettings(globActivity, globalVars, null)
         }
 
@@ -101,60 +88,63 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         getLogFromRetro(baseUrl,
             contId,
             token,
-            tvWordWrap,
-            tvNoWordWrap,
-            tvGetLogError,
             globalVars.logSettings?.linesCount ?: 1000,
-            chpTimestamp.isChecked, chpWrapLines.isChecked, swiperLayoutLogging)
+            chpTimestamp.isChecked)
     }
 
     fun getLogFromRetro(
         baseUrl: String,
         containerId: String,
         jwt: String,
-        tvWrapped: TextView,
-        tvNoWrap: TextView,
-        tvError: TextView,
         numOfRows: Int,
         useTimestamp: Boolean,
-        wrapText: Boolean,
-        swiper: SwipeRefreshLayout
     ) {
         fun readFromStream(
             body: ResponseBody?,
         ) {
             if (body != null) {
+
                 val oo = String(body.bytes(), Charsets.UTF_8)
-                //println(oo)
                 val lines: List<String> = oo.split("\n")
-                val filtered: List<String> = lines.map { x ->
-                    /* val nonAscii = Regex("[^\\x00-\\x7F]").replace(x, "")
+                /*val filtered: List<String> = lines.map { x ->
+                  val nonAscii = Regex("[^\\x00-\\x7F]").replace(x, "")
                      val ctrlChars = Regex("[\\p{Cntrl}&&[^\r\n\t]]").replace(nonAscii, "")
-                     val nonPrintable = Regex("\\p{C}").replace(ctrlChars, "")*/
+                     val nonPrintable = Regex("\\p{C}").replace(ctrlChars, "")
                     //nonPrintable
                     x
+                }*/
+
+
+                //val result = filtered.joinToString("\n")
+
+                ////////////////////////////////
+                ////////////////////////////////
+
+                val logItems: List<LogItem> = lines.map{ line ->
+                    LogItem(line.replace("\n",""))
                 }
 
-                val result = filtered.joinToString("\n")
+                rvLogging.adapter = LoggingAdapter(logItems)
+                rvLogging.layoutManager = LinearLayoutManager(activity)
+                rvLogging.setHasFixedSize(true)
 
-                tvNoWrap.text = result
-                tvWrapped.text = result
+                ///////////////////////////////
+                ///////////////////////////////
 
-                swiper.isRefreshing = false
-                swiper.isEnabled = false
-                toggleErrorTextView(tvError,
-                    tvNoWrap,
-                    tvWrapped,
+
+                srlLogging.isRefreshing = false
+
+                //tvNoWrap.text = result
+                //tvWrapped.text = result
+
+                toggleErrorTextView(
                     false,
-                    null, wrapText)
+                    null)
             } else {
-                swiper.isRefreshing = false
-                swiper.isEnabled = true
-                toggleErrorTextView(tvError,
-                    tvNoWrap,
-                    tvWrapped,
+                srlLogging.isRefreshing = false
+                toggleErrorTextView(
                     true,
-                    "ERROR: Cannot read log data!", null)
+                    "ERROR: Cannot read log data!")
             }
         }
 
@@ -173,31 +163,23 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
                     if (response.code() == 200) {
                         readFromStream(response.body())
                     } else {
-                        swiper.isRefreshing = false
-                        swiper.isEnabled = true
-                        toggleErrorTextView(tvError,
-                            tvNoWrap,
-                            tvWrapped,
+                        srlLogging.isRefreshing = false
+                        toggleErrorTextView(
                             true,
                             "ERROR: Response code: ${response.code()}; ${
                                 response.errorBody()?.string()
-                            }",
-                            null)
+                            }")
                     }
                 }
 
                 override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                    swiper.isRefreshing = false
-                    swiper.isEnabled = true
-                    toggleErrorTextView(tvError,
-                        tvNoWrap,
-                        tvWrapped,
+                    srlLogging.isRefreshing = false
+                    toggleErrorTextView(
                         true,
-                        "ERROR failure: ${t.message}", null)
+                        "ERROR failure: ${t.message}")
                 }
             })
     }
-
 
 
     private fun setLogSettings(globActivity: MainActiviy, globalVars: GlobalApp, linesCount: Int?) {
@@ -212,14 +194,10 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
     }
 
     private fun initChipsState(
-        chpAutoRefresh: Chip,
-        chpWordWrap: Chip,
-        chpTimestamp: Chip,
         globalVars: GlobalApp,
     ) {
         globalVars.logSettings?.let {
             chpAutoRefresh.isChecked = it.autoRefresh
-            chpWordWrap.isChecked = it.wrapLines
             chpTimestamp.isChecked = it.timestamp
         }
     }
@@ -233,32 +211,18 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
     }
 
     private fun toggleErrorTextView(
-        tvError: TextView,
-        tvNoWrap: TextView,
-        tvWrapped: TextView,
         show: Boolean,
         errorMsg: String?,
-        wrapText: Boolean?,
     ) {
         if (show) {
             errorMsg?.let {
-                tvError.text = it
+                tvLogError.text = it
             }
-            tvError.visibility = View.VISIBLE
-            tvNoWrap.visibility = View.GONE
-            tvWrapped.visibility = View.GONE
+            tvLogError.visibility = View.VISIBLE
+            rvLogging.visibility = View.GONE
         } else {
-            tvError.visibility = View.GONE
-            if (wrapText != null && wrapText == true) {
-                tvWrapped.visibility = View.VISIBLE
-                tvNoWrap.visibility = View.GONE
-            }
-            else if (wrapText != null && wrapText == false) {
-                tvNoWrap.visibility = View.VISIBLE
-                tvWrapped.visibility = View.GONE
-            }
+            tvLogError.visibility = View.GONE
+            rvLogging.visibility = View.VISIBLE
         }
     }
-
-
 }
