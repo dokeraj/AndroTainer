@@ -69,12 +69,20 @@ class MainActiviy : AppCompatActivity() {
     fun setGlobalLoggingSettings(
         autoRefresh: Boolean,
         timestamp: Boolean,
-        wrapLines: Boolean,
-        linesCount: Int,
+        linesCount: Int?,
+        autoRefreshInterval: Long?,
     ) {
         val global = (this.application as GlobalApp)
 
-        val logSettings = LogSettings(autoRefresh, timestamp, wrapLines, linesCount)
+        val logLinesCount: Int = linesCount ?: global.logSettings?.let {
+            it.linesCount
+        } ?: 1000
+
+        val arInterval: Long = autoRefreshInterval ?: global.logSettings?.let {
+            it.autoRefreshInterval
+        } ?: 6000L
+
+        val logSettings = LogSettings(autoRefresh, timestamp, logLinesCount, arInterval)
         // set logging settings to global var
         global.logSettings = logSettings
 

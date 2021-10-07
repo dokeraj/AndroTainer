@@ -2,8 +2,10 @@ package com.dokeraj.androtainer
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.adapter.LoggingAdapter
@@ -11,16 +13,24 @@ import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.interfaces.ApiInterface
 import com.dokeraj.androtainer.models.LogItem
 import com.dokeraj.androtainer.network.RetrofitBinaryInstance
+import com.dokeraj.androtainer.util.LogTimer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_logging.*
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 
+
 @AndroidEntryPoint
 class DockerLogging : Fragment(R.layout.fragment_logging) {
 
     private val args: DockerLoggingArgs by navArgs()
+    private val linesOfLog = listOf(1000, 5000, 100)
+    private val autoRefreshIntervals = listOf(3000, 6000, 12000)
+    private val eEgg = listOf("Y U Do Dis!?",
+        "There is no hidden functionality here!",
+        "Stop clicking me!",
+        "Aren't you a nosy snowflake :)")
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val globActivity: MainActiviy = (activity as MainActiviy?)!!
@@ -44,52 +54,106 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         srlLogging.isEnabled = true
         srlLogging.isRefreshing = true
 
-        srlLogging.setOnRefreshListener {
+        val timer = LogTimer()
+
+        if (chpAutoRefresh.isChecked) {
+            timer.startTimer(this, baseUrl, contId, token, globalVars)
+        } else {
             getLogFromRetro(baseUrl,
                 contId,
                 token,
                 globalVars.logSettings?.linesCount ?: 1000,
                 chpTimestamp.isChecked)
+        }
 
-            println("SWAJPAAAAAAAAAAAAAAA")
+        srlLogging.setOnRefreshListener {
+            if (!chpAutoRefresh.isChecked) {
+                getLogFromRetro(baseUrl,
+                    contId,
+                    token,
+                    globalVars.logSettings?.linesCount ?: 1000,
+                    chpTimestamp.isChecked)
+            }
         }
 
         chpAutoRefresh.setOnClickListener {
-            setLogSettings(globActivity, globalVars, null)
-            // todo:: call logic to call retro
+            globActivity.setGlobalLoggingSettings(chpAutoRefresh.isChecked,
+                chpTimestamp.isChecked,
+                null,
+                null
+            )
+
+            if (chpAutoRefresh.isChecked) {
+                srlLogging.isEnabled = false
+                timer.startTimer(this, baseUrl, contId, token, globalVars)
+            } else {
+                srlLogging.isEnabled = true
+                timer.cancelTimer()
+            }
         }
 
-        chpTimestamp.setOnClickListener {
-            setLogSettings(globActivity, globalVars, null)
-        }
+        chpAutoRefresh.setOnLongClickListener {
+            // disable the auto refresh so next time when you turn it on - it will pull the correct auto refresh interval
+            chpAutoRefresh.isChecked = false
+            srlLogging.isEnabled = true
+            timer.cancelTimer()
 
-        chpWrapLines.setOnClickListener {
-            //toggleErrorTextView(tvGetLogError)
-            setLogSettings(globActivity, globalVars, null)
-        }
-
-        chpWrapLines.setOnLongClickListener {
-            val currentLinesCount = globalVars.logSettings?.linesCount ?: 1000
-            val nextLineCount = getNextLineCount(currentLinesCount)
-            setLogSettings(globActivity, globalVars, nextLineCount)
+            val currentAutoRefreshInt: Long = globalVars.logSettings?.autoRefreshInterval ?: 6000L
+            val nextArInterval =
+                getNextListItem(currentAutoRefreshInt.toInt(), autoRefreshIntervals)
+            globActivity.setGlobalLoggingSettings(chpAutoRefresh.isChecked,
+                chpTimestamp.isChecked,
+                null,
+                nextArInterval.toLong()
+            )
 
             globActivity.showGenericSnack(requireContext(),
                 requireView(),
-                "Now displaying the last ${nextLineCount} lines of the log",
+                "Auto refresh interval: ${nextArInterval / 1000} seconds",
                 R.color.blue_main,
                 R.color.dis3)
+
             true
+        }
+
+        chpTimestamp.setOnClickListener {
+            globActivity.setGlobalLoggingSettings(chpAutoRefresh.isChecked,
+                chpTimestamp.isChecked,
+                null,
+                null
+            )
+        }
+
+        chpLinesCount.setOnClickListener {
+            val currentLinesCount = globalVars.logSettings?.linesCount ?: 1000
+            val nextLineCount = getNextListItem(currentLinesCount, linesOfLog)
+            globActivity.setGlobalLoggingSettings(chpAutoRefresh.isChecked,
+                chpTimestamp.isChecked,
+                nextLineCount,
+                null
+            )
+            chpLinesCount.text = "${nextLineCount} lines"
         }
 
         tbContainerLogging.setNavigationOnClickListener {
             requireActivity().onBackPressed()
         }
 
-        getLogFromRetro(baseUrl,
-            contId,
-            token,
-            globalVars.logSettings?.linesCount ?: 1000,
-            chpTimestamp.isChecked)
+        chpLinesCount.setOnLongClickListener {
+            val index = (0 until eEgg.size).random()
+
+            globActivity.showGenericSnack(requireContext(),
+                requireView(),
+                eEgg[index],
+                R.color.teal_200,
+                R.color.dis3)
+            true
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
+            timer.cancelTimer()
+            findNavController().popBackStack()
+        }
     }
 
     fun getLogFromRetro(
@@ -120,8 +184,8 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
                 ////////////////////////////////
                 ////////////////////////////////
 
-                val logItems: List<LogItem> = lines.map{ line ->
-                    LogItem(line.replace("\n",""))
+                val logItems: List<LogItem> = lines.map { line ->
+                    LogItem(line.replace("\n", ""))
                 }
 
                 rvLogging.adapter = LoggingAdapter(logItems)
@@ -131,11 +195,12 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
                 ///////////////////////////////
                 ///////////////////////////////
 
-
                 srlLogging.isRefreshing = false
+                if (chpAutoRefresh.isChecked)
+                    srlLogging.isEnabled = false
 
-                //tvNoWrap.text = result
-                //tvWrapped.text = result
+
+                rvLogging.scrollToPosition(logItems.size - 1);
 
                 toggleErrorTextView(
                     false,
@@ -181,33 +246,20 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
             })
     }
 
-
-    private fun setLogSettings(globActivity: MainActiviy, globalVars: GlobalApp, linesCount: Int?) {
-        val logLinesCount: Int = linesCount ?: globalVars.logSettings?.let {
-            it.linesCount
-        } ?: 1000
-
-        globActivity.setGlobalLoggingSettings(chpAutoRefresh.isChecked,
-            chpTimestamp.isChecked,
-            chpWrapLines.isChecked,
-            logLinesCount)
-    }
-
     private fun initChipsState(
         globalVars: GlobalApp,
     ) {
         globalVars.logSettings?.let {
             chpAutoRefresh.isChecked = it.autoRefresh
             chpTimestamp.isChecked = it.timestamp
+            chpLinesCount.text = "${it.linesCount} lines"
         }
     }
 
-    private fun getNextLineCount(currentLineCount: Int): Int {
-        val predefined = listOf(1000, 5000, 100)
-
-        val indexOfCurrent = predefined.indexOf(currentLineCount)
-        val indexOfNext = (indexOfCurrent + 1) % predefined.size
-        return predefined[indexOfNext]
+    private fun getNextListItem(selectedItem: Int, listOfItems: List<Int>): Int {
+        val indexOfCurrent = listOfItems.indexOf(selectedItem)
+        val indexOfNext = (indexOfCurrent + 1) % listOfItems.size
+        return listOfItems[indexOfNext]
     }
 
     private fun toggleErrorTextView(

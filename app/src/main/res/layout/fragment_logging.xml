@@ -63,14 +63,14 @@
             android:textAlignment="center" />
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/chpWrapLines"
-            style="@style/customChipStyle"
+            android:id="@+id/chpLinesCount"
+            style="@style/actionChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:layout_weight="1"
-            android:text="Wrap Lines"
+            android:text="Lines"
             android:textAlignment="center" />
     </LinearLayout>
 
