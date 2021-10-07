@@ -164,6 +164,23 @@
                 android:textColor="@color/disText2"
                 />
 
+            <Button
+                android:id="@+id/btnDonate"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/disRedDisabled"
+                android:drawableLeft="@drawable/ic_donation"
+                android:drawablePadding="9dp"
+                android:visibility="invisible"
+                android:fontFamily="@font/ubuntu"
+                android:lineHeight="15dp"
+                android:layout_marginStart="19dp"
+                android:text="Donate"
+                android:textAlignment="textStart"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+
         </LinearLayout>
 
 

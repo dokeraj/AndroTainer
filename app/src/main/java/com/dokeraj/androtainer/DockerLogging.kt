@@ -111,7 +111,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
                 requireView(),
                 "Auto refresh interval: ${nextArInterval / 1000} seconds",
                 R.color.blue_main,
-                R.color.dis3)
+                R.color.dis2)
 
             true
         }
@@ -145,8 +145,8 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
             globActivity.showGenericSnack(requireContext(),
                 requireView(),
                 eEgg[index],
-                R.color.teal_200,
-                R.color.dis3)
+                R.color.disText3,
+                R.color.dis2)
             true
         }
 
