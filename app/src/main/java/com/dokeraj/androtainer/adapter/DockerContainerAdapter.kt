@@ -132,6 +132,13 @@ class DockerContainerAdapter(
                     currentItem)
             findNavController(frag).navigate(action)
         }
+
+        holder.cardHolderLayout.setOnLongClickListener {
+            val action = DockerListerFragmentDirections.actionDockerListerFragmentToDockerLogging(currentItem.id, currentItem.name)
+            findNavController(frag).navigate(action)
+            true
+        }
+
     }
 
     override fun getItemCount() = pContainerList.size

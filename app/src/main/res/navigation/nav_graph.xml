@@ -43,6 +43,9 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_dockerListerFragment_to_dockerLogging"
+            app:destination="@id/dockerLogging" />
     </fragment>
     <fragment
         android:id="@+id/usersListerFragment"
@@ -63,5 +66,17 @@
         <argument
             android:name="dContainer"
             app:argType="com.dokeraj.androtainer.models.Kontainer" />
+    </fragment>
+    <fragment
+        android:id="@+id/dockerLogging"
+        android:name="com.dokeraj.androtainer.DockerLogging"
+        android:label="fragment_logging"
+        tools:layout="@layout/fragment_logging" >
+        <argument
+            android:name="containerId"
+            app:argType="string" />
+        <argument
+            android:name="containerName"
+            app:argType="string" />
     </fragment>
 </navigation>

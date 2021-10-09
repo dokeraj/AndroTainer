@@ -18,6 +18,7 @@
     <color name="disText1">#b9bbbe</color>
     <color name="disText2">#f2ffff</color>
     <color name="disText3">#fff000</color>
+    <color name="chipBlue">#254049</color>
     <color name="light_gray">#4E525A</color>
     <color name="red">#C62B2B</color>
     <color name="orange_warning">#C6732B</color>

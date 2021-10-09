@@ -1,5 +1,7 @@
 package com.dokeraj.androtainer
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.util.Linkify
 import android.view.View
@@ -79,10 +81,19 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         }
 
         btnAbout.setOnClickListener {
-            if (tvAboutInfo.visibility == View.VISIBLE)
+            if (tvAboutInfo.visibility == View.VISIBLE) {
                 tvAboutInfo.visibility = View.INVISIBLE
-            else
+                btnDonate.visibility = View.INVISIBLE
+            }
+            else {
                 tvAboutInfo.visibility = View.VISIBLE
+                btnDonate.visibility = View.VISIBLE
+            }
+        }
+
+        btnDonate.setOnClickListener {
+            val i = Intent(Intent.ACTION_VIEW, Uri.parse("https://donate.dokeraj.cc"))
+            startActivity(i)
         }
 
         btnManageUsers.setOnClickListener {

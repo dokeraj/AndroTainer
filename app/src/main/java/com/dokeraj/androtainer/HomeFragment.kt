@@ -218,7 +218,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                                 .toEpochMilli()
 
                         val globActivity: MainActiviy = (activity as MainActiviy?)!!
-                        globActivity.setAllMasterVals(baseUrl, usr, pwd, it, jwtValidUntil)
+                        globActivity.setGlobalCredentials(baseUrl, usr, pwd, it, jwtValidUntil)
 
                         callGetContainers(baseUrl, it)
                     }
