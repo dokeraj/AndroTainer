@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit
 object RetrofitInstance {
     private var retrofit: Retrofit? = null
 
-    private val okClient = OkHttpClient().newBuilder().readTimeout(1, TimeUnit.MINUTES)
-        .connectTimeout(30, TimeUnit.SECONDS)
+    private val okClient = OkHttpClient().newBuilder().readTimeout(20, TimeUnit.SECONDS)
+        .connectTimeout(20, TimeUnit.SECONDS)
         .build()
 
     val retrofitInstance: Retrofit?
@@ -28,8 +28,8 @@ object RetrofitInstance {
 object RetrofitBinaryInstance {
     private var retrofit: Retrofit? = null
 
-    private val okClient = OkHttpClient().newBuilder().readTimeout(1, TimeUnit.MINUTES)
-        .connectTimeout(12, TimeUnit.SECONDS)
+    private val okClient = OkHttpClient().newBuilder().readTimeout(20, TimeUnit.SECONDS)
+        .connectTimeout(10, TimeUnit.SECONDS)
         .build()
 
     val retrofitInstance: Retrofit?

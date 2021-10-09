@@ -19,6 +19,9 @@ import kotlinx.android.synthetic.main.fragment_logging.*
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 @AndroidEntryPoint
@@ -30,7 +33,10 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
     private val eEgg = listOf("Y U Do Dis!?",
         "There is no hidden functionality here!",
         "Stop clicking me!",
-        "Aren't you a nosy snowflake :)")
+        "Aren't you a nosy snowflake :)",
+        "I'm warning you!")
+    val dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        .withZone(ZoneId.systemDefault())
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val globActivity: MainActiviy = (activity as MainActiviy?)!!
@@ -47,9 +53,6 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
 
         // pull from global var and setup the chips state
         initChipsState(globalVars)
-
-        /** how to instantiate a viewModel object*/
-        //val model = ViewModelProvider(requireActivity()).get(DockerListerViewModel::class.java)
 
         srlLogging.isEnabled = true
         srlLogging.isRefreshing = true
@@ -140,7 +143,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         }
 
         chpLinesCount.setOnLongClickListener {
-            val index = (0 until eEgg.size).random()
+            val index = (eEgg.indices).random()
 
             globActivity.showGenericSnack(requireContext(),
                 requireView(),
@@ -151,8 +154,15 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
-            timer.cancelTimer()
-            findNavController().popBackStack()
+            if (!srlLogging.isRefreshing) {
+                timer.cancelTimer()
+                findNavController().popBackStack()
+            } else
+                globActivity.showGenericSnack(requireContext(),
+                    requireView(),
+                    "Please wait until the logging request is finished..",
+                    R.color.dis4,
+                    R.color.blue_main)
         }
     }
 
@@ -169,36 +179,42 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
             if (body != null) {
 
                 val oo = String(body.bytes(), Charsets.UTF_8)
-                val lines: List<String> = oo.split("\n")
-                /*val filtered: List<String> = lines.map { x ->
-                  val nonAscii = Regex("[^\\x00-\\x7F]").replace(x, "")
-                     val ctrlChars = Regex("[\\p{Cntrl}&&[^\r\n\t]]").replace(nonAscii, "")
-                     val nonPrintable = Regex("\\p{C}").replace(ctrlChars, "")
-                    //nonPrintable
-                    x
-                }*/
 
+                val kraj = getRegex().fold(oo) { acc, i ->
+                    acc.replace(Regex(i), "")
+                }
 
-                //val result = filtered.joinToString("\n")
+                val lines: List<String> = kraj.split("\n").map { x ->
+                    val fixedLine = x.drop(1)
 
-                ////////////////////////////////
-                ////////////////////////////////
+                    val timeFormatted = if (chpTimestamp.isChecked) {
+                        val instant: Instant? = try {
+                            Instant.parse(fixedLine.take(30))
+                        } catch (ex: Exception) {
+                            null
+                        }
+
+                        instant?.let {
+                            val formattedTime = dtf.format(it)
+                            "$formattedTime - ${fixedLine.drop(30)}"
+                        } ?: fixedLine
+
+                    } else
+                        fixedLine
+                    timeFormatted
+                }
 
                 val logItems: List<LogItem> = lines.map { line ->
-                    LogItem(line.replace("\n", ""))
+                    LogItem(line)
                 }
 
                 rvLogging.adapter = LoggingAdapter(logItems)
                 rvLogging.layoutManager = LinearLayoutManager(activity)
                 rvLogging.setHasFixedSize(true)
 
-                ///////////////////////////////
-                ///////////////////////////////
-
                 srlLogging.isRefreshing = false
                 if (chpAutoRefresh.isChecked)
                     srlLogging.isEnabled = false
-
 
                 rvLogging.scrollToPosition(logItems.size - 1);
 
@@ -276,5 +292,24 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
             tvLogError.visibility = View.GONE
             rvLogging.visibility = View.VISIBLE
         }
+    }
+
+    private fun getRegex(): List<String> {
+        // for now we're only using "\\u0000" and "\\u0001" characters
+        val regulars: List<String> = (0..2).map { x ->
+            val padded = x.toString().padStart(2, '0')
+            "\\u00${padded}"
+        }
+
+        val letters = listOf("A", "B", "C", "D", "E", "F")
+
+        // we're not using the special characters
+        val specials: List<String> = listOf(1).flatMap { num ->
+            letters.map { spec ->
+                "\\u00${num}${spec}"
+            }
+        }
+
+        return regulars //+ specials
     }
 }

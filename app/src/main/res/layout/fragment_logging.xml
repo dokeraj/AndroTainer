@@ -98,6 +98,7 @@
                 android:textColor="@color/disRedDisabled"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:visibility="gone"
                 android:typeface="monospace"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -110,6 +111,9 @@
                 android:id="@+id/rvLogging"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:paddingTop="3dp"
+                android:paddingStart="6dp"
+                android:paddingLeft="6dp"
                 tools:listitem="@layout/logging_card_item">
 
             </androidx.recyclerview.widget.RecyclerView>
