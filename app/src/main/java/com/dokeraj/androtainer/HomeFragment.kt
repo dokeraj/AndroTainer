@@ -9,7 +9,6 @@ import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
@@ -27,7 +26,6 @@ import com.dokeraj.androtainer.network.RetrofitInstance
 import com.dokeraj.androtainer.util.DataState
 import com.dokeraj.androtainer.viewmodels.HomeFragmentViewModel
 import com.dokeraj.androtainer.viewmodels.HomeMainStateEvent
-import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_home.*
 import retrofit2.Call
@@ -245,10 +243,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         jwt: String,
         jwtValidUntil: Long,
     ) {
-        fun getLocalEndpoint(response: PEndpointsResponse): PortainerEndpoint? {
-            return response.find {
+        fun getFirstAvailableEndpoint(response: PEndpointsResponse): PortainerEndpoint? {
+            val dockerSock: PortainerEndpoint? = response.find {
                 it.url == "unix:///var/run/docker.sock"
             }
+
+            return dockerSock ?: response.getOrNull(0)
         }
 
         val fullPath =
@@ -263,21 +263,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     disableDrawerSwipe = false
 
                     if (response.code() == 200 && response.body() != null) {
-                        val localEndpoint = getLocalEndpoint(response = response.body()!!)
+                        val portainerEndpoint = getFirstAvailableEndpoint(response = response.body()!!)
 
-                        if (localEndpoint != null) {
+                        if (portainerEndpoint != null) {
                             val globActivity: MainActiviy = (activity as MainActiviy?)!!
                             globActivity.setGlobalCredentials(baseUrl,
                                 usr,
                                 pwd,
                                 jwt,
                                 jwtValidUntil,
-                                localEndpoint.id)
+                                portainerEndpoint.id)
 
-                            callGetContainers(baseUrl, jwt, localEndpoint.id)
+                            callGetContainers(baseUrl, jwt, portainerEndpoint.id)
                         } else {
                             onLoginError(btnLoginState,
-                                "No Portainer endpoint ID that is locally hosted!")
+                                "There are no Portainer endpoints listed!")
                         }
                     } else {
                         onLoginError(btnLoginState,
