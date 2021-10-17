@@ -16,12 +16,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.dokeraj.androtainer.interfaces.ApiInterface
 import com.dokeraj.androtainer.adapter.UsersLoginAdapter
 import com.dokeraj.androtainer.buttons.BtnLogin
 import com.dokeraj.androtainer.globalvars.GlobalApp
-import com.dokeraj.androtainer.models.*
-import com.dokeraj.androtainer.models.retrofit.*
+import com.dokeraj.androtainer.interfaces.ApiInterface
+import com.dokeraj.androtainer.models.Credential
+import com.dokeraj.androtainer.models.Kontainer
+import com.dokeraj.androtainer.models.Kontainers
+import com.dokeraj.androtainer.models.retrofit.Jwt
+import com.dokeraj.androtainer.models.retrofit.PEndpointsResponse
+import com.dokeraj.androtainer.models.retrofit.PortainerEndpoint
+import com.dokeraj.androtainer.models.retrofit.UserCredentials
 import com.dokeraj.androtainer.network.RetrofitInstance
 import com.dokeraj.androtainer.util.DataState
 import com.dokeraj.androtainer.viewmodels.HomeFragmentViewModel
@@ -248,7 +253,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 it.url == "unix:///var/run/docker.sock"
             }
 
-            return dockerSock ?: response.getOrNull(0)
+            val sortedById: List<PortainerEndpoint> = response.sortedBy { it.id }
+
+            return dockerSock ?: sortedById.getOrNull(0)
         }
 
         val fullPath =
@@ -263,7 +270,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     disableDrawerSwipe = false
 
                     if (response.code() == 200 && response.body() != null) {
-                        val portainerEndpoint = getFirstAvailableEndpoint(response = response.body()!!)
+                        val portainerEndpoint =
+                            getFirstAvailableEndpoint(response = response.body()!!)
 
                         if (portainerEndpoint != null) {
                             val globActivity: MainActiviy = (activity as MainActiviy?)!!
