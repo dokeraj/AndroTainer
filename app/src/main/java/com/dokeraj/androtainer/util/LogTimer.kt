@@ -28,6 +28,7 @@ class LogTimer : CoroutineScope by MainScope() {
     fun startTimer(
         logFrag: DockerLogging,
         baseUrl: String,
+        endpointId:Int,
         contId: String,
         token: String,
         globalVars: GlobalApp,
@@ -39,6 +40,7 @@ class LogTimer : CoroutineScope by MainScope() {
                         baseUrl,
                         contId,
                         token,
+                        endpointId,
                         globalVars.logSettings?.linesCount ?: 100,
                         logFrag.chpTimestamp.isChecked,
                     )

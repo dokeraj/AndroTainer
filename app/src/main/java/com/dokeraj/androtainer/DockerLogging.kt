@@ -50,6 +50,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         val contId = args.containerId
         val baseUrl = globalVars.currentUser!!.serverUrl
         val token: String = globalVars.currentUser!!.jwt!!
+        val endpointId: Int = globalVars.currentUser!!.endpointId
 
         // pull from global var and setup the chips state
         initChipsState(globalVars)
@@ -60,11 +61,12 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         val timer = LogTimer()
 
         if (chpAutoRefresh.isChecked) {
-            timer.startTimer(this, baseUrl, contId, token, globalVars)
+            timer.startTimer(this, baseUrl, endpointId, contId, token, globalVars)
         } else {
             getLogFromRetro(baseUrl,
                 contId,
                 token,
+                endpointId,
                 globalVars.logSettings?.linesCount ?: 1000,
                 chpTimestamp.isChecked)
         }
@@ -74,6 +76,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
                 getLogFromRetro(baseUrl,
                     contId,
                     token,
+                    endpointId,
                     globalVars.logSettings?.linesCount ?: 1000,
                     chpTimestamp.isChecked)
             }
@@ -88,7 +91,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
 
             if (chpAutoRefresh.isChecked) {
                 srlLogging.isEnabled = false
-                timer.startTimer(this, baseUrl, contId, token, globalVars)
+                timer.startTimer(this, baseUrl, endpointId, contId, token, globalVars)
             } else {
                 srlLogging.isEnabled = true
                 timer.cancelTimer()
@@ -170,6 +173,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         baseUrl: String,
         containerId: String,
         jwt: String,
+        endpointId:Int,
         numOfRows: Int,
         useTimestamp: Boolean,
     ) {
@@ -233,6 +237,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
             getString(R.string.getLog)
                 .replace("{baseUrl}", baseUrl.removeSuffix("/"))
                 .replace("{containerId}", containerId)
+                .replace("{endpointId}", endpointId.toString())
         val api = RetrofitBinaryInstance.retrofitInstance!!.create(ApiInterface::class.java)
 
         api.getLog(fullPath, "Bearer ${jwt}", 0, 1, 1, numOfRows, if (useTimestamp) 1 else 0)

@@ -1,6 +1,7 @@
 package com.dokeraj.androtainer.interfaces
 
 import com.dokeraj.androtainer.models.retrofit.Jwt
+import com.dokeraj.androtainer.models.retrofit.PEndpointsResponse
 import com.dokeraj.androtainer.models.retrofit.UserCredentials
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -22,4 +23,13 @@ interface ApiInterface {
         @Query("tail") tail: Int,
         @Query("timestamps") timestamps: Int,
     ): Call<ResponseBody>
+
+    @Headers("Content-Type: application/json")
+    @GET
+    fun getEnpointId(
+        @Url fullPath: String,
+        @Header("Authorization") auth: String,
+        @Query("limit") limit: Int,
+        @Query("start") start: Int,
+    ): Call<PEndpointsResponse>
 }

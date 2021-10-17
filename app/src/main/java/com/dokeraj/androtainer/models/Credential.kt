@@ -7,4 +7,5 @@ data class Credential(
     val jwt: String? = null,
     val jwtValidUntil: Long? = null,
     val lastActivity: Long? = null,
+    val endpointId: Int
 )

@@ -122,12 +122,13 @@ class MainActiviy : AppCompatActivity() {
         pwd: String,
         jwt: String?,
         validUntil: Long?,
+        endpointId:Int
     ) {
         val global = (this.application as GlobalApp)
 
         // create new user cred
         val lastActivity: Long = ZonedDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli()
-        val currentUser: Credential = Credential(url, usr, pwd, jwt, validUntil, lastActivity)
+        val currentUser: Credential = Credential(url, usr, pwd, jwt, validUntil, lastActivity, endpointId)
 
         // set this user as current user
         global.currentUser = currentUser

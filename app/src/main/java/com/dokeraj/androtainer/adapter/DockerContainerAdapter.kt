@@ -28,6 +28,7 @@ class DockerContainerAdapter(
     private var pContainerList: List<Kontainer>,
     private val baseUrl: String,
     private val jwt: String,
+    private val endpointId:Int,
     private val context: Context,
     private val frag: DockerListerFragment,
     private val dataViewModel: DockerListerViewModel
@@ -160,6 +161,7 @@ class DockerContainerAdapter(
             .replace("{baseUrl}", baseUrl.removeSuffix("/"))
             .replace("{containerId}", containerId)
             .replace("{actionType}", actionType.name.toLowerCase())
+            .replace("{endpointId}", endpointId.toString())
 
         dataViewModel.setStateEvent(MainStateEvent.StartStopKontejneri(jwt = jwt, url = fullUrl, currentItem = currentItemIndex, containerActionType = actionType ))
     }
