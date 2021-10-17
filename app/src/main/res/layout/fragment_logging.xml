@@ -70,7 +70,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:layout_weight="1"
-            android:text="Lines"
+            android:text="1000 lines"
             android:textAlignment="center" />
     </LinearLayout>
 

@@ -71,6 +71,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             DockerContainerAdapter(containers,
                 globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
+                globalVars.currentUser!!.endpointId,
                 requireContext(), this, model)
         recycler_view.adapter = recyclerAdapter
         recycler_view.layoutManager = LinearLayoutManager(activity)
@@ -84,8 +85,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             if (tvAboutInfo.visibility == View.VISIBLE) {
                 tvAboutInfo.visibility = View.INVISIBLE
                 btnDonate.visibility = View.INVISIBLE
-            }
-            else {
+            } else {
                 tvAboutInfo.visibility = View.VISIBLE
                 btnDonate.visibility = View.VISIBLE
             }
@@ -152,9 +152,15 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
     }
 
     @ExperimentalCoroutinesApi
-    private fun callGetContainers(dataViewModel: DockerListerViewModel, url: String, jwt: String) {
+    private fun callGetContainers(
+        dataViewModel: DockerListerViewModel,
+        url: String,
+        jwt: String,
+        endpointId: Int,
+    ) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
+                .replace("{endpointId}", endpointId.toString())
 
         dataViewModel.setStateEvent(MainStateEvent.GetKontejneri(jwt = jwt, url = fullUrl))
     }
@@ -173,7 +179,8 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             else {
                 callGetContainers(dataViewModel,
                     globalVars.currentUser!!.serverUrl,
-                    globalVars.currentUser!!.jwt!!)
+                    globalVars.currentUser!!.jwt!!,
+                    globalVars.currentUser!!.endpointId)
             }
         } else {
             logout(globActivity, "Session has expired! Please log in again.")

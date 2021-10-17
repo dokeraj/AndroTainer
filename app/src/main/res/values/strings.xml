@@ -17,10 +17,11 @@
      URLs to portainer
      -->
     <string name="authenticate">{baseUrl}/api/auth</string>
-    <string name="getDockerContainers">{baseUrl}/api/endpoints/1/docker/containers/json</string>
-    <string name="StartStopContainer">{baseUrl}/api/endpoints/1/docker/containers/{containerId}/{actionType}</string>
-    <string name="removeDockerContainer">{baseUrl}/api/endpoints/1/docker/containers/{containerId}</string>
-    <string name="getLog">{baseUrl}/api/endpoints/1/docker/containers/{containerId}/logs</string>
+    <string name="getEnpointId">{baseUrl}/api/endpoints</string>
+    <string name="getDockerContainers">{baseUrl}/api/endpoints/{endpointId}/docker/containers/json</string>
+    <string name="StartStopContainer">{baseUrl}/api/endpoints/{endpointId}/docker/containers/{containerId}/{actionType}</string>
+    <string name="removeDockerContainer">{baseUrl}/api/endpoints/{endpointId}/docker/containers/{containerId}</string>
+    <string name="getLog">{baseUrl}/api/endpoints/{endpointId}/docker/containers/{containerId}/logs</string>
     <!--
     URLs to logos for docker details fragment (json format)
     -->

@@ -30,6 +30,8 @@ import com.dokeraj.androtainer.viewmodels.HomeMainStateEvent
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_home.*
+import retrofit2.Call
+import retrofit2.Response
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import kotlin.math.abs
@@ -105,13 +107,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         if (globActivity.hasJwt() && globActivity.isJwtValid()) {
             btnLoginState.changeBtnState(false)
-            callGetContainers(globalVars.currentUser!!.serverUrl, globalVars.currentUser!!.jwt!!)
+            callGetContainers(globalVars.currentUser!!.serverUrl,
+                globalVars.currentUser!!.jwt!!,
+                globalVars.currentUser!!.endpointId)
         } else if (globActivity.hasJwt() && !globActivity.isJwtValid()) {
             btnLoginState.changeBtnState(false)
             authenticate(etUrl.text.toString(),
                 etUser.text.toString(),
                 etPass.text.toString(),
-                globActivity, btnLoginState)
+                btnLoginState)
         }
 
         view.setOnTouchListener { _, event ->
@@ -146,7 +150,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
                 authenticate(etUrl.text.toString(),
                     etUser.text.toString(),
-                    etPass.text.toString(), globActivity, btnLoginState)
+                    etPass.text.toString(), btnLoginState)
             } else {
                 btnLoginState.changeBtnState(true)
                 globActivity.showGenericSnack(requireContext(),
@@ -177,7 +181,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     btnLoginState.changeBtnState(true)
                     mainActivity.showGenericSnack(requireContext(),
                         requireView(),
-                        "Server not permitting communication! Check URL.",
+                        "Cannot pull docker containers!",
                         R.color.red,
                         R.color.white)
                 }
@@ -193,7 +197,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         baseUrl: String,
         usr: String,
         pwd: String,
-        mainActiviy: MainActiviy,
         btnLoginState: BtnLogin,
     ) {
         val cred = UserCredentials(usr, pwd)
@@ -207,86 +210,132 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     call: retrofit2.Call<Jwt?>,
                     response: retrofit2.Response<Jwt?>,
                 ) {
-                    disableDrawerSwipe = false
-                    val jwtResponse: String? = response.body()?.jwt
-                    showResponseSnack(response.code().toString(), btnLoginState)
+                    if (response.code() == 200) {
+                        val jwtResponse: String? = response.body()?.jwt
 
-                    jwtResponse?.let {
-                        val jwtValidUntil: Long =
-                            ZonedDateTime.now(ZoneOffset.UTC).plusHours(7).plusMinutes(59)
-                                .toInstant()
-                                .toEpochMilli()
+                        jwtResponse?.let {
+                            val jwtValidUntil: Long =
+                                ZonedDateTime.now(ZoneOffset.UTC).plusHours(7).plusMinutes(59)
+                                    .toInstant()
+                                    .toEpochMilli()
 
-                        val globActivity: MainActiviy = (activity as MainActiviy?)!!
-                        globActivity.setGlobalCredentials(baseUrl, usr, pwd, it, jwtValidUntil)
-
-                        callGetContainers(baseUrl, it)
+                            getEndpointId(baseUrl = baseUrl,
+                                usr = usr,
+                                pwd = pwd,
+                                btnLoginState = btnLoginState,
+                                jwt = it,
+                                jwtValidUntil = jwtValidUntil)
+                        }
+                    } else {
+                        showResponseSnack(response.code().toString(), btnLoginState)
                     }
                 }
 
                 override fun onFailure(call: retrofit2.Call<Jwt?>, t: Throwable) {
-                    disableDrawerSwipe = false
-                    btnLoginState.changeBtnState(true)
-                    mainActiviy.showGenericSnack(requireContext(),
-                        requireView(),
-                        "Server not permitting communication! Check URL.",
-                        R.color.red,
-                        R.color.white)
+                    onLoginError(btnLoginState, "Server not permitting communication! Check URL.")
                 }
-
             })
     }
 
-    private fun callGetContainers(url: String, jwt: String) {
+    private fun getEndpointId(
+        baseUrl: String,
+        usr: String,
+        pwd: String,
+        btnLoginState: BtnLogin,
+        jwt: String,
+        jwtValidUntil: Long,
+    ) {
+        fun getLocalEndpoint(response: PEndpointsResponse): PortainerEndpoint? {
+            return response.find {
+                it.url == "unix:///var/run/docker.sock"
+            }
+        }
+
+        val fullPath =
+            getString(R.string.getEnpointId).replace("{baseUrl}", baseUrl.removeSuffix("/"))
+        val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
+        api.getEnpointId(fullPath, "Bearer ${jwt}", 10, 0)
+            .enqueue(object : retrofit2.Callback<PEndpointsResponse> {
+                override fun onResponse(
+                    call: Call<PEndpointsResponse>,
+                    response: Response<PEndpointsResponse>,
+                ) {
+                    disableDrawerSwipe = false
+
+                    if (response.code() == 200 && response.body() != null) {
+                        val localEndpoint = getLocalEndpoint(response = response.body()!!)
+
+                        if (localEndpoint != null) {
+                            val globActivity: MainActiviy = (activity as MainActiviy?)!!
+                            globActivity.setGlobalCredentials(baseUrl,
+                                usr,
+                                pwd,
+                                jwt,
+                                jwtValidUntil,
+                                localEndpoint.id)
+
+                            callGetContainers(baseUrl, jwt, localEndpoint.id)
+                        } else {
+                            onLoginError(btnLoginState,
+                                "No Portainer endpoint ID that is locally hosted!")
+                        }
+                    } else {
+                        onLoginError(btnLoginState,
+                            "Cannot get portainer endpoint id! Error code: ${response.code()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<PEndpointsResponse>, t: Throwable) {
+                    onLoginError(btnLoginState, "Failed to get Portainer endpoint ID!")
+                }
+            })
+    }
+
+    private fun callGetContainers(url: String, jwt: String, endpointId: Int) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
+                .replace("{endpointId}", endpointId.toString())
 
         model.setStateEvent(HomeMainStateEvent.GetosKontejneri(jwt = jwt, url = fullUrl))
     }
 
     fun showResponseSnack(responseStatus: String, btnLoginState: BtnLogin) {
-        data class SnackStyle(val text: String, val textColor: Int, val bckColor: Int)
-        // colors
-        val cBlueMain = context?.let { ContextCompat.getColor(it, R.color.blue_main) }
-        val cDGray = context?.let { ContextCompat.getColor(it, R.color.dis4) }
-        val cRed = context?.let { ContextCompat.getColor(it, R.color.red) }
-        val cWhite = context?.let { ContextCompat.getColor(it, R.color.white) }
-        val cOrange = context?.let { ContextCompat.getColor(it, R.color.orange_warning) }
-
-        val sbStyle: SnackStyle = when (responseStatus) {
-            "200" -> SnackStyle("", cWhite!!, cRed!!)
+        when (responseStatus) {
             "502", "404" -> {
-                btnLoginState.changeBtnState(true)
-                SnackStyle("Wrong URL or service is down", cWhite!!, cRed!!)
+                onLoginError(btnLoginState,
+                    "Wrong URL or service is down",
+                    R.color.white,
+                    R.color.red)
             }
             "422" -> {
-                btnLoginState.changeBtnState(true)
-                SnackStyle("Invalid Credentials", cWhite!!, cOrange!!)
+                onLoginError(btnLoginState,
+                    "Invalid Credentials",
+                    R.color.white,
+                    R.color.orange_warning)
             }
             else -> {
-                btnLoginState.changeBtnState(true)
-                SnackStyle("Server response: Unknown error", cBlueMain!!, cDGray!!)
+                onLoginError(btnLoginState,
+                    "Server response: Unknown error",
+                    R.color.blue_main,
+                    R.color.dis4)
             }
         }
+    }
 
-        val v: View? = activity?.findViewById(android.R.id.content)
-        val snackbar = Snackbar.make(
-            v!!,
-            sbStyle.text,
-            Snackbar.LENGTH_SHORT
-        )
-
-        val snackbarView: View = snackbar.view
-        val snackbarTextId: Int = R.id.snackbar_text
-
-        val textView = snackbarView.findViewById<View>(snackbarTextId) as TextView
-        textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
-        textView.setTextColor(sbStyle.textColor)
-
-        snackbarView.setBackgroundColor(sbStyle.bckColor)
-
-        if (responseStatus != "200")
-            snackbar.show()
+    private fun onLoginError(
+        btnLoginState: BtnLogin,
+        msg: String,
+        textColor: Int = R.color.red,
+        bckColor: Int = R.color.white,
+    ) {
+        disableDrawerSwipe = false
+        btnLoginState.changeBtnState(true)
+        val globActivity: MainActiviy = (activity as MainActiviy?)!!
+        globActivity.showGenericSnack(requireContext(),
+            requireView(),
+            msg,
+            textColor,
+            bckColor)
     }
 
     inner class UsersGestureListener : GestureDetector.SimpleOnGestureListener() {
