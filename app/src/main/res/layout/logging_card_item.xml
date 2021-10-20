@@ -11,6 +11,7 @@
             android:id="@+id/tvLoggingItem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/dis6"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="2dp"
             android:text="AJKDE TEMPLARTE"/>
@@ -18,8 +19,10 @@
         <View
             android:id="@+id/dividerLogging"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="0.5dp"
             android:layout_below="@+id/tvLoggingItem"
+            android:backgroundTint="@color/dis6"
+            android:backgroundTintMode="add"
             android:background="?android:attr/listDivider" />
 
     </RelativeLayout>
