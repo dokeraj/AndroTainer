@@ -11,7 +11,7 @@
             android:id="@+id/tvLoggingItem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/dis6"
+            android:textColor="@color/loggingText"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="2dp"
             android:text="AJKDE TEMPLARTE"/>
