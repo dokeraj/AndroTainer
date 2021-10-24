@@ -15,7 +15,7 @@ class DockerListerRepo constructor(
         emit(DataState.Loading)
         try {
             val networkKontainers = kontainerRetrofit.listDockerContainers(jwt, url, 1)
-            val kontainers = networkMapper.mapFromEntityList(networkKontainers)
+            val kontainers = networkMapper.mapFromEntityList(networkKontainers).sortedBy { it.name }
             emit(DataState.Success(kontainers))
         } catch (e: Exception) {
             emit(DataState.Error(e))

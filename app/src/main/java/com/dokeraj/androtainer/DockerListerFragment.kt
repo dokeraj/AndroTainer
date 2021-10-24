@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.adapter.DockerContainerAdapter
 import com.dokeraj.androtainer.adapter.DockerEndpointAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
+import com.dokeraj.androtainer.models.ContainerStateType
 import com.dokeraj.androtainer.models.Kontainer
 import com.dokeraj.androtainer.util.DataState
 import com.dokeraj.androtainer.viewmodels.DockerListerViewModel
@@ -141,6 +142,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     recyclerAdapter.setItems(ds.data)
                     recyclerAdapter.notifyDataSetChanged()
                     swiperLayout.isRefreshing = false
+                    setContainerStats(ds.data)
                 }
                 is DataState.Error -> {
                     swiperLayout.isRefreshing = false
@@ -148,20 +150,24 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 }
                 is DataState.Loading -> {
                     swiperLayout.isRefreshing = true
+                    setContainerStats(listOf(), true)
                 }
                 /** below these is the logic for handling the idividual cards*/
                 is DataState.CardLoading -> {
                     recyclerAdapter.setItems(ds.data)
                     recyclerAdapter.notifyItemChanged(ds.itemIndex)
+                    setContainerStats(listOf(),true)
                 }
                 is DataState.CardSuccess -> {
                     swiperLayout.isRefreshing = false
                     recyclerAdapter.setItems(ds.data)
                     recyclerAdapter.notifyItemChanged(ds.itemIndex)
+                    setContainerStats(ds.data)
                 }
                 is DataState.CardError -> {
                     recyclerAdapter.setItems(ds.data)
                     recyclerAdapter.notifyItemChanged(ds.itemIndex)
+                    setContainerStats(ds.data)
                 }
             }
         })
@@ -234,6 +240,39 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         val action =
             DockerListerFragmentDirections.actionDockerListerFragmentToHomeFragment()
         findNavController().navigate(action)
+    }
+
+    private fun setContainerStats(allContainers: List<Kontainer>, isLoading: Boolean = false) {
+        fun showProgressBar(show: Boolean) {
+            val pbAndTextVisibility = if (show)
+                Pair(View.VISIBLE, View.INVISIBLE)
+            else
+                Pair(View.INVISIBLE, View.VISIBLE)
+
+            pbTotalStats.visibility = pbAndTextVisibility.first
+            pbRunningStats.visibility = pbAndTextVisibility.first
+            pbStoppedStats.visibility = pbAndTextVisibility.first
+            tvTotalStat.visibility = pbAndTextVisibility.second
+            tvStoppedStat.visibility = pbAndTextVisibility.second
+            tvRunningStat.visibility = pbAndTextVisibility.second
+        }
+        if (!isLoading) {
+            tvTotalStat.text = allContainers.size.toString()
+            tvRunningStat.text = allContainers.count { kon ->
+                kon.state == ContainerStateType.RUNNING
+            }.toString()
+            tvStoppedStat.text = allContainers.count { kon ->
+                kon.state == ContainerStateType.EXITED || kon.state == ContainerStateType.ERRORED
+            }.toString()
+
+            // if there are any more containers that are in transitioning state, don't show the stats, instead keep the spinner
+            if (allContainers.any { it.state == ContainerStateType.TRANSITIONING })
+                showProgressBar(true)
+            else
+                showProgressBar(false)
+        } else {
+            showProgressBar(true)
+        }
     }
 
 }
