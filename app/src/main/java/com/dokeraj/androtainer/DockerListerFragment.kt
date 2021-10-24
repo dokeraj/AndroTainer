@@ -14,8 +14,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.adapter.DockerContainerAdapter
+import com.dokeraj.androtainer.adapter.DockerEndpointAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
-import com.dokeraj.androtainer.models.*
+import com.dokeraj.androtainer.models.Kontainer
 import com.dokeraj.androtainer.util.DataState
 import com.dokeraj.androtainer.viewmodels.DockerListerViewModel
 import com.dokeraj.androtainer.viewmodels.MainStateEvent
@@ -45,6 +46,8 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         val globActivity: MainActiviy = (activity as MainActiviy?)!!
         val globalVars: GlobalApp = (globActivity.application as GlobalApp)
 
+        tvContainerListerEndpointName.text = globalVars.currentUser!!.currentEndpoint.name
+
         setDrawerInfo(globalVars)
 
         val hamburgerMenu = ActionBarDrawerToggle(activity,
@@ -71,11 +74,16 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             DockerContainerAdapter(containers,
                 globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
-                globalVars.currentUser!!.endpointId,
+                globalVars.currentUser!!.currentEndpoint.id,
                 requireContext(), this, model)
         recycler_view.adapter = recyclerAdapter
         recycler_view.layoutManager = LinearLayoutManager(activity)
         recycler_view.setHasFixedSize(true)
+
+        rvDockerEndpoints.adapter = DockerEndpointAdapter(globalVars.currentUser!!.listOfEndpoints,
+            globalVars, requireContext(), globActivity, drawerLister, model, recyclerAdapter, this)
+        rvDockerEndpoints.layoutManager = LinearLayoutManager(activity)
+        rvDockerEndpoints.setHasFixedSize(true)
 
         btnLogout.setOnClickListener {
             logout(globActivity)
@@ -94,6 +102,14 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         btnDonate.setOnClickListener {
             val i = Intent(Intent.ACTION_VIEW, Uri.parse("https://donate.dokeraj.cc"))
             startActivity(i)
+        }
+
+        btnEndpoints.setOnClickListener {
+            if (rvDockerEndpoints.visibility == View.VISIBLE)
+                rvDockerEndpoints.visibility = View.GONE
+            else {
+                rvDockerEndpoints.visibility = View.VISIBLE
+            }
         }
 
         btnManageUsers.setOnClickListener {
@@ -166,7 +182,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
     }
 
     @ExperimentalCoroutinesApi
-    private fun callSwiperLogic(
+    fun callSwiperLogic(
         dataViewModel: DockerListerViewModel,
         globActivity: MainActiviy,
         globalVars: GlobalApp,
@@ -180,7 +196,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 callGetContainers(dataViewModel,
                     globalVars.currentUser!!.serverUrl,
                     globalVars.currentUser!!.jwt!!,
-                    globalVars.currentUser!!.endpointId)
+                    globalVars.currentUser!!.currentEndpoint.id)
             }
         } else {
             logout(globActivity, "Session has expired! Please log in again.")

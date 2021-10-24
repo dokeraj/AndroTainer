@@ -12,6 +12,7 @@ import com.dokeraj.androtainer.globalvars.PermaVals.LOG_SETTINGS
 import com.dokeraj.androtainer.globalvars.PermaVals.SP_DB
 import com.dokeraj.androtainer.globalvars.PermaVals.USERS_CREDENTIALS
 import com.dokeraj.androtainer.models.Credential
+import com.dokeraj.androtainer.models.CredentialDeserializer
 import com.dokeraj.androtainer.models.LogSettings
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
@@ -116,19 +117,15 @@ class MainActiviy : AppCompatActivity() {
         editor?.apply()
     }
 
-    fun setGlobalCredentials(
-        url: String,
-        usr: String,
-        pwd: String,
-        jwt: String?,
-        validUntil: Long?,
-        endpointId:Int
-    ) {
+    fun setGlobalCredentials(user: Credential, isFromLogin: Boolean = false) {
         val global = (this.application as GlobalApp)
 
-        // create new user cred
-        val lastActivity: Long = ZonedDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli()
-        val currentUser: Credential = Credential(url, usr, pwd, jwt, validUntil, lastActivity, endpointId)
+        val currentUser: Credential = if (isFromLogin) {
+            // create new user cred
+            val lastActivity: Long = ZonedDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli()
+            user.copy(lastActivity = lastActivity)
+        } else
+            user
 
         // set this user as current user
         global.currentUser = currentUser
@@ -200,9 +197,12 @@ class MainActiviy : AppCompatActivity() {
     private fun initializeGlobalVar(): Unit {
         val sharedPrefs = this.getSharedPreferences(SP_DB, AppCompatActivity.MODE_PRIVATE)
         val usersStr: String? = sharedPrefs?.getString(USERS_CREDENTIALS, null)
-        val credentials: List<Credential> = if (usersStr != null)
-            GsonBuilder().create().fromJson(usersStr, Array<Credential>::class.java).toList()
-        else listOf()
+        val credentials: List<Credential> = if (usersStr != null) {
+            val credentialGSon =
+                GsonBuilder().registerTypeAdapter(Credential::class.java, CredentialDeserializer())
+                    .create()
+            credentialGSon.fromJson(usersStr, Array<Credential>::class.java).toList()
+        } else listOf()
 
         val collectionCreds: MutableMap<String, Credential> = credentials.map {
             "${it.serverUrl}.${it.username}" to it

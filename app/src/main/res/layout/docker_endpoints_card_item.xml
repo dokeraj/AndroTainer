@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="5dp"
+    android:layout_marginBottom="5dp">
+
+    <LinearLayout
+        android:id="@+id/llDockerEndpoint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/dis1">
+
+        <TextView
+            android:id="@+id/tvDockerEnpointNameCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="1dp"
+            android:fontFamily="@font/ubuntu_bold"
+            android:textStyle="bold"
+            android:text="Local Endpoint"
+            android:textColor="@color/loggingText" />
+
+        <TextView
+            android:id="@+id/tvDockerEnpointUrlCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="9dp"
+            android:textStyle="italic"
+            android:textSize="12dp"
+            android:text="https://var.docker.sock"
+            android:textColor="@color/loggingText" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

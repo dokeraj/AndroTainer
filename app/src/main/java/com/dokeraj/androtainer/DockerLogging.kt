@@ -46,11 +46,12 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
             ContextCompat.getDrawable(requireActivity(), R.drawable.ic_back)
 
         tvContainerLoggingTitle.text = "${args.containerName} Logs"
+        tvLoggingEndpointName.text = globalVars.currentUser!!.currentEndpoint.name
 
         val contId = args.containerId
         val baseUrl = globalVars.currentUser!!.serverUrl
         val token: String = globalVars.currentUser!!.jwt!!
-        val endpointId: Int = globalVars.currentUser!!.endpointId
+        val endpointId: Int = globalVars.currentUser!!.currentEndpoint.id
 
         // pull from global var and setup the chips state
         initChipsState(globalVars)
