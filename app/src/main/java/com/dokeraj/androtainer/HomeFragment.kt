@@ -21,11 +21,12 @@ import com.dokeraj.androtainer.buttons.BtnLogin
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.interfaces.ApiInterface
 import com.dokeraj.androtainer.models.Credential
+import com.dokeraj.androtainer.models.DockerEndpoint
 import com.dokeraj.androtainer.models.Kontainer
 import com.dokeraj.androtainer.models.Kontainers
+import com.dokeraj.androtainer.models.retrofit.DockerEndpointNetworkMapper
 import com.dokeraj.androtainer.models.retrofit.Jwt
 import com.dokeraj.androtainer.models.retrofit.PEndpointsResponse
-import com.dokeraj.androtainer.models.retrofit.PortainerEndpoint
 import com.dokeraj.androtainer.models.retrofit.UserCredentials
 import com.dokeraj.androtainer.network.RetrofitInstance
 import com.dokeraj.androtainer.util.DataState
@@ -112,7 +113,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             btnLoginState.changeBtnState(false)
             callGetContainers(globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
-                globalVars.currentUser!!.endpointId)
+                globalVars.currentUser!!.currentEndpoint.id)
         } else if (globActivity.hasJwt() && !globActivity.isJwtValid()) {
             btnLoginState.changeBtnState(false)
             authenticate(etUrl.text.toString(),
@@ -248,14 +249,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         jwt: String,
         jwtValidUntil: Long,
     ) {
-        fun getFirstAvailableEndpoint(response: PEndpointsResponse): PortainerEndpoint? {
-            val dockerSock: PortainerEndpoint? = response.find {
+        fun getDockerEndpoints(response: PEndpointsResponse): Pair<DockerEndpoint?, List<DockerEndpoint>> {
+            val dockerEndpoints: List<DockerEndpoint> =
+                DockerEndpointNetworkMapper.mapFromRetrofitModel(response)
+
+            val dockerSock: DockerEndpoint? = dockerEndpoints.find {
                 it.url == "unix:///var/run/docker.sock"
             }
 
-            val sortedById: List<PortainerEndpoint> = response.sortedBy { it.id }
+            val sortedById: List<DockerEndpoint> = dockerEndpoints.sortedBy { it.id }
 
-            return dockerSock ?: sortedById.getOrNull(0)
+            return Pair(dockerSock ?: sortedById.getOrNull(0), sortedById)
         }
 
         val fullPath =
@@ -270,19 +274,20 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     disableDrawerSwipe = false
 
                     if (response.code() == 200 && response.body() != null) {
-                        val portainerEndpoint =
-                            getFirstAvailableEndpoint(response = response.body()!!)
+                        val dockerEndpoints: Pair<DockerEndpoint?, List<DockerEndpoint>> =
+                            getDockerEndpoints(response = response.body()!!)
 
-                        if (portainerEndpoint != null) {
+                        if (dockerEndpoints.first != null) {
                             val globActivity: MainActiviy = (activity as MainActiviy?)!!
-                            globActivity.setGlobalCredentials(baseUrl,
-                                usr,
-                                pwd,
-                                jwt,
-                                jwtValidUntil,
-                                portainerEndpoint.id)
+                            globActivity.setGlobalCredentials(Credential(serverUrl = baseUrl,
+                                username = usr,
+                                pwd = pwd,
+                                jwt = jwt,
+                                jwtValidUntil = jwtValidUntil,
+                                currentEndpoint = dockerEndpoints.first!!,
+                                listOfEndpoints = dockerEndpoints.second), true)
 
-                            callGetContainers(baseUrl, jwt, portainerEndpoint.id)
+                            callGetContainers(baseUrl, jwt, dockerEndpoints.first!!.id)
                         } else {
                             onLoginError(btnLoginState,
                                 "There are no Portainer endpoints listed!")

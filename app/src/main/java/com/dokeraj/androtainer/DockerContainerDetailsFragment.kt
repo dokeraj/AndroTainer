@@ -47,10 +47,11 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
         val btnDeleteState =
             BtnDeleteContainer(requireContext(), btnContainerDelete)
 
-        tvContainerDetailsTitle.text = selectedContainer.name
-
         val globActivity: MainActiviy = (activity as MainActiviy?)!!
         val globalVars: GlobalApp = (globActivity.application as GlobalApp)
+
+        tvContainerDetailsTitle.text = selectedContainer.name
+        tvContainerDetailsEndpointName.text = globalVars.currentUser!!.currentEndpoint.name
 
         setContainerDetails(selectedContainer)
 
@@ -103,7 +104,7 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
                 getString(R.string.removeDockerContainer).replace("{baseUrl}",
                     globalVars.currentUser!!.serverUrl.removeSuffix("/"))
                     .replace("{containerId}", selectedContainer.id)
-                    .replace("{endpointId}", globalVars.currentUser!!.endpointId.toString())
+                    .replace("{endpointId}", globalVars.currentUser!!.currentEndpoint.toString())
 
             model.setStateEvent(MainStateEvent.DeleteContaier(globalVars.currentUser!!.jwt!!,
                 fullUrl,

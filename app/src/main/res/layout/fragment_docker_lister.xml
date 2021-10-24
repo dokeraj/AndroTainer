@@ -7,8 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/dis4"
     android:fitsSystemWindows="true"
-    tools:context=".DockerListerFragment"
-    >
+    tools:context=".DockerListerFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -24,14 +23,33 @@
             android:elevation="20dp"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/ubuntu_bold"
-                android:text="Docker Containers"
-                android:textColor="@color/disText2"
-                android:textSize="25dp"
-                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/ubuntu_bold"
+                    android:text="Docker Containers"
+                    android:textColor="@color/disText2"
+                    android:textSize="25dp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/tvContainerListerEndpointName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/ubuntu"
+                    android:includeFontPadding="false"
+                    android:text="Endpoint Name"
+                    android:textColor="@color/disText2"
+                    android:textSize="14dp"
+                    android:paddingStart="5dp"
+                    android:textStyle="italic" />
+            </LinearLayout>
+
         </androidx.appcompat.widget.Toolbar>
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -41,8 +59,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbarMenu"
-            >
+            app:layout_constraintTop_toBottomOf="@+id/toolbarMenu">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view"
@@ -56,7 +73,6 @@
                 tools:listitem="@layout/docker_card_item" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -87,99 +103,133 @@
 
             <Button
                 android:id="@+id/btnLogout"
-                android:layout_marginTop="8dp"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginTop="8dp"
                 android:backgroundTint="@color/dis3"
-                android:fontFamily="@font/ubuntu"
-                android:textSize="15sp"
-                android:drawablePadding="9dp"
-                app:drawableTint="@color/disText2"
                 android:drawableLeft="@drawable/ic_logout_icon"
+                android:drawablePadding="9dp"
+                android:fontFamily="@font/ubuntu"
                 android:gravity="start|center_vertical"
-                style="?android:attr/borderlessButtonStyle"
+                android:text="Logout"
                 android:textAllCaps="false"
-                android:text="Logout" />
+                android:textSize="15sp"
+                app:drawableTint="@color/disText2" />
 
             <View
-                android:layout_marginTop="5dp"
                 android:layout_width="250dp"
-                android:layout_gravity="center"
                 android:layout_height="1dp"
-                android:background="@color/blue_main"/>
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:background="@color/blue_main" />
 
             <Button
                 android:id="@+id/btnManageUsers"
-                android:layout_marginTop="3dp"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginTop="3dp"
                 android:backgroundTint="@color/dis3"
-                android:textSize="15sp"
-                android:fontFamily="@font/ubuntu"
-                app:drawableTint="@color/disText2"
                 android:drawableLeft="@drawable/ic_users_group"
                 android:drawablePadding="9dp"
-                android:textAlignment="textStart"
+                android:fontFamily="@font/ubuntu"
                 android:lineHeight="15dp"
-                style="?android:attr/borderlessButtonStyle"
+                android:text="Manage Users"
+                android:textAlignment="textStart"
                 android:textAllCaps="false"
-                android:text="Manage Users" />
+                android:textSize="15sp"
+                app:drawableTint="@color/disText2" />
 
             <View
-                android:layout_marginTop="5dp"
                 android:layout_width="250dp"
-                android:layout_gravity="center"
                 android:layout_height="1dp"
-                android:background="@color/blue_main"/>
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:background="@color/blue_main" />
+
+            <Button
+                android:id="@+id/btnEndpoints"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="3dp"
+                android:backgroundTint="@color/dis3"
+                android:drawableLeft="@drawable/ic_endpoints"
+                android:drawablePadding="9dp"
+                android:fontFamily="@font/ubuntu"
+                android:lineHeight="15dp"
+                android:text="Endpoints"
+                android:textAlignment="textStart"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                app:drawableTint="@color/disText2" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDockerEndpoints"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:visibility="gone"
+                tools:listitem="@layout/docker_endpoints_card_item">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <View
+                android:layout_width="250dp"
+                android:layout_height="1dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:background="@color/blue_main" />
 
             <Button
                 android:id="@+id/btnAbout"
-                android:layout_marginTop="3dp"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginTop="3dp"
                 android:backgroundTint="@color/dis3"
-                android:textSize="15sp"
-                android:fontFamily="@font/ubuntu"
-                app:drawableTint="@color/disText2"
                 android:drawableLeft="@drawable/ic_info"
                 android:drawablePadding="9dp"
-                android:textAlignment="textStart"
+                android:fontFamily="@font/ubuntu"
                 android:lineHeight="15dp"
-                style="?android:attr/borderlessButtonStyle"
+                android:text="About"
+                android:textAlignment="textStart"
                 android:textAllCaps="false"
-                android:text="About" />
+                android:textSize="15sp"
+                app:drawableTint="@color/disText2" />
 
             <TextView
                 android:id="@+id/tvAboutInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:justificationMode="inter_word"
-                android:fontFamily="@font/ubuntu"
                 android:layout_marginTop="15dp"
-                android:visibility="invisible"
+                android:fontFamily="@font/ubuntu"
+                android:justificationMode="inter_word"
+                android:linksClickable="true"
                 android:paddingStart="19dp"
                 android:paddingEnd="30dp"
-                android:textSize="12sp"
-                android:linksClickable="true"
                 android:textColor="@color/disText2"
-                />
+                android:textSize="12sp"
+                android:visibility="invisible" />
 
             <Button
                 android:id="@+id/btnDonate"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
+                android:layout_marginStart="19dp"
                 android:layout_marginTop="10dp"
                 android:backgroundTint="@color/disRedDisabled"
                 android:drawableLeft="@drawable/ic_donation"
                 android:drawablePadding="9dp"
-                android:visibility="invisible"
                 android:fontFamily="@font/ubuntu"
                 android:lineHeight="15dp"
-                android:layout_marginStart="19dp"
                 android:text="Donate"
                 android:textAlignment="textStart"
                 android:textAllCaps="false"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                android:visibility="invisible" />
 
         </LinearLayout>
 

@@ -17,8 +17,8 @@ android {
         applicationId "com.dokeraj.androtainer"
         minSdkVersion 29
         targetSdkVersion 30
-        versionCode 12
-        versionName "1.55"
+        versionCode 13
+        versionName "1.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
