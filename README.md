@@ -8,6 +8,7 @@ Note:
 You can find the app on [Google Play Store](https://play.google.com/store/apps/details?id=com.dokeraj.androtainer).
 
 Also available on: 
+
 <a href="https://apt.izzysoft.de/fdroid/index/apk/com.dokeraj.androtainer/"> <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="IzzyOnDroid" width="150"/> </a>
 
 
