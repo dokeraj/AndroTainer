@@ -6,6 +6,7 @@ Note:
 - *This app is in no way related to the official Portainer project*
 
 You can find the app on [Google Play Store](https://play.google.com/store/apps/details?id=com.dokeraj.androtainer).
+Also available on: [![IzzyOnDroid](https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png))](https://apt.izzysoft.de/fdroid/index/apk/com.dokeraj.androtainer)
 
 ---------------------------------------------
 [![donate](https://i.imgur.com/BTVI4EQ.png)](https://donate.dokeraj.cc)
