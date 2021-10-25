@@ -9,7 +9,7 @@
     <string name="navigation_drawer_open">Open Navigation Drawer</string>
     <string name="navigation_drawer_close">Close Navigation Drawer</string>
     <string name="welcome_messages">My First Heading My <i>first</i> paragraph.</string>
-    <string name="about_app">**AndroTainer** is an open source app. This *SERVICE* is provided by Dokeraj at no cost and is intended for use as is.\nSource code can be found here: https://github.com/dokeraj/AndroTainer\n\nFor any further inquiries: dokeraj87@gmail.com\n\n Privacy policy: [find it here](https://sites.google.com/view/androtainer/privacy-stuff)\n\n`Current version: %1$s`</string>
+    <string name="about_app">**AndroTainer** is an open source app. This *SERVICE* is provided by Dokeraj at no cost and is intended for use as is.\nSource code can be found here: https://github.com/dokeraj/AndroTainer\n\nFor any further inquiries: dokeraj87@gmail.com\n\n Privacy policy: [find it here](https://sites.google.com/view/androtainer/privacy)\n\n`Current version: %1$s`</string>
     <string name="users_manage_note">`ANY DELETED CREDENTIAL WILL ONLY BE REMOVED FROM ANDROTAINER`\n\nPro tip: You can find the stored credentials by swiping right on the login screen.</string>
     <string name="dialogWarning">If `CONTINUE` is chosen, you will be logged out and pushed back to the login screen.</string>
     <string name="deletingContainerNote">Long press the remove button to delete the container **{containerName}**</string>
