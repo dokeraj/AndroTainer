@@ -8,6 +8,7 @@ import android.view.View
 import androidx.activity.addCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -33,6 +34,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
     private val args: DockerListerFragmentArgs by navArgs()
+    private var lastTimePressed: Long = 0L
+    private val intervalToastTime = 1200
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -125,7 +128,19 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
             // hijack the back button press and don't allow going back to login page (only close the drawer)
-            drawerLister.close()
+            if (drawerLister.isDrawerOpen(GravityCompat.START))
+                drawerLister.close()
+            else {
+                if (lastTimePressed < System.currentTimeMillis() - intervalToastTime) {
+                    globActivity.showGenericSnack(requireContext(),
+                        requireView(),
+                        "Press back again to close the app",
+                        R.color.blue_main,
+                        R.color.dis2, intervalToastTime)
+                    lastTimePressed = System.currentTimeMillis()
+                } else
+                    globActivity.moveTaskToBack(true)
+            }
         }
 
         subscribeObservers(model, recyclerAdapter, globActivity)
@@ -156,7 +171,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 is DataState.CardLoading -> {
                     recyclerAdapter.setItems(ds.data)
                     recyclerAdapter.notifyItemChanged(ds.itemIndex)
-                    setContainerStats(listOf(),true)
+                    setContainerStats(listOf(), true)
                 }
                 is DataState.CardSuccess -> {
                     swiperLayout.isRefreshing = false
