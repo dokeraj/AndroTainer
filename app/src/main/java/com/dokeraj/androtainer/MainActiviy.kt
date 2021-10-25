@@ -44,6 +44,7 @@ class MainActiviy : AppCompatActivity() {
         snackbarText: String,
         textColor: Int,
         snackBckColor: Int,
+        duration:Int = 3000
     ) {
 
         val markwon = Markwon.create(context);
@@ -52,7 +53,7 @@ class MainActiviy : AppCompatActivity() {
         val snackbar = Snackbar.make(
             view,
             mardownFormattedText,
-            Snackbar.LENGTH_SHORT
+            duration
         )
 
         val snackbarView: View = snackbar.view
