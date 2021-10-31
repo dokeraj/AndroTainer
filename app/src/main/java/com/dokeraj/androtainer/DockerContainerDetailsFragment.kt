@@ -104,7 +104,7 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
                 getString(R.string.removeDockerContainer).replace("{baseUrl}",
                     globalVars.currentUser!!.serverUrl.removeSuffix("/"))
                     .replace("{containerId}", selectedContainer.id)
-                    .replace("{endpointId}", globalVars.currentUser!!.currentEndpoint.toString())
+                    .replace("{endpointId}", globalVars.currentUser!!.currentEndpoint.id.toString())
 
             model.setStateEvent(MainStateEvent.DeleteContaier(globalVars.currentUser!!.jwt!!,
                 fullUrl,
