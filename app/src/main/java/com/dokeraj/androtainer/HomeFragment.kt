@@ -62,7 +62,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         etUrl.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
 
-                when (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
+                when (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches() && (etUrl.text.toString().toLowerCase().startsWith("http") || etUrl.text.toString().toLowerCase().startsWith("https"))) {
                     true -> {
                         etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_web_link,
                             0,
@@ -151,15 +151,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         lgnBtn.setOnClickListener {
             disableDrawerSwipe = true
             btnLoginState.changeBtnState(false)
-            if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches()) {
+            if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches() && (etUrl.text.toString().toLowerCase().startsWith("http") || etUrl.text.toString().toLowerCase().startsWith("https"))) {
                 authenticate(etUrl.text.toString(),
                     etUser.text.toString(),
                     etPass.text.toString(), btnLoginState)
             } else {
+
+                val errText = if (!etUrl.text.toString().toLowerCase().startsWith("http") && !etUrl.text.toString().toLowerCase().startsWith("https"))
+                    "The URL must start with http:// or https://"
+                else
+                    "Invalid URL!"
+
                 btnLoginState.changeBtnState(true)
                 globActivity.showGenericSnack(requireContext(),
                     requireView(),
-                    "Invalid URL!",
+                    errText,
                     R.color.white,
                     R.color.orange_warning)
             }
