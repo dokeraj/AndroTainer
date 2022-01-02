@@ -242,7 +242,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
 
                 override fun onFailure(call: retrofit2.Call<Jwt?>, t: Throwable) {
-                    onLoginError(btnLoginState, "Server not permitting communication! Check URL.")
+                    onLoginError(btnLoginState, "Server not permitting communication! ${t.message}")
                 }
             })
     }
