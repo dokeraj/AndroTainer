@@ -8,12 +8,15 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.dokeraj.androtainer.globalvars.GlobalApp
+import com.dokeraj.androtainer.globalvars.PermaVals.APP_SETTINGS
 import com.dokeraj.androtainer.globalvars.PermaVals.LOG_SETTINGS
 import com.dokeraj.androtainer.globalvars.PermaVals.SP_DB
 import com.dokeraj.androtainer.globalvars.PermaVals.USERS_CREDENTIALS
 import com.dokeraj.androtainer.models.Credential
 import com.dokeraj.androtainer.models.CredentialDeserializer
+import com.dokeraj.androtainer.models.KontainerFilterPref
 import com.dokeraj.androtainer.models.LogSettings
+import com.dokeraj.androtainer.models.retrofit.AppSettings
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -66,6 +69,26 @@ class MainActiviy : AppCompatActivity() {
         snackbarView.setBackgroundColor(ContextCompat.getColor(context, snackBckColor))
 
         snackbar.show()
+    }
+
+    fun setGlobalAppSettings(inputKontainerFilter: KontainerFilterPref) {
+        val global = (this.application as GlobalApp)
+
+        val appSettings = AppSettings(inputKontainerFilter)
+        // set app settings to global var
+        global.appSettings = appSettings
+
+        // save the app settings to the perma val
+        saveAppSettingsToPerma(appSettings)
+    }
+
+    fun saveAppSettingsToPerma(appSettings: AppSettings) {
+        val sharedPrefs = this.getSharedPreferences(SP_DB, MODE_PRIVATE)
+        val editor = sharedPrefs?.edit()
+
+        editor?.putString(APP_SETTINGS, Gson().toJson(appSettings))
+
+        editor?.apply()
     }
 
     fun setGlobalLoggingSettings(
@@ -214,12 +237,18 @@ class MainActiviy : AppCompatActivity() {
             GsonBuilder().create().fromJson(logSettingsStr, LogSettings::class.java)
         else null
 
+        val appSettingsStr: String? = sharedPrefs?.getString(APP_SETTINGS, null)
+        val appSettings: AppSettings? = if (appSettingsStr != null)
+            GsonBuilder().create().fromJson(appSettingsStr, AppSettings::class.java)
+        else AppSettings(KontainerFilterPref.RUNNING)
+
         val lastUsedCred: Credential? = getLatestActivityUser(credentials)
 
         val global = (this.application as GlobalApp)
         global.credentials = collectionCreds
         global.currentUser = lastUsedCred
         global.logSettings = logSettings
+        global.appSettings = appSettings
     }
 
     private fun getLatestActivityUser(allCredentials: List<Credential>): Credential? {

@@ -1,5 +1,6 @@
 package com.dokeraj.androtainer.adapter
 
+import android.R.attr
 import android.content.Context
 import android.graphics.BlendMode
 import android.graphics.BlendModeColorFilter
@@ -13,25 +14,34 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.dokeraj.androtainer.DockerListerFragment
 import com.dokeraj.androtainer.DockerListerFragmentDirections
 import com.dokeraj.androtainer.R
+import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.ContainerActionType
 import com.dokeraj.androtainer.models.ContainerStateType
-import kotlinx.android.synthetic.main.docker_card_item.view.*
-import com.dokeraj.androtainer.DockerListerFragment
 import com.dokeraj.androtainer.models.Kontainer
+import com.dokeraj.androtainer.models.KontainerFilterPref
 import com.dokeraj.androtainer.viewmodels.DockerListerViewModel
 import com.dokeraj.androtainer.viewmodels.MainStateEvent
+import kotlinx.android.synthetic.main.docker_card_item.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import android.R.attr.right
+
+import android.R.attr.left
+
+
+
 
 class DockerContainerAdapter(
     private var pContainerList: List<Kontainer>,
     private val baseUrl: String,
     private val jwt: String,
-    private val endpointId:Int,
+    private val endpointId: Int,
+    private val globalApp: GlobalApp,
     private val context: Context,
     private val frag: DockerListerFragment,
-    private val dataViewModel: DockerListerViewModel
+    private val dataViewModel: DockerListerViewModel,
 ) :
     RecyclerView.Adapter<DockerContainerAdapter.ContainerViewHolder>() {
 
@@ -61,6 +71,7 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter, currentItem.state, holder)
             }
             ContainerStateType.EXITED -> {
                 /** set style for stopped docker container */
@@ -75,6 +86,7 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter, currentItem.state, holder)
             }
             ContainerStateType.TRANSITIONING -> {
                 /** set style for container that is either starting or stopping */
@@ -89,6 +101,7 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter, currentItem.state, holder)
             }
             ContainerStateType.ERRORED -> {
                 /** set style for docker container that has received error from portainer api */
@@ -103,6 +116,7 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter, currentItem.state, holder)
             }
             ContainerStateType.CREATED -> {
                 /** set style for docker container that is in the created state */
@@ -117,13 +131,14 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter, currentItem.state, holder)
             }
         }
 
         holder.dockerButton.setOnClickListener {
             callStartStopContainer(currentItemIndex = position,
-                containerId =  currentItem.id,
-                actionType =  if (pContainerList[position].state == ContainerStateType.RUNNING) ContainerActionType.STOP else ContainerActionType.START)
+                containerId = currentItem.id,
+                actionType = if (pContainerList[position].state == ContainerStateType.RUNNING) ContainerActionType.STOP else ContainerActionType.START)
         }
 
         holder.cardHolderLayout.setOnClickListener {
@@ -135,7 +150,9 @@ class DockerContainerAdapter(
         }
 
         holder.cardHolderLayout.setOnLongClickListener {
-            val action = DockerListerFragmentDirections.actionDockerListerFragmentToDockerLogging(currentItem.id, currentItem.name)
+            val action = DockerListerFragmentDirections.actionDockerListerFragmentToDockerLogging(
+                currentItem.id,
+                currentItem.name)
             findNavController(frag).navigate(action)
             true
         }
@@ -156,14 +173,21 @@ class DockerContainerAdapter(
     }
 
     @ExperimentalCoroutinesApi
-    private fun callStartStopContainer(currentItemIndex: Int, containerId: String, actionType: ContainerActionType) {
+    private fun callStartStopContainer(
+        currentItemIndex: Int,
+        containerId: String,
+        actionType: ContainerActionType,
+    ) {
         val fullUrl = context.getString(R.string.StartStopContainer)
             .replace("{baseUrl}", baseUrl.removeSuffix("/"))
             .replace("{containerId}", containerId)
             .replace("{actionType}", actionType.name.toLowerCase())
             .replace("{endpointId}", endpointId.toString())
 
-        dataViewModel.setStateEvent(MainStateEvent.StartStopKontejneri(jwt = jwt, url = fullUrl, currentItem = currentItemIndex, containerActionType = actionType ))
+        dataViewModel.setStateEvent(MainStateEvent.StartStopKontejneri(jwt = jwt,
+            url = fullUrl,
+            currentItem = currentItemIndex,
+            containerActionType = actionType))
     }
 
     private fun setCardStyle(
@@ -219,5 +243,53 @@ class DockerContainerAdapter(
 
     fun areItemsInTransitioningState(): Boolean {
         return pContainerList.any { pCont -> pCont.state == ContainerStateType.TRANSITIONING }
+    }
+
+    private fun setVisibilityByFilter(
+        kontainerFilterPref: KontainerFilterPref,
+        holderState: ContainerStateType,
+        holder: ContainerViewHolder,
+    ) {
+        when (kontainerFilterPref) {
+            KontainerFilterPref.RUNNING -> when (holderState) {
+                ContainerStateType.CREATED -> showHideCard(true, holder)
+                ContainerStateType.RUNNING -> showHideCard(true, holder)
+                ContainerStateType.ERRORED -> showHideCard(false, holder)
+                ContainerStateType.EXITED -> showHideCard(false, holder)
+                ContainerStateType.TRANSITIONING -> showHideCard(true, holder)
+            }
+
+            KontainerFilterPref.TOTAL -> when (holderState) {
+                ContainerStateType.CREATED -> showHideCard(true, holder)
+                ContainerStateType.RUNNING -> showHideCard(true, holder)
+                ContainerStateType.ERRORED -> showHideCard(true, holder)
+                ContainerStateType.EXITED -> showHideCard(true, holder)
+                ContainerStateType.TRANSITIONING -> showHideCard(true, holder)
+            }
+
+            KontainerFilterPref.STOPPED_OR_ERRORED -> when (holderState) {
+                ContainerStateType.CREATED -> showHideCard(false, holder)
+                ContainerStateType.RUNNING -> showHideCard(false, holder)
+                ContainerStateType.ERRORED -> showHideCard(true, holder)
+                ContainerStateType.EXITED -> showHideCard(true, holder)
+                ContainerStateType.TRANSITIONING -> showHideCard(true, holder)
+            }
+        }
+    }
+
+    private fun showHideCard(showCard: Boolean, holder: ContainerViewHolder) {
+        if (showCard) {
+            holder.itemView.visibility = View.VISIBLE
+
+            val params = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            params.bottomMargin = 8
+
+            holder.itemView.layoutParams = params
+        } else {
+            holder.itemView.visibility = View.GONE
+            holder.itemView.layoutParams = RecyclerView.LayoutParams(0, 0)
+        }
     }
 }

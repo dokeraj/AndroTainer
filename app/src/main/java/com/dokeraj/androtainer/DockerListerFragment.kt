@@ -7,6 +7,7 @@ import android.text.util.Linkify
 import android.view.View
 import androidx.activity.addCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
@@ -19,6 +20,7 @@ import com.dokeraj.androtainer.adapter.DockerEndpointAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.ContainerStateType
 import com.dokeraj.androtainer.models.Kontainer
+import com.dokeraj.androtainer.models.KontainerFilterPref
 import com.dokeraj.androtainer.util.DataState
 import com.dokeraj.androtainer.viewmodels.DockerListerViewModel
 import com.dokeraj.androtainer.viewmodels.MainStateEvent
@@ -79,6 +81,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
                 globalVars.currentUser!!.currentEndpoint.id,
+                globalVars,
                 requireContext(), this, model)
         recycler_view.adapter = recyclerAdapter
         recycler_view.layoutManager = LinearLayoutManager(activity)
@@ -101,6 +104,48 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 tvAboutInfo.visibility = View.VISIBLE
                 btnDonate.visibility = View.VISIBLE
             }
+        }
+
+        // initialize the filtering
+        when (globalVars.appSettings!!.kontainerFilter) {
+            KontainerFilterPref.RUNNING -> filterContainers(recyclerAdapter,
+                globActivity,
+                clStatsRunning,
+                listOf(clStatsTotal, clStatsStopped),
+                KontainerFilterPref.RUNNING)
+            KontainerFilterPref.STOPPED_OR_ERRORED -> filterContainers(recyclerAdapter,
+                globActivity,
+                clStatsStopped,
+                listOf(clStatsTotal, clStatsRunning),
+                KontainerFilterPref.STOPPED_OR_ERRORED)
+            KontainerFilterPref.TOTAL -> filterContainers(recyclerAdapter,
+                globActivity,
+                clStatsTotal,
+                listOf(clStatsRunning, clStatsStopped),
+                KontainerFilterPref.TOTAL)
+        }
+
+        // container filtering
+        clStatsRunning.setOnClickListener {
+            filterContainers(recyclerAdapter,
+                globActivity,
+                clStatsRunning,
+                listOf(clStatsTotal, clStatsStopped),
+                KontainerFilterPref.RUNNING)
+        }
+        clStatsStopped.setOnClickListener {
+            filterContainers(recyclerAdapter,
+                globActivity,
+                clStatsStopped,
+                listOf(clStatsTotal, clStatsRunning),
+                KontainerFilterPref.STOPPED_OR_ERRORED)
+        }
+        clStatsTotal.setOnClickListener {
+            filterContainers(recyclerAdapter,
+                globActivity,
+                clStatsTotal,
+                listOf(clStatsRunning, clStatsStopped),
+                KontainerFilterPref.TOTAL)
         }
 
         btnDonate.setOnClickListener {
@@ -170,18 +215,21 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 /** below these is the logic for handling the idividual cards*/
                 is DataState.CardLoading -> {
                     recyclerAdapter.setItems(ds.data)
-                    recyclerAdapter.notifyItemChanged(ds.itemIndex)
+                    recyclerAdapter.notifyDataSetChanged()
+                    //recyclerAdapter.notifyItemChanged(ds.itemIndex)
                     setContainerStats(listOf(), true)
                 }
                 is DataState.CardSuccess -> {
                     swiperLayout.isRefreshing = false
                     recyclerAdapter.setItems(ds.data)
-                    recyclerAdapter.notifyItemChanged(ds.itemIndex)
+                    recyclerAdapter.notifyDataSetChanged()
+                    //recyclerAdapter.notifyItemChanged(ds.itemIndex)
                     setContainerStats(ds.data)
                 }
                 is DataState.CardError -> {
                     recyclerAdapter.setItems(ds.data)
-                    recyclerAdapter.notifyItemChanged(ds.itemIndex)
+                    recyclerAdapter.notifyDataSetChanged()
+                    //recyclerAdapter.notifyItemChanged(ds.itemIndex)
                     setContainerStats(ds.data)
                 }
             }
@@ -290,4 +338,21 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         }
     }
 
+    private fun filterContainers(
+        recyclerAdapter: DockerContainerAdapter,
+        globActivity: MainActiviy,
+        layoutToSelect: ConstraintLayout,
+        layoutsToDeselect: List<ConstraintLayout>,
+        filterPreference: KontainerFilterPref,
+    ) {
+        layoutToSelect.background = ContextCompat.getDrawable(requireContext(),
+            R.drawable.square_stats_shape_item_selected)
+
+        layoutsToDeselect.forEach {
+            it.background = ContextCompat.getDrawable(requireContext(),
+                R.drawable.square_stats_shape_item)
+        }
+        globActivity.setGlobalAppSettings(filterPreference)
+        recyclerAdapter.notifyDataSetChanged()
+    }
 }
