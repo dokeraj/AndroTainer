@@ -11,14 +11,14 @@ data class Credential(
     val jwtValidUntil: Long? = null,
     val lastActivity: Long? = null,
     val currentEndpoint: DockerEndpoint,
-    val listOfEndpoints: List<DockerEndpoint>
+    val listOfEndpoints: List<DockerEndpoint>,
 )
 
-class CredentialDeserializer: JsonDeserializer<Credential> {
+class CredentialDeserializer : JsonDeserializer<Credential> {
     override fun deserialize(
         json: JsonElement?,
         typeOfT: Type?,
-        context: JsonDeserializationContext?
+        context: JsonDeserializationContext?,
     ): Credential {
         json as JsonObject
 
@@ -30,23 +30,27 @@ class CredentialDeserializer: JsonDeserializer<Credential> {
         val lastActivity: Long? = json.get("lastActivity")?.asLong
 
         val currentEndpoint: DockerEndpoint = json.get("currentEndpoint")?.asJsonObject?.let {
-            val curEndpointGson = GsonBuilder().registerTypeAdapter(DockerEndpoint::class.java, DockerEndpointDeserializer()).create()
+            val curEndpointGson = GsonBuilder().registerTypeAdapter(DockerEndpoint::class.java,
+                DockerEndpointDeserializer()).create()
             curEndpointGson.fromJson(it, DockerEndpoint::class.java)
-        } ?: DockerEndpoint(id = -1, name= "INVALID ENDPOINT", "INVALID URL")
+        } ?: DockerEndpoint(id = -1, name = "INVALID ENDPOINT", "INVALID URL")
 
         val listOfEndpoints: Array<DockerEndpoint> = json.get("listOfEndpoints")?.asJsonArray?.let {
-            val curEndpointGson = GsonBuilder().registerTypeAdapter(DockerEndpoint::class.java, DockerEndpointDeserializer()).create()
+            val curEndpointGson = GsonBuilder().registerTypeAdapter(DockerEndpoint::class.java,
+                DockerEndpointDeserializer()).create()
             curEndpointGson.fromJson(it, Array<DockerEndpoint>::class.java)
-        } ?:  arrayOf<DockerEndpoint>()
+        } ?: arrayOf<DockerEndpoint>()
 
 
-        return Credential(serverUrl = serverUrl,
-        username = username,
-        pwd = pwd,
-        jwt = jwt,
-        jwtValidUntil = jwtValidUntil,
-        lastActivity = lastActivity,
-        currentEndpoint = currentEndpoint,
-        listOfEndpoints = listOfEndpoints.toList())
+        return Credential(
+            serverUrl = serverUrl,
+            username = username,
+            pwd = pwd,
+            jwt = jwt,
+            jwtValidUntil = jwtValidUntil,
+            lastActivity = lastActivity,
+            currentEndpoint = currentEndpoint,
+            listOfEndpoints = listOfEndpoints.toList(),
+        )
     }
 }

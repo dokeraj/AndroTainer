@@ -3,6 +3,7 @@ package com.dokeraj.androtainer.repositories
 import com.dokeraj.androtainer.interfaces.KontainerRetrofit
 import com.dokeraj.androtainer.models.*
 import com.dokeraj.androtainer.models.retrofit.NetworkMapper
+import com.dokeraj.androtainer.models.retrofit.PContainersResponse
 import com.dokeraj.androtainer.util.DataState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -14,8 +15,8 @@ class DockerListerRepo constructor(
     suspend fun getDocContainers(jwt: String?, url: String): Flow<DataState<List<Kontainer>>> = flow {
         emit(DataState.Loading)
         try {
-            val networkKontainers = kontainerRetrofit.listDockerContainers(jwt, url, 1)
-            val kontainers = networkMapper.mapFromEntityList(networkKontainers).sortedBy { it.name }
+            val networkKontainers: PContainersResponse = kontainerRetrofit.listDockerContainers(jwt, url, 1)
+            val kontainers: List<Kontainer> = networkMapper.mapFromEntityList(networkKontainers).sortedBy { it.name }
             emit(DataState.Success(kontainers))
         } catch (e: Exception) {
             emit(DataState.Error(e))

@@ -75,7 +75,7 @@
                     >
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/constraintLayout"
+                        android:id="@+id/clStatsTotal"
                         android:layout_width="100dp"
                         android:layout_height="60dp"
                         android:layout_marginStart="23dp"
@@ -141,7 +141,7 @@
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/constraintLayout3"
+                        android:id="@+id/clStatsRunning"
                         android:layout_width="100dp"
                         android:layout_height="60dp"
                         android:background="@drawable/square_stats_shape_item"
@@ -207,6 +207,7 @@
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/clStatsStopped"
                         android:layout_width="100dp"
                         android:layout_height="60dp"
                         android:layout_marginEnd="23dp"
