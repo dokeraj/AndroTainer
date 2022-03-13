@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.fragment_logging.*
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
+import java.io.Reader
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -174,7 +175,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         baseUrl: String,
         containerId: String,
         jwt: String,
-        endpointId:Int,
+        endpointId: Int,
         numOfRows: Int,
         useTimestamp: Boolean,
     ) {
@@ -182,15 +183,16 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
             body: ResponseBody?,
         ) {
             if (body != null) {
+                val regexANSI = "\u001B\\[[;\\d]*m".toRegex()
+                val regNoPrintable = "\\p{C}".toRegex()
 
-                val oo = String(body.bytes(), Charsets.UTF_8)
+                val charReader: Reader = body.charStream()
 
-                val kraj = getRegex().fold(oo) { acc, i ->
-                    acc.replace(Regex(i), "")
-                }
+                val lines: List<String> = charReader.readLines().map { x ->
+                    val noANSI = regexANSI.replace(x, "")
+                    val noPrintable = regNoPrintable.replace(noANSI, "")
 
-                val lines: List<String> = kraj.split("\n").map { x ->
-                    val fixedLine = x.drop(1)
+                    val fixedLine = noPrintable.drop(1)
 
                     val timeFormatted = if (chpTimestamp.isChecked) {
                         val instant: Instant? = try {
@@ -212,6 +214,8 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
                 val logItems: List<LogItem> = lines.map { line ->
                     LogItem(line)
                 }
+
+                charReader.close()
 
                 rvLogging.adapter = LoggingAdapter(logItems)
                 rvLogging.layoutManager = LinearLayoutManager(activity)
@@ -298,24 +302,5 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
             tvLogError.visibility = View.GONE
             rvLogging.visibility = View.VISIBLE
         }
-    }
-
-    private fun getRegex(): List<String> {
-        // for now we're only using "\\u0000" and "\\u0001" characters
-        val regulars: List<String> = (0..2).map { x ->
-            val padded = x.toString().padStart(2, '0')
-            "\\u00${padded}"
-        }
-
-        val letters = listOf("A", "B", "C", "D", "E", "F")
-
-        // we're not using the special characters
-        val specials: List<String> = listOf(1).flatMap { num ->
-            letters.map { spec ->
-                "\\u00${num}${spec}"
-            }
-        }
-
-        return regulars //+ specials
     }
 }
