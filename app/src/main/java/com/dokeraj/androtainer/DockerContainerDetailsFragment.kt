@@ -108,6 +108,7 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
 
             model.setStateEvent(MainStateEvent.DeleteContaier(globalVars.currentUser!!.jwt!!,
                 fullUrl,
+                globalVars.currentUser!!.isUsingApiKey,
                 selectedContainer))
 
             true

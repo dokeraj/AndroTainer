@@ -3,7 +3,7 @@ package com.dokeraj.androtainer.viewmodels
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
-import com.dokeraj.androtainer.models.*
+import com.dokeraj.androtainer.models.Kontainer
 import com.dokeraj.androtainer.repositories.DockerListerRepo
 import com.dokeraj.androtainer.util.DataState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,7 +27,9 @@ class HomeFragmentViewModel
         viewModelScope.launch {
             when (homeMainStateEvent) {
                 is HomeMainStateEvent.GetosKontejneri ->
-                    dockerListerRepo.getDocContainers(homeMainStateEvent.jwt, homeMainStateEvent.url)
+                    dockerListerRepo.getDocContainers(homeMainStateEvent.jwt,
+                        homeMainStateEvent.url,
+                        homeMainStateEvent.isUsingApiKey)
                         .onEach { dataState ->
                             _dataState.value = dataState
                         }.launchIn(viewModelScope)
@@ -37,5 +39,6 @@ class HomeFragmentViewModel
 }
 
 sealed class HomeMainStateEvent {
-    data class GetosKontejneri(val jwt: String?, val url: String) : HomeMainStateEvent()
+    data class GetosKontejneri(val jwt: String?, val url: String, val isUsingApiKey: Boolean) :
+        HomeMainStateEvent()
 }

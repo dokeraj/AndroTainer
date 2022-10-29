@@ -28,7 +28,7 @@ class DockerListerViewModel
         viewModelScope.launch {
             when (mainStateEvent) {
                 is MainStateEvent.GetKontejneri ->
-                    dockerListerRepo.getDocContainers(mainStateEvent.jwt, mainStateEvent.url)
+                    dockerListerRepo.getDocContainers(mainStateEvent.jwt, mainStateEvent.url, mainStateEvent.isUsingApiKey)
                         .onEach { dlDataState ->
                             when (dlDataState) {
                                 is DataState.Success -> {
@@ -47,7 +47,7 @@ class DockerListerViewModel
 
                 is MainStateEvent.StartStopKontejneri -> {
                     dockerListerRepo.startStopDokerContainer(mainStateEvent.jwt,
-                        mainStateEvent.url, mainStateEvent.currentItem)
+                        mainStateEvent.url,mainStateEvent.isUsingApiKey, mainStateEvent.currentItem)
                         .onEach { ssDataState ->
                             when (ssDataState) {
 
@@ -112,6 +112,7 @@ class DockerListerViewModel
                 is MainStateEvent.DeleteContaier -> {
                     dockerListerRepo.deleteContainer(mainStateEvent.jwt,
                         mainStateEvent.url,
+                        mainStateEvent.isUsingApiKey,
                         mainStateEvent.selectedItem)
                         .onEach { ssState ->
                             when (ssState) {
@@ -152,17 +153,18 @@ class DockerListerViewModel
 }
 
 sealed class MainStateEvent {
-    data class GetKontejneri(val jwt: String?, val url: String) : MainStateEvent()
+    data class GetKontejneri(val jwt: String?, val url: String, val isUsingApiKey: Boolean) : MainStateEvent()
     data class StartStopKontejneri(
         val jwt: String?,
         val url: String,
+        val isUsingApiKey:Boolean,
         val currentItem: Int,
         val containerActionType: ContainerActionType,
     ) : MainStateEvent()
 
     data class InitializeView(val lista: List<Kontainer>) : MainStateEvent()
 
-    data class DeleteContaier(val jwt: String?, val url: String, val selectedItem: Kontainer) :
+    data class DeleteContaier(val jwt: String?, val url: String, val isUsingApiKey: Boolean, val selectedItem: Kontainer) :
         MainStateEvent()
 
     object SetNone : MainStateEvent()

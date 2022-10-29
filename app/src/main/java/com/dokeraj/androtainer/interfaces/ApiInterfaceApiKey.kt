@@ -10,7 +10,7 @@ import retrofit2.http.*
 interface ApiInterfaceApiKey:MasterInter {
     @Headers("Content-Type: application/octet-stream")
     @GET
-    fun getStatus(@Url fullPath: String): Call<ResponseBody>
+    fun getStatus(@Url fullPath: String,@Header("X-API-Key") auth: String): Call<ResponseBody>
 
     @Headers("Content-Type: application/octet-stream")
     @GET

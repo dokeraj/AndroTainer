@@ -23,27 +23,4 @@ interface MasterInter {
         tail: Int,
         timestamps: Int,
     ): Call<ResponseBody>
-
-    @GET
-    abstract suspend fun listDockerContainers(
-        auth: String?,
-        fullPath: String,
-        paramAll: Int,
-    ): PContainersResponse
-
-    @POST
-    abstract suspend fun startStopContainer(
-       auth: String?,
-       fullPath: String,
-    ): Response<Unit>
-
-    @DELETE
-    abstract suspend fun deleteDockerContainer(
-       auth: String?,
-        fullPath: String,
-        force: Boolean,
-        deleteVolumes: Int,
-    ): Response<Unit>
-
-
 }

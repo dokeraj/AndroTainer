@@ -132,7 +132,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             btnLoginState.changeBtnState(false)
             callGetContainers(globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
-                globalVars.currentUser!!.currentEndpoint.id)
+                globalVars.currentUser!!.currentEndpoint.id,globalVars.currentUser!!.isUsingApiKey)
         } else if (globActivity.hasJwt() && (!globActivity.isJwtValid() || globActivity.isUserUsingApiKey())) {
             btnLoginState.changeBtnState(false)
             if (globActivity.isUserUsingApiKey())
@@ -175,13 +175,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         lgnBtn.setOnClickListener {
             disableDrawerSwipe = true
             btnLoginState.changeBtnState(false)
-            if (swUseApiKey.isChecked){
+            if (swUseApiKey.isChecked) {
                 authenticateApi(etUrl.text.toString(),
                     etApiKey.text.toString(),
                     btnLoginState)
-            }
-
-            else if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches() && (etUrl.text.toString()
+            } else if (Patterns.WEB_URL.matcher(etUrl.text.toString())
+                    .matches() && (etUrl.text.toString()
                     .toLowerCase().startsWith("http") || etUrl.text.toString().toLowerCase()
                     .startsWith("https"))
             ) {
@@ -289,16 +288,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         apiKey: String,
         btnLoginState: BtnLogin,
     ) {
+        println("tuuutututuutututututuuttu")
         val fullPath =
             getString(R.string.status).replace("{baseUrl}", baseUrl.removeSuffix("/"))
         val api = RetrofitInstance.retrofitInstance!!.create(ApiInterfaceApiKey::class.java)
-        api.getStatus(fullPath)
+        api.getStatus(fullPath, apiKey)
             .enqueue(object : retrofit2.Callback<ResponseBody> {
                 override fun onResponse(
                     call: Call<ResponseBody>,
                     response: Response<ResponseBody>,
                 ) {
+                    println("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS: ${response.code()}")
                     if (response.code() == 200) {
+                        println("XXXXXXXXXXXXXXXXXXX: ${response.body()}")
                         val usr = apiKey.take(3) + ".." + apiKey.takeLast(3)
                         getEndpointId(baseUrl = baseUrl,
                             usr = usr,
@@ -308,6 +310,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             jwtValidUntil = 0L,
                             isUsingApiKey = true)
                     } else {
+                        println("SO E PROBLEMO: ${response.body()}")
                         showResponseSnack(response.code().toString(), btnLoginState)
                     }
                 }
@@ -376,7 +379,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                                 isUsingApiKey = isUsingApiKey),
                                 true)
 
-                            callGetContainers(baseUrl, jwt, dockerEndpoints.first!!.id)
+                            callGetContainers(baseUrl, jwt, dockerEndpoints.first!!.id, isUsingApiKey)
                         } else {
                             onLoginError(btnLoginState,
                                 "There are no Portainer endpoints listed!")
@@ -394,12 +397,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     }
 
-    private fun callGetContainers(url: String, jwt: String, endpointId: Int) {
+    private fun callGetContainers(url: String, jwt: String, endpointId: Int, isUsingApiKey: Boolean) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
                 .replace("{endpointId}", endpointId.toString())
 
-        model.setStateEvent(HomeMainStateEvent.GetosKontejneri(jwt = jwt, url = fullUrl))
+        model.setStateEvent(HomeMainStateEvent.GetosKontejneri(jwt = jwt, url = fullUrl, isUsingApiKey = isUsingApiKey))
     }
 
     fun showResponseSnack(responseStatus: String, btnLoginState: BtnLogin) {

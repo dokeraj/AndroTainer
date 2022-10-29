@@ -37,6 +37,7 @@ class DockerContainerAdapter(
     private var pContainerList: List<Kontainer>,
     private val baseUrl: String,
     private val jwt: String,
+    private val isUsingApiKey: Boolean,
     private val endpointId: Int,
     private val globalApp: GlobalApp,
     private val context: Context,
@@ -186,6 +187,7 @@ class DockerContainerAdapter(
 
         dataViewModel.setStateEvent(MainStateEvent.StartStopKontejneri(jwt = jwt,
             url = fullUrl,
+            isUsingApiKey = isUsingApiKey,
             currentItem = currentItemIndex,
             containerActionType = actionType))
     }
