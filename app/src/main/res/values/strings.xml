@@ -17,6 +17,7 @@
      URLs to portainer
      -->
     <string name="authenticate">{baseUrl}/api/auth</string>
+    <string name="status">{baseUrl}/api/status/version</string>
     <string name="getEnpointId">{baseUrl}/api/endpoints</string>
     <string name="getDockerContainers">{baseUrl}/api/endpoints/{endpointId}/docker/containers/json</string>
     <string name="StartStopContainer">{baseUrl}/api/endpoints/{endpointId}/docker/containers/{containerId}/{actionType}</string>

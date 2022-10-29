@@ -218,6 +218,11 @@ class MainActiviy : AppCompatActivity() {
         return global.currentUser?.jwt != null
     }
 
+    fun isUserUsingApiKey(): Boolean {
+        val global = (this.application as GlobalApp)
+        return global.currentUser?.isUsingApiKey == true
+    }
+
     private fun initializeGlobalVar(): Unit {
         val sharedPrefs = this.getSharedPreferences(SP_DB, AppCompatActivity.MODE_PRIVATE)
         val usersStr: String? = sharedPrefs?.getString(USERS_CREDENTIALS, null)

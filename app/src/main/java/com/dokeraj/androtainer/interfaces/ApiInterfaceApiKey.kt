@@ -7,16 +7,16 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
 
-interface ApiInterface:MasterInter {
-    //@Headers("Content-Type: application/json")
-    @POST
-    fun loginRequest(@Body userData: UserCredentials, @Url fullPath: String): Call<Jwt>
+interface ApiInterfaceApiKey:MasterInter {
+    @Headers("Content-Type: application/octet-stream")
+    @GET
+    fun getStatus(@Url fullPath: String): Call<ResponseBody>
 
     @Headers("Content-Type: application/octet-stream")
     @GET
     override fun getLog(
         @Url fullPath: String,
-        @Header("Authorization") auth: String,
+        @Header("X-API-Key") auth: String,
         @Query("since") since: Int,
         @Query("stderr") stderr: Int,
         @Query("stdout") stdout: Int,
@@ -29,8 +29,9 @@ interface ApiInterface:MasterInter {
     @GET
     override fun getEnpointId(
         @Url fullPath: String,
-        @Header("Authorization") auth: String,
+        @Header("X-API-Key") auth: String,
         @Query("limit") limit: Int,
         @Query("start") start: Int,
     ): Call<PEndpointsResponse>
+
 }

@@ -11,8 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.adapter.LoggingAdapter
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.interfaces.ApiInterface
+import com.dokeraj.androtainer.interfaces.ApiInterfaceApiKey
 import com.dokeraj.androtainer.models.LogItem
-import com.dokeraj.androtainer.network.RetrofitBinaryInstance
+import com.dokeraj.androtainer.network.RetrofitInstance
 import com.dokeraj.androtainer.util.LogTimer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_logging.*
@@ -53,6 +54,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         val baseUrl = globalVars.currentUser!!.serverUrl
         val token: String = globalVars.currentUser!!.jwt!!
         val endpointId: Int = globalVars.currentUser!!.currentEndpoint.id
+        val isUsingApiKey: Boolean = globalVars.currentUser!!.isUsingApiKey
 
         // pull from global var and setup the chips state
         initChipsState(globalVars)
@@ -63,14 +65,16 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         val timer = LogTimer()
 
         if (chpAutoRefresh.isChecked) {
-            timer.startTimer(this, baseUrl, endpointId, contId, token, globalVars)
+            timer.startTimer(this, baseUrl, endpointId, contId, token, globalVars, isUsingApiKey)
         } else {
             getLogFromRetro(baseUrl,
                 contId,
                 token,
                 endpointId,
                 globalVars.logSettings?.linesCount ?: 1000,
-                chpTimestamp.isChecked)
+                chpTimestamp.isChecked,
+                isUsingApiKey
+            )
         }
 
         srlLogging.setOnRefreshListener {
@@ -80,7 +84,8 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
                     token,
                     endpointId,
                     globalVars.logSettings?.linesCount ?: 1000,
-                    chpTimestamp.isChecked)
+                    chpTimestamp.isChecked,
+                    isUsingApiKey)
             }
         }
 
@@ -93,7 +98,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
 
             if (chpAutoRefresh.isChecked) {
                 srlLogging.isEnabled = false
-                timer.startTimer(this, baseUrl, endpointId, contId, token, globalVars)
+                timer.startTimer(this, baseUrl, endpointId, contId, token, globalVars, isUsingApiKey)
             } else {
                 srlLogging.isEnabled = true
                 timer.cancelTimer()
@@ -178,6 +183,7 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
         endpointId: Int,
         numOfRows: Int,
         useTimestamp: Boolean,
+        isUsingApiKey: Boolean,
     ) {
         fun readFromStream(
             body: ResponseBody?,
@@ -243,9 +249,15 @@ class DockerLogging : Fragment(R.layout.fragment_logging) {
                 .replace("{baseUrl}", baseUrl.removeSuffix("/"))
                 .replace("{containerId}", containerId)
                 .replace("{endpointId}", endpointId.toString())
-        val api = RetrofitBinaryInstance.retrofitInstance!!.create(ApiInterface::class.java)
 
-        api.getLog(fullPath, "Bearer ${jwt}", 0, 1, 1, numOfRows, if (useTimestamp) 1 else 0)
+        val (api, authType) = if (!isUsingApiKey) {
+            Pair(RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java),
+                "Bearer ${jwt}")
+        } else {
+            Pair(RetrofitInstance.retrofitInstance!!.create(ApiInterfaceApiKey::class.java), jwt)
+        }
+
+        api.getLog(fullPath, authType, 0, 1, 1, numOfRows, if (useTimestamp) 1 else 0)
             .enqueue(object : retrofit2.Callback<ResponseBody> {
                 override fun onResponse(
                     call: Call<ResponseBody>,

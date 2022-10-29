@@ -8,11 +8,9 @@
     android:background="@color/dis4"
     android:fitsSystemWindows="true"
     tools:context=".HomeFragment"
-    tools:openDrawer="start">
+    tools:openDrawer="end">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/gradient_login"
@@ -36,7 +34,7 @@
             android:layout_below="@+id/imageView3"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
-            android:layout_marginTop="75dp"
+            android:layout_marginTop="50dp"
             android:width="300dip"
             android:backgroundTint="#38daff"
             android:drawableStart="@drawable/ic_web_link"
@@ -48,49 +46,102 @@
             android:textColor="@color/loginText"
             android:textColorHint="@color/loginDisabledText" />
 
-        <EditText
-            android:id="@+id/etUser"
-            android:layout_width="wrap_content"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/conApiKey"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/etUrl"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="25dp"
-            android:width="250dip"
-            android:backgroundTint="#38daff"
-            android:drawableStart="@drawable/ic_person_login"
-            android:fontFamily="sans-serif-light"
-            android:gravity="center"
-            android:hint="UserName"
-            android:inputType="textPersonName"
-            android:textColor="@color/loginText"
-            android:textColorHint="@color/loginDisabledText" />
+            android:visibility="gone"
+            >
 
-        <EditText
-            android:id="@+id/etPass"
+            <EditText
+                android:id="@+id/etApiKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:width="250dip"
+                android:layout_marginTop="58dp"
+                android:backgroundTint="#38daff"
+                android:drawableStart="@drawable/ic_fingerprint"
+                android:fontFamily="sans-serif-light"
+                android:hint="Api Key"
+                android:inputType="textPassword"
+                android:textColor="@color/loginText"
+                android:textColorHint="@color/loginDisabledText"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:id="@+id/lnLayUsrPwd"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_below="@+id/etUrl"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="25dp"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <EditText
+                android:id="@+id/etUser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:width="250dip"
+                android:backgroundTint="#38daff"
+                android:drawableStart="@drawable/ic_person_login"
+                android:fontFamily="sans-serif-light"
+                android:hint="UserName"
+                android:inputType="textPersonName"
+                android:textColor="@color/loginText"
+                android:textColorHint="@color/loginDisabledText" />
+
+
+            <EditText
+                android:id="@+id/etPass"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="25dp"
+                android:width="250dip"
+                android:backgroundTint="#38daff"
+                android:drawableStart="@drawable/ic_padlock"
+                android:fontFamily="sans-serif-light"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:textColor="@color/loginText"
+                android:textColorHint="@color/loginDisabledText" />
+
+        </LinearLayout>
+
+        <Switch
+            android:id="@+id/swUseApiKey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/etUser"
+            android:layout_below="@+id/lnLayUsrPwd"
+            android:layout_gravity="center"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="25dp"
-            android:width="250dip"
+            android:layout_marginTop="20dp"
             android:backgroundTint="#38daff"
-            android:drawableStart="@drawable/ic_padlock"
-            android:fontFamily="sans-serif-light"
-            android:gravity="center"
-            android:hint="Password"
-            android:inputType="textPassword"
-            android:textColor="@color/loginText"
-            android:textColorHint="@color/loginDisabledText" />
+            android:fontFamily="sans-serif"
+            android:text="Use Api Key"
+            android:textColor="@color/loginDisabledText" />
 
         <include
             android:id="@+id/lgnBtn"
             layout="@layout/login_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/etPass"
+            android:layout_below="@+id/swUseApiKey"
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="45dp" />
+
 
     </RelativeLayout>
 
