@@ -142,6 +142,14 @@ class DockerContainerAdapter(
                 actionType = if (pContainerList[position].state == ContainerStateType.RUNNING) ContainerActionType.STOP else ContainerActionType.START)
         }
 
+        holder.dockerButton.setOnLongClickListener{
+            callRestartContainer(currentItemIndex = position,
+                containerId = currentItem.id,
+                actionType = if (pContainerList[position].state == ContainerStateType.RUNNING) ContainerActionType.STOP else ContainerActionType.START)
+
+            true
+        }
+
         holder.cardHolderLayout.setOnClickListener {
             dataViewModel.setStateEvent(MainStateEvent.SetNone)
             val action =
@@ -183,6 +191,24 @@ class DockerContainerAdapter(
             .replace("{baseUrl}", baseUrl.removeSuffix("/"))
             .replace("{containerId}", containerId)
             .replace("{actionType}", actionType.name.toLowerCase())
+            .replace("{endpointId}", endpointId.toString())
+
+        dataViewModel.setStateEvent(MainStateEvent.StartStopKontejneri(jwt = jwt,
+            url = fullUrl,
+            isUsingApiKey = isUsingApiKey,
+            currentItem = currentItemIndex,
+            containerActionType = actionType))
+    }
+
+    @ExperimentalCoroutinesApi
+    private fun callRestartContainer(
+        currentItemIndex: Int,
+        containerId: String,
+        actionType: ContainerActionType,
+    ) {
+        val fullUrl = context.getString(R.string.RestartContainer)
+            .replace("{baseUrl}", baseUrl.removeSuffix("/"))
+            .replace("{containerId}", containerId)
             .replace("{endpointId}", endpointId.toString())
 
         dataViewModel.setStateEvent(MainStateEvent.StartStopKontejneri(jwt = jwt,

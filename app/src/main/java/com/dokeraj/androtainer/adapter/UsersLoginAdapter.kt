@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Switch
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.drawerlayout.widget.DrawerLayout
@@ -11,7 +12,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dokeraj.androtainer.MainActiviy
 import com.dokeraj.androtainer.R
 import com.dokeraj.androtainer.models.Credential
+import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.users_card_item.view.*
+import org.w3c.dom.Text
 
 class UsersLoginAdapter(
     private val credentials: List<Credential>,
@@ -34,15 +37,28 @@ class UsersLoginAdapter(
 
         holder.serverUrl.text = currentItem.serverUrl
         holder.username.text = currentItem.username
+        if (currentItem.isUsingApiKey)
+            holder.userIsApiKey.visibility = View.VISIBLE
+        else
+            holder.userIsApiKey.visibility = View.GONE
 
         holder.cardLayout.setOnClickListener {
             val etUrl: TextView = homeView.findViewById(R.id.etUrl)
             val etUser: TextView = homeView.findViewById(R.id.etUser)
             val etPass: TextView = homeView.findViewById(R.id.etPass)
+            val switchApiKey: Switch = homeView.findViewById(R.id.swUseApiKey)
+            val etApiKey: TextView = homeView.findViewById(R.id.etApiKey)
 
             etUrl.text = currentItem.serverUrl
-            etUser.text = currentItem.username
-            etPass.text = currentItem.pwd
+
+            if (currentItem.isUsingApiKey) {
+                switchApiKey.isChecked = true
+                etApiKey.text = currentItem.jwt
+            } else {
+                switchApiKey.isChecked = false
+                etUser.text = currentItem.username
+                etPass.text = currentItem.pwd
+            }
 
             mainActiviy.showGenericSnack(context,homeView,"Loaded `${currentItem.username}` credentials!", R.color.blue_main, R.color.dis3)
             usersDrawerLayout.close()
@@ -55,5 +71,6 @@ class UsersLoginAdapter(
         val serverUrl: TextView = itemView.tvServerUrl
         val username: TextView = itemView.tvCardUsername
         val cardLayout: ConstraintLayout = itemView.usersCardHolderLayout
+        val userIsApiKey: TextView = itemView.tvIsUserApiKey
     }
 }

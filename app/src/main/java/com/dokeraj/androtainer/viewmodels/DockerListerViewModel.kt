@@ -104,6 +104,65 @@ class DockerListerViewModel
                         }.launchIn(viewModelScope)
                 }
 
+                is MainStateEvent.RestartKontejneri -> {
+                    dockerListerRepo.restartContainer(mainStateEvent.jwt,
+                        mainStateEvent.url,mainStateEvent.isUsingApiKey, mainStateEvent.currentItem)
+                        .onEach { ssDataState ->
+                            when (ssDataState) {
+
+                                is DataState.CardLoading -> {
+                                    /** change the state and status to transitioning */
+                                    val modifiedKontainers: List<Kontainer> =
+                                        currentList.mapIndexed { ind, itemToChange ->
+                                            if (ind == mainStateEvent.currentItem)
+                                                itemToChange.copy(status = if (mainStateEvent.containerActionType == ContainerActionType.START) "Starting" else "Exiting",
+                                                    state = ContainerStateType.TRANSITIONING)
+                                            else
+                                                itemToChange
+                                        }
+
+                                    currentList = modifiedKontainers
+                                    /** result back to View */
+                                    _dataState.value = DataState.CardLoading(modifiedKontainers,
+                                        ssDataState.itemIndex)
+                                }
+
+                                is DataState.CardSuccess -> {
+                                    val modifiedKontainers: List<Kontainer> =
+                                        currentList.mapIndexed { ind, itemToChange ->
+                                            if (ind == mainStateEvent.currentItem)
+                                                itemToChange.copy(status = if (mainStateEvent.containerActionType == ContainerActionType.START) "Started just now" else "Exited just now",
+                                                    state = if (mainStateEvent.containerActionType == ContainerActionType.START) ContainerStateType.RUNNING else ContainerStateType.EXITED)
+                                            else
+                                                itemToChange
+                                        }
+
+                                    currentList = modifiedKontainers
+                                    /** result back to View */
+                                    _dataState.value = DataState.CardSuccess(
+                                        modifiedKontainers, ssDataState.itemIndex)
+                                }
+                                is DataState.CardError -> {
+                                    val modifiedKontainers: List<Kontainer> =
+                                        currentList.mapIndexed { ind, curItem ->
+                                            if (ind == mainStateEvent.currentItem)
+                                                curItem.copy(status = "Refresh by swiping down",
+                                                    state = ContainerStateType.ERRORED)
+                                            else
+                                                curItem
+                                        }
+
+                                    currentList = modifiedKontainers
+                                    /** result back to View */
+                                    _dataState.value = DataState.CardError(modifiedKontainers,
+                                        mainStateEvent.currentItem)
+                                }
+                                else -> { }
+                            }
+
+                        }.launchIn(viewModelScope)
+                }
+
                 is MainStateEvent.InitializeView -> {
                     currentList = mainStateEvent.lista
                     _dataState.value = DataState.Success(mainStateEvent.lista)
@@ -160,6 +219,14 @@ sealed class MainStateEvent {
         val isUsingApiKey:Boolean,
         val currentItem: Int,
         val containerActionType: ContainerActionType,
+    ) : MainStateEvent()
+
+    data class RestartKontejneri(
+        val jwt: String?,
+        val url: String,
+        val isUsingApiKey:Boolean,
+        val currentItem: Int,
+        val containerActionType: ContainerActionType
     ) : MainStateEvent()
 
     data class InitializeView(val lista: List<Kontainer>) : MainStateEvent()

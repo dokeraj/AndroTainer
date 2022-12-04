@@ -51,6 +51,25 @@ class DockerListerRepo constructor(
         }
     }
 
+    suspend fun restartContainer(
+        jwt: String?,
+        url: String,
+        isUsingApiKey: Boolean,
+        currentItemIndex: Int,
+    ): Flow<DataState<List<Kontainer>>> = flow {
+        emit(DataState.CardLoading(listOf<Kontainer>(), currentItemIndex))
+        try {
+            val so = if (!isUsingApiKey) kontainerRetrofit.restartContainer(jwt,
+                url) else kontainerRetrofit.restartContainerApiKey(jwt, url)
+            if (so.code() != 204) {
+                emit(DataState.CardError(listOf<Kontainer>(), currentItemIndex))
+            } else
+                emit(DataState.CardSuccess(listOf<Kontainer>(), currentItemIndex))
+        } catch (e: Exception) {
+            emit(DataState.CardError(listOf<Kontainer>(), currentItemIndex))
+        }
+    }
+
     suspend fun deleteContainer(
         jwt: String?,
         url: String,

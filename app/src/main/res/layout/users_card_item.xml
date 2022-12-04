@@ -72,33 +72,46 @@
             android:id="@+id/tvLoggedUserWarrning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/ubuntu"
-            android:layout_marginTop="5dp"
-            android:paddingBottom="9dp"
             android:layout_marginStart="16dp"
-            android:textSize="16sp"
-            android:visibility="gone"
+            android:layout_marginTop="5dp"
+            android:fontFamily="@font/ubuntu"
+            android:paddingBottom="9dp"
             android:text="This is the currently logged in user!"
             android:textColor="@color/blue_main"
+            android:textSize="16sp"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvCardUsername"
-            />
+            app:layout_constraintTop_toBottomOf="@+id/tvCardUsername" />
+
+        <TextView
+            android:id="@+id/tvIsUserApiKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="5dp"
+            android:fontFamily="@font/ubuntu"
+            android:paddingBottom="9dp"
+            android:text="API Key User"
+            android:textColor="@color/orange_warning"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvLoggedUserWarrning" />
 
         <Button
             android:id="@+id/btnUserDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:backgroundTint="@color/disRed"
+            android:layout_marginBottom="10dp"
             android:width="110dp"
+            android:backgroundTint="@color/disRed"
             android:text="Delete"
             android:textColor="@color/disText2"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="10dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvLoggedUserWarrning"
-            />
+            app:layout_constraintTop_toBottomOf="@+id/tvIsUserApiKey" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

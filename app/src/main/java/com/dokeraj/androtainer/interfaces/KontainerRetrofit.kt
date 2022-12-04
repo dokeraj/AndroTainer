@@ -31,7 +31,17 @@ interface KontainerRetrofit {
         @Url fullPath: String,
     ): Response<Unit>
 
+    @POST
+    suspend fun restartContainer(
+        @Header("Authorization") auth: String?,
+        @Url fullPath: String,
+    ): Response<Unit>
 
+    @POST
+    suspend fun restartContainerApiKey(
+        @Header("X-API-Key") auth: String?,
+        @Url fullPath: String,
+    ): Response<Unit>
 
     @DELETE
     suspend fun deleteDockerContainer(

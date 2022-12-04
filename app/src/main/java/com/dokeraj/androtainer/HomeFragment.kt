@@ -123,23 +123,25 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         globalVars.currentUser?.serverUrl?.let { etUrl.setText(it) }
         globalVars.currentUser?.username?.let { etUser.setText(it) }
         globalVars.currentUser?.pwd?.let { etPass.setText(it) }
-        globalVars.currentUser?.isUsingApiKey?.let { swUseApiKey.isChecked = it }
+        globalVars.currentUser?.isUsingApiKey?.let { useApi ->
+            swUseApiKey.isChecked = useApi
+            globalVars.currentUser?.jwt?.let { etApiKey.setText(it) }
+        }
 
 
-
-
-        if (globActivity.hasJwt() && (globActivity.isJwtValid() || globActivity.isUserUsingApiKey())) {
+        if (globActivity.hasJwt() && (globActivity.isJwtValid())) {
             btnLoginState.changeBtnState(false)
             callGetContainers(globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
-                globalVars.currentUser!!.currentEndpoint.id,globalVars.currentUser!!.isUsingApiKey)
-        } else if (globActivity.hasJwt() && (!globActivity.isJwtValid() || globActivity.isUserUsingApiKey())) {
+                globalVars.currentUser!!.currentEndpoint.id, globalVars.currentUser!!.isUsingApiKey)
+        } else if (globActivity.hasJwt() && (!globActivity.isJwtValid() && !globActivity.isUserUsingApiKey())) {
             btnLoginState.changeBtnState(false)
-            if (globActivity.isUserUsingApiKey())
+            if (globActivity.isUserUsingApiKey()) {
+                println("u appciciciciciciicicic")
                 authenticateApi(etUrl.text.toString(),
                     etApiKey.text.toString(),
                     btnLoginState)
-            else
+            } else
                 authenticate(etUrl.text.toString(),
                     etUser.text.toString(),
                     etPass.text.toString(),
@@ -288,7 +290,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         apiKey: String,
         btnLoginState: BtnLogin,
     ) {
-        println("tuuutututuutututututuuttu")
         val fullPath =
             getString(R.string.status).replace("{baseUrl}", baseUrl.removeSuffix("/"))
         val api = RetrofitInstance.retrofitInstance!!.create(ApiInterfaceApiKey::class.java)
@@ -298,9 +299,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     call: Call<ResponseBody>,
                     response: Response<ResponseBody>,
                 ) {
-                    println("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS: ${response.code()}")
                     if (response.code() == 200) {
-                        println("XXXXXXXXXXXXXXXXXXX: ${response.body()}")
                         val usr = apiKey.take(3) + ".." + apiKey.takeLast(3)
                         getEndpointId(baseUrl = baseUrl,
                             usr = usr,
@@ -310,7 +309,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             jwtValidUntil = 0L,
                             isUsingApiKey = true)
                     } else {
-                        println("SO E PROBLEMO: ${response.body()}")
                         showResponseSnack(response.code().toString(), btnLoginState)
                     }
                 }
@@ -379,7 +377,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                                 isUsingApiKey = isUsingApiKey),
                                 true)
 
-                            callGetContainers(baseUrl, jwt, dockerEndpoints.first!!.id, isUsingApiKey)
+                            callGetContainers(baseUrl,
+                                jwt,
+                                dockerEndpoints.first!!.id,
+                                isUsingApiKey)
                         } else {
                             onLoginError(btnLoginState,
                                 "There are no Portainer endpoints listed!")
@@ -397,12 +398,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     }
 
-    private fun callGetContainers(url: String, jwt: String, endpointId: Int, isUsingApiKey: Boolean) {
+    private fun callGetContainers(
+        url: String,
+        jwt: String,
+        endpointId: Int,
+        isUsingApiKey: Boolean,
+    ) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
                 .replace("{endpointId}", endpointId.toString())
 
-        model.setStateEvent(HomeMainStateEvent.GetosKontejneri(jwt = jwt, url = fullUrl, isUsingApiKey = isUsingApiKey))
+        model.setStateEvent(HomeMainStateEvent.GetosKontejneri(jwt = jwt,
+            url = fullUrl,
+            isUsingApiKey = isUsingApiKey))
     }
 
     fun showResponseSnack(responseStatus: String, btnLoginState: BtnLogin) {

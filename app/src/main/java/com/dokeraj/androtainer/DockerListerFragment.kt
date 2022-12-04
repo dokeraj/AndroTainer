@@ -271,7 +271,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     globalVars.currentUser!!.currentEndpoint.id)
             }
         } else {
-            logout(globActivity, "Session has expired! Please log in again.")
+            logout(globActivity, logoutMsg ="Session has expired! Please log in again.")
         }
     }
 
