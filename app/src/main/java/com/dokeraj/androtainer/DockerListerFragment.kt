@@ -1,8 +1,8 @@
 package com.dokeraj.androtainer
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.text.util.Linkify
 import android.view.View
 import androidx.activity.addCallback
@@ -17,6 +17,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dokeraj.androtainer.adapter.DockerContainerAdapter
 import com.dokeraj.androtainer.adapter.DockerEndpointAdapter
+import com.dokeraj.androtainer.dialogs.ShowHiddenFeaturesDiag
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.models.ContainerStateType
 import com.dokeraj.androtainer.models.Kontainer
@@ -100,10 +101,10 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         btnAbout.setOnClickListener {
             if (tvAboutInfo.visibility == View.VISIBLE) {
                 tvAboutInfo.visibility = View.INVISIBLE
-                btnDonate.visibility = View.INVISIBLE
+                btnHiddenFeatures.visibility = View.INVISIBLE
             } else {
                 tvAboutInfo.visibility = View.VISIBLE
-                btnDonate.visibility = View.VISIBLE
+                btnHiddenFeatures.visibility = View.VISIBLE
             }
         }
 
@@ -125,6 +126,13 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 listOf(clStatsRunning, clStatsStopped),
                 KontainerFilterPref.TOTAL)
         }
+
+        // initialize the searchTermVisibility
+        if (globalVars.appSettings!!.searchTermVisibility)
+            llSearchTerm.visibility = View.VISIBLE
+        else
+            llSearchTerm.visibility = View.GONE
+
 
         // container filtering
         clStatsRunning.setOnClickListener {
@@ -149,9 +157,9 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 KontainerFilterPref.TOTAL)
         }
 
-        btnDonate.setOnClickListener {
-            val i = Intent(Intent.ACTION_VIEW, Uri.parse("https://donate.dokeraj.cc"))
-            startActivity(i)
+        btnHiddenFeatures.setOnClickListener {
+            val dialog = ShowHiddenFeaturesDiag()
+            dialog.show(parentFragmentManager, "Hidden Explanations")
         }
 
         btnEndpoints.setOnClickListener {
@@ -170,6 +178,36 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
 
         swiperLayout.setOnRefreshListener {
             callSwiperLogic(model, globActivity, globalVars, recyclerAdapter)
+        }
+
+        clStatsTotal.setOnLongClickListener {
+            if (llSearchTerm.visibility == View.VISIBLE) {
+                etSearchTerm.setText("")
+                llSearchTerm.visibility = View.GONE
+                globActivity.setGlobalAppSettings(searchTermVisibility = false)
+            } else {
+                llSearchTerm.visibility = View.VISIBLE
+                globActivity.setGlobalAppSettings(searchTermVisibility = true)
+            }
+
+            true
+        }
+
+        etSearchTerm.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s.toString() == "")
+                    filterContainersByTerm(recyclerAdapter, null)
+                else
+                    filterContainersByTerm(recyclerAdapter, s.toString().toLowerCase())
+            }
+        })
+
+        clDeleteTerm.setOnClickListener {
+            etSearchTerm.setText("")
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, true) {
@@ -242,14 +280,16 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         dataViewModel: DockerListerViewModel,
         url: String,
         jwt: String,
-        isUsingApiKey:Boolean,
+        isUsingApiKey: Boolean,
         endpointId: Int,
     ) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
                 .replace("{endpointId}", endpointId.toString())
 
-        dataViewModel.setStateEvent(MainStateEvent.GetKontejneri(jwt = jwt, url = fullUrl,isUsingApiKey))
+        dataViewModel.setStateEvent(MainStateEvent.GetKontejneri(jwt = jwt,
+            url = fullUrl,
+            isUsingApiKey))
     }
 
     @ExperimentalCoroutinesApi
@@ -271,7 +311,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     globalVars.currentUser!!.currentEndpoint.id)
             }
         } else {
-            logout(globActivity, logoutMsg ="Session has expired! Please log in again.")
+            logout(globActivity, logoutMsg = "Session has expired! Please log in again.")
         }
     }
 
@@ -339,6 +379,14 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         } else {
             showProgressBar(true)
         }
+    }
+
+    private fun filterContainersByTerm(
+        recyclerAdapter: DockerContainerAdapter,
+        searchTerm: String?,
+    ) {
+        recyclerAdapter.containerSearchTerm = searchTerm
+        recyclerAdapter.notifyDataSetChanged()
     }
 
     private fun filterContainers(

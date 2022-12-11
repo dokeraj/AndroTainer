@@ -14,7 +14,7 @@
         android:roundIcon="@mipmap/launcher_icon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroTainer">
-        <activity android:name=".MainActiviy">
+        <activity android:name=".MainActiviy" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

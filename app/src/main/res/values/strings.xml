@@ -12,6 +12,8 @@
     <string name="about_app">**AndroTainer** is an open source app. This *SERVICE* is provided by Dokeraj at no cost and is intended for use as is.\nSource code can be found here: https://github.com/dokeraj/AndroTainer\n\nFor any further inquiries: dokeraj87@gmail.com\n\n Privacy policy: [find it here](https://sites.google.com/view/androtainer/privacy)\n\n`Current version: %1$s`</string>
     <string name="users_manage_note">`ANY DELETED CREDENTIAL WILL ONLY BE REMOVED FROM ANDROTAINER`\n\nPro tip: You can find the stored credentials by swiping right on the login screen.</string>
     <string name="dialogWarning">If `CONTINUE` is chosen, you will be logged out and pushed back to the login screen.</string>
+    <string name="hiddenHeader">Hidden Functionalities</string>
+    <string name="hiddenExplanations">`Restart container` - Long press on the **START** / **STOP** button.\n\n`Search container by name` - Long press on the **Total** statistics filter.\n\n`Open logs` - Long press on container name.\n\n`Change refresh time for logs` - Long press on **Auto Refresh** button.</string>
     <string name="deletingContainerNote">Long press the remove button to delete the container **{containerName}**</string>
     <!--
      URLs to portainer

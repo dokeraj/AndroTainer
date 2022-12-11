@@ -37,16 +37,17 @@
                     android:textColor="@color/disText2"
                     android:textSize="25dp"
                     android:textStyle="bold" />
+
                 <TextView
                     android:id="@+id/tvContainerListerEndpointName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/ubuntu"
                     android:includeFontPadding="false"
+                    android:paddingStart="5dp"
                     android:text="Endpoint Name"
                     android:textColor="@color/disText2"
                     android:textSize="14dp"
-                    android:paddingStart="5dp"
                     android:textStyle="italic" />
             </LinearLayout>
 
@@ -67,12 +68,12 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
+
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="0.5dp"
-                    android:background="@drawable/square_stats_shape"
-                    >
+                    android:background="@drawable/square_stats_shape">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/clStatsTotal"
@@ -117,9 +118,9 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:indeterminateTint="@color/dis6"
+                            android:visibility="invisible"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            android:visibility="invisible"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintVertical_bias="1.0" />
@@ -183,10 +184,10 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:indeterminateTint="@color/dis6"
+                            android:visibility="invisible"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            android:visibility="invisible"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintVertical_bias="1.0" />
 
@@ -273,12 +274,58 @@
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <LinearLayout
+                    android:id="@+id/llSearchTerm"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    tools:visibility="visible">
+
+                    <EditText
+                        android:id="@+id/etSearchTerm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_weight="1"
+                        android:ems="10"
+                        android:inputType="textNoSuggestions" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/clDeleteTerm"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="3dp"
+                        android:layout_marginEnd="9dp"
+                        android:background="@drawable/square_stats_shape_item"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/ubuntu_bold"
+                            android:text="X"
+                            android:textColor="@color/dis6"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="2dp"
                     android:layout_marginStart="4dp"
+                    android:layout_marginTop="2dp"
                     android:layout_marginEnd="4dp"
                     android:layout_marginBottom="4dp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -429,17 +476,17 @@
                 android:visibility="invisible" />
 
             <Button
-                android:id="@+id/btnDonate"
+                android:id="@+id/btnHiddenFeatures"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_marginStart="19dp"
                 android:layout_marginTop="10dp"
                 android:backgroundTint="@color/disRedDisabled"
-                android:drawableLeft="@drawable/ic_donation"
+                android:drawableLeft="@drawable/ic_egg"
                 android:drawablePadding="9dp"
                 android:fontFamily="@font/ubuntu"
                 android:lineHeight="15dp"
-                android:text="Donate"
+                android:text="Hidden Functionalities"
                 android:textAlignment="textStart"
                 android:textAllCaps="false"
                 android:textSize="15sp"
