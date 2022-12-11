@@ -11,9 +11,6 @@ Note:
 
 
 ---------------------------------------------
-If you feel generous here is the part where you can contribute :) [![donate](https://i.imgur.com/BTVI4EQ.png)](https://donate.dokeraj.cc)
-
-------------------------------------------------
 
 ## LICENSE
 
