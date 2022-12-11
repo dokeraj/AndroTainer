@@ -71,10 +71,18 @@ class MainActiviy : AppCompatActivity() {
         snackbar.show()
     }
 
-    fun setGlobalAppSettings(inputKontainerFilter: KontainerFilterPref) {
+    fun setGlobalAppSettings(
+        inputKontainerFilter: KontainerFilterPref? = null,
+        searchTermVisibility: Boolean? = null,
+    ) {
         val global = (this.application as GlobalApp)
 
-        val appSettings = AppSettings(inputKontainerFilter)
+        val kontainerFilterToSave: KontainerFilterPref =
+            inputKontainerFilter ?: global.appSettings!!.kontainerFilter
+        val searchTermVisibilityToSave: Boolean =
+            searchTermVisibility ?: global.appSettings!!.searchTermVisibility
+
+        val appSettings = AppSettings(kontainerFilterToSave, searchTermVisibilityToSave)
         // set app settings to global var
         global.appSettings = appSettings
 
@@ -262,7 +270,7 @@ class MainActiviy : AppCompatActivity() {
         val appSettingsStr: String? = sharedPrefs?.getString(APP_SETTINGS, null)
         val appSettings: AppSettings? = if (appSettingsStr != null)
             GsonBuilder().create().fromJson(appSettingsStr, AppSettings::class.java)
-        else AppSettings(KontainerFilterPref.RUNNING)
+        else AppSettings(KontainerFilterPref.RUNNING, false)
 
         val lastUsedCred: Credential? = getLatestActivityUser(credentials)
 

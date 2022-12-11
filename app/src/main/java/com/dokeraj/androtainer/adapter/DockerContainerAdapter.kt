@@ -41,6 +41,8 @@ class DockerContainerAdapter(
 ) :
     RecyclerView.Adapter<DockerContainerAdapter.ContainerViewHolder>() {
 
+    var containerSearchTerm: String? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContainerViewHolder {
         val itemView =
             LayoutInflater.from(parent.context).inflate(R.layout.docker_card_item, parent, false)
@@ -67,9 +69,10 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                setVisibilityByFilterAndSearchTerm(globalApp.appSettings!!.kontainerFilter,
                     currentItem.state,
                     holder)
+                searchTermShowContainer(holder)
             }
             ContainerStateType.EXITED -> {
                 /** set style for stopped docker container */
@@ -84,9 +87,10 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                setVisibilityByFilterAndSearchTerm(globalApp.appSettings!!.kontainerFilter,
                     currentItem.state,
                     holder)
+                searchTermShowContainer(holder)
             }
             ContainerStateType.TRANSITIONING -> {
                 /** set style for container that is either starting or stopping */
@@ -101,9 +105,10 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                setVisibilityByFilterAndSearchTerm(globalApp.appSettings!!.kontainerFilter,
                     currentItem.state,
                     holder)
+                searchTermShowContainer(holder)
             }
             ContainerStateType.ERRORED -> {
                 /** set style for docker container that has received error from portainer api */
@@ -118,9 +123,10 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                setVisibilityByFilterAndSearchTerm(globalApp.appSettings!!.kontainerFilter,
                     currentItem.state,
                     holder)
+                searchTermShowContainer(holder)
             }
             ContainerStateType.CREATED -> {
                 /** set style for docker container that is in the created state */
@@ -135,9 +141,10 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                setVisibilityByFilterAndSearchTerm(globalApp.appSettings!!.kontainerFilter,
                     currentItem.state,
                     holder)
+                searchTermShowContainer(holder)
             }
 
             ContainerStateType.RESTARTING -> {
@@ -154,9 +161,10 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                setVisibilityByFilterAndSearchTerm(globalApp.appSettings!!.kontainerFilter,
                     currentItem.state,
                     holder)
+                searchTermShowContainer(holder)
             }
         }
 
@@ -268,7 +276,7 @@ class DockerContainerAdapter(
 
             // change button background
             holder.btnTextView.text = buttonText
-            holder.btnTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,buttonTextSize)
+            holder.btnTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, buttonTextSize)
             holder.dockerButton.isClickable = buttonIsEnabled
             holder.dockerButton.isEnabled = buttonIsEnabled
             val btnBackground = holder.btnBackgroundView.background
@@ -297,38 +305,48 @@ class DockerContainerAdapter(
         return pContainerList.any { pCont -> pCont.state == ContainerStateType.TRANSITIONING }
     }
 
-    private fun setVisibilityByFilter(
+    private fun setVisibilityByFilterAndSearchTerm(
         kontainerFilterPref: KontainerFilterPref,
         holderState: ContainerStateType,
         holder: ContainerViewHolder,
     ) {
         when (kontainerFilterPref) {
             KontainerFilterPref.RUNNING -> when (holderState) {
-                ContainerStateType.CREATED -> showHideCard(true, holder)
-                ContainerStateType.RUNNING -> showHideCard(true, holder)
+                ContainerStateType.CREATED -> showHideCard(searchTermShowContainer(holder), holder)
+                ContainerStateType.RUNNING -> showHideCard(searchTermShowContainer(holder), holder)
                 ContainerStateType.ERRORED -> showHideCard(false, holder)
                 ContainerStateType.EXITED -> showHideCard(false, holder)
-                ContainerStateType.TRANSITIONING -> showHideCard(true, holder)
-                ContainerStateType.RESTARTING -> showHideCard(true, holder)
+                ContainerStateType.TRANSITIONING -> showHideCard(searchTermShowContainer(holder), holder)
+                ContainerStateType.RESTARTING -> showHideCard(searchTermShowContainer(holder), holder)
             }
 
             KontainerFilterPref.TOTAL -> when (holderState) {
-                ContainerStateType.CREATED -> showHideCard(true, holder)
-                ContainerStateType.RUNNING -> showHideCard(true, holder)
-                ContainerStateType.ERRORED -> showHideCard(true, holder)
-                ContainerStateType.EXITED -> showHideCard(true, holder)
-                ContainerStateType.TRANSITIONING -> showHideCard(true, holder)
-                ContainerStateType.RESTARTING -> showHideCard(true, holder)
+                ContainerStateType.CREATED -> showHideCard(searchTermShowContainer(holder), holder)
+                ContainerStateType.RUNNING -> showHideCard(searchTermShowContainer(holder), holder)
+                ContainerStateType.ERRORED -> showHideCard(searchTermShowContainer(holder), holder)
+                ContainerStateType.EXITED -> showHideCard(searchTermShowContainer(holder), holder)
+                ContainerStateType.TRANSITIONING -> showHideCard(searchTermShowContainer(holder), holder)
+                ContainerStateType.RESTARTING -> showHideCard(searchTermShowContainer(holder), holder)
             }
 
             KontainerFilterPref.STOPPED_OR_ERRORED -> when (holderState) {
                 ContainerStateType.CREATED -> showHideCard(false, holder)
                 ContainerStateType.RUNNING -> showHideCard(false, holder)
-                ContainerStateType.ERRORED -> showHideCard(true, holder)
-                ContainerStateType.EXITED -> showHideCard(true, holder)
-                ContainerStateType.TRANSITIONING -> showHideCard(true, holder)
-                ContainerStateType.RESTARTING -> showHideCard(true, holder)
+                ContainerStateType.ERRORED -> showHideCard(searchTermShowContainer(holder), holder)
+                ContainerStateType.EXITED -> showHideCard(searchTermShowContainer(holder), holder)
+                ContainerStateType.TRANSITIONING -> showHideCard(searchTermShowContainer(holder), holder)
+                ContainerStateType.RESTARTING -> showHideCard(searchTermShowContainer(holder), holder)
             }
+        }
+    }
+
+    private fun searchTermShowContainer(
+        holder: ContainerViewHolder,
+    ): Boolean {
+        return containerSearchTerm?.let {
+            holder.dockerNameView.text.toString().toLowerCase().startsWith(it)
+        } ?: run {
+            true
         }
     }
 
