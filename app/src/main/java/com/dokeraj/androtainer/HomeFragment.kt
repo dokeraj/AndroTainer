@@ -137,7 +137,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         } else if (globActivity.hasJwt() && (!globActivity.isJwtValid() && !globActivity.isUserUsingApiKey())) {
             btnLoginState.changeBtnState(false)
             if (globActivity.isUserUsingApiKey()) {
-                println("u appciciciciciciicicic")
                 authenticateApi(etUrl.text.toString(),
                     etApiKey.text.toString(),
                     btnLoginState)

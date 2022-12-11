@@ -47,7 +47,7 @@ class MainActiviy : AppCompatActivity() {
         snackbarText: String,
         textColor: Int,
         snackBckColor: Int,
-        duration:Int = 3000
+        duration: Int = 3000,
     ) {
 
         val markwon = Markwon.create(context);
@@ -192,13 +192,15 @@ class MainActiviy : AppCompatActivity() {
         val jwtValidUntil = if (global.currentUser!!.isUsingApiKey) -1L else 0L
 
         // jwt should not be invalidated if user is using Api Key; another hack
-        val jwt =  if (global.currentUser!!.isUsingApiKey) global.currentUser!!.jwt else null
+        val jwt = if (global.currentUser!!.isUsingApiKey) global.currentUser!!.jwt else null
 
 
         // create new cred that has user's JWT to null and validUntil to 0 and updated lastActivity
         val lastActivity: Long = ZonedDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli()
         val curUser: Credential =
-            global.currentUser!!.copy(jwt = jwt, jwtValidUntil = jwtValidUntil, lastActivity = lastActivity)
+            global.currentUser!!.copy(jwt = jwt,
+                jwtValidUntil = jwtValidUntil,
+                lastActivity = lastActivity)
 
         // add that user to globals current cred
         global.currentUser = curUser
@@ -214,9 +216,8 @@ class MainActiviy : AppCompatActivity() {
         val global = (this.application as GlobalApp)
 
         // hack to not keep you in the login loop when using an API Key login
-        val jwtIsValid: Boolean? = if(global.currentUser!!.isUsingApiKey)
+        val jwtIsValid: Boolean? = if (global.currentUser!!.isUsingApiKey)
             global.currentUser?.jwtValidUntil?.let {
-                print("SO E VALID UNTILLLLLLLLLLL ${it}")
                 it == 0L
             }
         else global.currentUser?.jwtValidUntil?.let {

@@ -1,9 +1,9 @@
 package com.dokeraj.androtainer.adapter
 
-import android.R.attr
 import android.content.Context
 import android.graphics.BlendMode
 import android.graphics.BlendModeColorFilter
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,11 +26,6 @@ import com.dokeraj.androtainer.viewmodels.DockerListerViewModel
 import com.dokeraj.androtainer.viewmodels.MainStateEvent
 import kotlinx.android.synthetic.main.docker_card_item.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import android.R.attr.right
-
-import android.R.attr.left
-
-
 
 
 class DockerContainerAdapter(
@@ -72,7 +67,9 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter, currentItem.state, holder)
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                    currentItem.state,
+                    holder)
             }
             ContainerStateType.EXITED -> {
                 /** set style for stopped docker container */
@@ -87,7 +84,9 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter, currentItem.state, holder)
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                    currentItem.state,
+                    holder)
             }
             ContainerStateType.TRANSITIONING -> {
                 /** set style for container that is either starting or stopping */
@@ -102,7 +101,9 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter, currentItem.state, holder)
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                    currentItem.state,
+                    holder)
             }
             ContainerStateType.ERRORED -> {
                 /** set style for docker container that has received error from portainer api */
@@ -117,7 +118,9 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter, currentItem.state, holder)
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                    currentItem.state,
+                    holder)
             }
             ContainerStateType.CREATED -> {
                 /** set style for docker container that is in the created state */
@@ -132,7 +135,28 @@ class DockerContainerAdapter(
                     currentItemNum = position,
                     holder = holder
                 )
-                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter, currentItem.state, holder)
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                    currentItem.state,
+                    holder)
+            }
+
+            ContainerStateType.RESTARTING -> {
+                /** set style for container that is restarting */
+                setCardStyle(containerState = ContainerStateType.RESTARTING,
+                    statusTextColor = R.color.disText1,
+                    cardBckColor = R.color.dis6,
+                    buttonText = currentItem.status,
+                    buttonTextSize = 10f,
+                    buttonIsEnabled = false,
+                    buttonColor = R.color.dis6,
+                    statusIconImage = R.drawable.ic_docker_status,
+                    statusIconColor = R.color.disText1,
+                    currentItemNum = position,
+                    holder = holder
+                )
+                setVisibilityByFilter(globalApp.appSettings!!.kontainerFilter,
+                    currentItem.state,
+                    holder)
             }
         }
 
@@ -142,10 +166,10 @@ class DockerContainerAdapter(
                 actionType = if (pContainerList[position].state == ContainerStateType.RUNNING) ContainerActionType.STOP else ContainerActionType.START)
         }
 
-        holder.dockerButton.setOnLongClickListener{
+        // restart the container
+        holder.dockerButton.setOnLongClickListener {
             callRestartContainer(currentItemIndex = position,
-                containerId = currentItem.id,
-                actionType = if (pContainerList[position].state == ContainerStateType.RUNNING) ContainerActionType.STOP else ContainerActionType.START)
+                containerId = currentItem.id)
 
             true
         }
@@ -204,18 +228,16 @@ class DockerContainerAdapter(
     private fun callRestartContainer(
         currentItemIndex: Int,
         containerId: String,
-        actionType: ContainerActionType,
     ) {
         val fullUrl = context.getString(R.string.RestartContainer)
             .replace("{baseUrl}", baseUrl.removeSuffix("/"))
             .replace("{containerId}", containerId)
             .replace("{endpointId}", endpointId.toString())
 
-        dataViewModel.setStateEvent(MainStateEvent.StartStopKontejneri(jwt = jwt,
+        dataViewModel.setStateEvent(MainStateEvent.RestartKontejneri(jwt = jwt,
             url = fullUrl,
             isUsingApiKey = isUsingApiKey,
-            currentItem = currentItemIndex,
-            containerActionType = actionType))
+            currentItem = currentItemIndex))
     }
 
     private fun setCardStyle(
@@ -223,6 +245,7 @@ class DockerContainerAdapter(
         statusTextColor: Int,
         cardBckColor: Int,
         buttonText: String,
+        buttonTextSize: Float = 12f,
         buttonIsEnabled: Boolean,
         buttonColor: Int,
         statusIconImage: Int,
@@ -245,6 +268,7 @@ class DockerContainerAdapter(
 
             // change button background
             holder.btnTextView.text = buttonText
+            holder.btnTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,buttonTextSize)
             holder.dockerButton.isClickable = buttonIsEnabled
             holder.dockerButton.isEnabled = buttonIsEnabled
             val btnBackground = holder.btnBackgroundView.background
@@ -261,7 +285,7 @@ class DockerContainerAdapter(
 
             // Progress Bar
             holder.btnProgressBar.visibility =
-                if (containerState == ContainerStateType.TRANSITIONING) View.VISIBLE else View.GONE
+                if (containerState == ContainerStateType.TRANSITIONING || containerState == ContainerStateType.RESTARTING) View.VISIBLE else View.GONE
         }
     }
 
@@ -285,6 +309,7 @@ class DockerContainerAdapter(
                 ContainerStateType.ERRORED -> showHideCard(false, holder)
                 ContainerStateType.EXITED -> showHideCard(false, holder)
                 ContainerStateType.TRANSITIONING -> showHideCard(true, holder)
+                ContainerStateType.RESTARTING -> showHideCard(true, holder)
             }
 
             KontainerFilterPref.TOTAL -> when (holderState) {
@@ -293,6 +318,7 @@ class DockerContainerAdapter(
                 ContainerStateType.ERRORED -> showHideCard(true, holder)
                 ContainerStateType.EXITED -> showHideCard(true, holder)
                 ContainerStateType.TRANSITIONING -> showHideCard(true, holder)
+                ContainerStateType.RESTARTING -> showHideCard(true, holder)
             }
 
             KontainerFilterPref.STOPPED_OR_ERRORED -> when (holderState) {
@@ -301,6 +327,7 @@ class DockerContainerAdapter(
                 ContainerStateType.ERRORED -> showHideCard(true, holder)
                 ContainerStateType.EXITED -> showHideCard(true, holder)
                 ContainerStateType.TRANSITIONING -> showHideCard(true, holder)
+                ContainerStateType.RESTARTING -> showHideCard(true, holder)
             }
         }
     }

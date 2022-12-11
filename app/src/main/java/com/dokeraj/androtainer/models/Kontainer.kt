@@ -23,7 +23,8 @@ enum class ContainerStateType {
     EXITED,
     TRANSITIONING,
     ERRORED,
-    CREATED
+    CREATED,
+    RESTARTING
 }
 
 enum class ContainerActionType {

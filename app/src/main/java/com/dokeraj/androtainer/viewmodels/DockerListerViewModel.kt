@@ -3,7 +3,9 @@ package com.dokeraj.androtainer.viewmodels
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
-import com.dokeraj.androtainer.models.*
+import com.dokeraj.androtainer.models.ContainerActionType
+import com.dokeraj.androtainer.models.ContainerStateType
+import com.dokeraj.androtainer.models.Kontainer
 import com.dokeraj.androtainer.repositories.DockerListerRepo
 import com.dokeraj.androtainer.util.DataState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,7 +30,9 @@ class DockerListerViewModel
         viewModelScope.launch {
             when (mainStateEvent) {
                 is MainStateEvent.GetKontejneri ->
-                    dockerListerRepo.getDocContainers(mainStateEvent.jwt, mainStateEvent.url, mainStateEvent.isUsingApiKey)
+                    dockerListerRepo.getDocContainers(mainStateEvent.jwt,
+                        mainStateEvent.url,
+                        mainStateEvent.isUsingApiKey)
                         .onEach { dlDataState ->
                             when (dlDataState) {
                                 is DataState.Success -> {
@@ -47,7 +51,9 @@ class DockerListerViewModel
 
                 is MainStateEvent.StartStopKontejneri -> {
                     dockerListerRepo.startStopDokerContainer(mainStateEvent.jwt,
-                        mainStateEvent.url,mainStateEvent.isUsingApiKey, mainStateEvent.currentItem)
+                        mainStateEvent.url,
+                        mainStateEvent.isUsingApiKey,
+                        mainStateEvent.currentItem)
                         .onEach { ssDataState ->
                             when (ssDataState) {
 
@@ -98,7 +104,7 @@ class DockerListerViewModel
                                     _dataState.value = DataState.CardError(modifiedKontainers,
                                         mainStateEvent.currentItem)
                                 }
-                                else -> { }
+                                else -> {}
                             }
 
                         }.launchIn(viewModelScope)
@@ -106,7 +112,9 @@ class DockerListerViewModel
 
                 is MainStateEvent.RestartKontejneri -> {
                     dockerListerRepo.restartContainer(mainStateEvent.jwt,
-                        mainStateEvent.url,mainStateEvent.isUsingApiKey, mainStateEvent.currentItem)
+                        mainStateEvent.url,
+                        mainStateEvent.isUsingApiKey,
+                        mainStateEvent.currentItem)
                         .onEach { ssDataState ->
                             when (ssDataState) {
 
@@ -115,8 +123,8 @@ class DockerListerViewModel
                                     val modifiedKontainers: List<Kontainer> =
                                         currentList.mapIndexed { ind, itemToChange ->
                                             if (ind == mainStateEvent.currentItem)
-                                                itemToChange.copy(status = if (mainStateEvent.containerActionType == ContainerActionType.START) "Starting" else "Exiting",
-                                                    state = ContainerStateType.TRANSITIONING)
+                                                itemToChange.copy(status = "Restarting",
+                                                    state = ContainerStateType.RESTARTING)
                                             else
                                                 itemToChange
                                         }
@@ -131,8 +139,8 @@ class DockerListerViewModel
                                     val modifiedKontainers: List<Kontainer> =
                                         currentList.mapIndexed { ind, itemToChange ->
                                             if (ind == mainStateEvent.currentItem)
-                                                itemToChange.copy(status = if (mainStateEvent.containerActionType == ContainerActionType.START) "Started just now" else "Exited just now",
-                                                    state = if (mainStateEvent.containerActionType == ContainerActionType.START) ContainerStateType.RUNNING else ContainerStateType.EXITED)
+                                                itemToChange.copy(status = "Restarted just now",
+                                                    state = ContainerStateType.RUNNING)
                                             else
                                                 itemToChange
                                         }
@@ -157,7 +165,7 @@ class DockerListerViewModel
                                     _dataState.value = DataState.CardError(modifiedKontainers,
                                         mainStateEvent.currentItem)
                                 }
-                                else -> { }
+                                else -> {}
                             }
 
                         }.launchIn(viewModelScope)
@@ -212,11 +220,13 @@ class DockerListerViewModel
 }
 
 sealed class MainStateEvent {
-    data class GetKontejneri(val jwt: String?, val url: String, val isUsingApiKey: Boolean) : MainStateEvent()
+    data class GetKontejneri(val jwt: String?, val url: String, val isUsingApiKey: Boolean) :
+        MainStateEvent()
+
     data class StartStopKontejneri(
         val jwt: String?,
         val url: String,
-        val isUsingApiKey:Boolean,
+        val isUsingApiKey: Boolean,
         val currentItem: Int,
         val containerActionType: ContainerActionType,
     ) : MainStateEvent()
@@ -224,14 +234,19 @@ sealed class MainStateEvent {
     data class RestartKontejneri(
         val jwt: String?,
         val url: String,
-        val isUsingApiKey:Boolean,
+        val isUsingApiKey: Boolean,
         val currentItem: Int,
-        val containerActionType: ContainerActionType
+        //val containerActionType: ContainerActionType,
     ) : MainStateEvent()
 
     data class InitializeView(val lista: List<Kontainer>) : MainStateEvent()
 
-    data class DeleteContaier(val jwt: String?, val url: String, val isUsingApiKey: Boolean, val selectedItem: Kontainer) :
+    data class DeleteContaier(
+        val jwt: String?,
+        val url: String,
+        val isUsingApiKey: Boolean,
+        val selectedItem: Kontainer,
+    ) :
         MainStateEvent()
 
     object SetNone : MainStateEvent()
