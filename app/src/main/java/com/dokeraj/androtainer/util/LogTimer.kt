@@ -32,6 +32,7 @@ class LogTimer : CoroutineScope by MainScope() {
         contId: String,
         token: String,
         globalVars: GlobalApp,
+        isUsingApiKey:Boolean
     ) {
         job =
             startCoroutineTimer(delayMillis = 0, repeatMillis = globalVars.logSettings?.autoRefreshInterval ?: 6000L) {
@@ -43,6 +44,7 @@ class LogTimer : CoroutineScope by MainScope() {
                         endpointId,
                         globalVars.logSettings?.linesCount ?: 100,
                         logFrag.chpTimestamp.isChecked,
+                        isUsingApiKey
                     )
                 }
             }

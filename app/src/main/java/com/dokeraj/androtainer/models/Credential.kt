@@ -7,11 +7,12 @@ data class Credential(
     val serverUrl: String,
     val username: String,
     val pwd: String,
-    val jwt: String? = null,
+    val jwt: String? = null, // this is where the API key will be stored if user is logged in with API key
     val jwtValidUntil: Long? = null,
     val lastActivity: Long? = null,
     val currentEndpoint: DockerEndpoint,
     val listOfEndpoints: List<DockerEndpoint>,
+    val isUsingApiKey: Boolean, // check against this field to know if you need to call methods that use API key
 )
 
 class CredentialDeserializer : JsonDeserializer<Credential> {
@@ -28,6 +29,7 @@ class CredentialDeserializer : JsonDeserializer<Credential> {
         val jwt: String? = json.get("jwt")?.asString
         val jwtValidUntil: Long? = json.get("jwtValidUntil")?.asLong
         val lastActivity: Long? = json.get("lastActivity")?.asLong
+        val isUsingApi: Boolean = json.get("isUsingApiKey")?.asBoolean ?: false
 
         val currentEndpoint: DockerEndpoint = json.get("currentEndpoint")?.asJsonObject?.let {
             val curEndpointGson = GsonBuilder().registerTypeAdapter(DockerEndpoint::class.java,
@@ -51,6 +53,7 @@ class CredentialDeserializer : JsonDeserializer<Credential> {
             lastActivity = lastActivity,
             currentEndpoint = currentEndpoint,
             listOfEndpoints = listOfEndpoints.toList(),
+            isUsingApiKey = isUsingApi
         )
     }
 }

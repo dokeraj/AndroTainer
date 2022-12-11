@@ -7,22 +7,56 @@ import retrofit2.http.*
 interface KontainerRetrofit {
     @GET
     suspend fun listDockerContainers(
-        @Header("Authorization") jwt: String?,
+        @Header("Authorization") auth: String?,
+        @Url fullPath: String,
+        @Query("all") paramAll: Int,
+    ): PContainersResponse
+
+    @GET
+    suspend fun listDockerContainersApiKey(
+        @Header("X-API-Key") auth: String?,
         @Url fullPath: String,
         @Query("all") paramAll: Int,
     ): PContainersResponse
 
     @POST
     suspend fun startStopContainer(
-        @Header("Authorization") jwt: String?,
+        @Header("Authorization") auth: String?,
+        @Url fullPath: String,
+    ): Response<Unit>
+
+    @POST
+    suspend fun startStopContainerApiKey(
+        @Header("X-API-Key") auth: String?,
+        @Url fullPath: String,
+    ): Response<Unit>
+
+    @POST
+    suspend fun restartContainer(
+        @Header("Authorization") auth: String?,
+        @Url fullPath: String,
+    ): Response<Unit>
+
+    @POST
+    suspend fun restartContainerApiKey(
+        @Header("X-API-Key") auth: String?,
         @Url fullPath: String,
     ): Response<Unit>
 
     @DELETE
     suspend fun deleteDockerContainer(
-        @Header("Authorization") jwt: String?,
+        @Header("Authorization") auth: String?,
         @Url fullPath: String,
         @Query("force") force: Boolean,
         @Query("v") deleteVolumes: Int,
     ): Response<Unit>
+
+    @DELETE
+    suspend fun deleteDockerContainerApiKey(
+        @Header("X-API-Key") auth: String?,
+        @Url fullPath: String,
+        @Query("force") force: Boolean,
+        @Query("v") deleteVolumes: Int,
+    ): Response<Unit>
+
 }

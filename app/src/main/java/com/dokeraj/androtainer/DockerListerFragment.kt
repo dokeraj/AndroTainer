@@ -80,6 +80,7 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
             DockerContainerAdapter(containers,
                 globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
+                globalVars.currentUser!!.isUsingApiKey,
                 globalVars.currentUser!!.currentEndpoint.id,
                 globalVars,
                 requireContext(), this, model)
@@ -241,13 +242,14 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
         dataViewModel: DockerListerViewModel,
         url: String,
         jwt: String,
+        isUsingApiKey:Boolean,
         endpointId: Int,
     ) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
                 .replace("{endpointId}", endpointId.toString())
 
-        dataViewModel.setStateEvent(MainStateEvent.GetKontejneri(jwt = jwt, url = fullUrl))
+        dataViewModel.setStateEvent(MainStateEvent.GetKontejneri(jwt = jwt, url = fullUrl,isUsingApiKey))
     }
 
     @ExperimentalCoroutinesApi
@@ -265,10 +267,11 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                 callGetContainers(dataViewModel,
                     globalVars.currentUser!!.serverUrl,
                     globalVars.currentUser!!.jwt!!,
+                    globalVars.currentUser!!.isUsingApiKey,
                     globalVars.currentUser!!.currentEndpoint.id)
             }
         } else {
-            logout(globActivity, "Session has expired! Please log in again.")
+            logout(globActivity, logoutMsg ="Session has expired! Please log in again.")
         }
     }
 

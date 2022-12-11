@@ -50,6 +50,9 @@ class ManageUsersAdapter(
         else
             holder.tvCurrentUser.visibility = View.GONE
 
+        holder.tvApiUser.visibility = if (currentItem.isUsingApiKey) View.VISIBLE else View.GONE
+
+
         holder.btnDelete.setOnClickListener {
             if (mainActivity.isUserCurrentlyLoggedIn(currentItem)) {
                 val dialog = DeleteCurrentUserDiag(currentItem)
@@ -70,6 +73,7 @@ class ManageUsersAdapter(
         val tvCurrentUser: TextView = itemView.tvLoggedUserWarrning
         val btnDelete: Button = itemView.btnUserDelete
         val cardHolderLayout: ConstraintLayout = itemView.usersCardHolderLayout
+        val tvApiUser: TextView = itemView.tvIsUserApiKey
     }
 
     fun removeUser(currentItem: Credential, position: Int) {

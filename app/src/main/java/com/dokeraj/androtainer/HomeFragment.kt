@@ -20,6 +20,7 @@ import com.dokeraj.androtainer.adapter.UsersLoginAdapter
 import com.dokeraj.androtainer.buttons.BtnLogin
 import com.dokeraj.androtainer.globalvars.GlobalApp
 import com.dokeraj.androtainer.interfaces.ApiInterface
+import com.dokeraj.androtainer.interfaces.ApiInterfaceApiKey
 import com.dokeraj.androtainer.models.Credential
 import com.dokeraj.androtainer.models.DockerEndpoint
 import com.dokeraj.androtainer.models.Kontainer
@@ -34,6 +35,8 @@ import com.dokeraj.androtainer.viewmodels.HomeFragmentViewModel
 import com.dokeraj.androtainer.viewmodels.HomeMainStateEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.fragment_logging.*
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import java.time.ZoneOffset
@@ -59,10 +62,23 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val globActivity: MainActiviy = (activity as MainActiviy?)!!
         val globalVars = (globActivity.application as GlobalApp)
 
+        swUseApiKey.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                lnLayUsrPwd.visibility = View.INVISIBLE
+                conApiKey.visibility = View.VISIBLE
+            } else {
+                lnLayUsrPwd.visibility = View.VISIBLE
+                conApiKey.visibility = View.GONE
+            }
+        }
+
         etUrl.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
 
-                when (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches() && (etUrl.text.toString().toLowerCase().startsWith("http") || etUrl.text.toString().toLowerCase().startsWith("https"))) {
+                when (Patterns.WEB_URL.matcher(etUrl.text.toString())
+                    .matches() && (etUrl.text.toString().toLowerCase()
+                    .startsWith("http") || etUrl.text.toString().toLowerCase()
+                    .startsWith("https"))) {
                     true -> {
                         etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_web_link,
                             0,
@@ -107,19 +123,29 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         globalVars.currentUser?.serverUrl?.let { etUrl.setText(it) }
         globalVars.currentUser?.username?.let { etUser.setText(it) }
         globalVars.currentUser?.pwd?.let { etPass.setText(it) }
+        globalVars.currentUser?.isUsingApiKey?.let { useApi ->
+            swUseApiKey.isChecked = useApi
+            globalVars.currentUser?.jwt?.let { etApiKey.setText(it) }
+        }
 
 
-        if (globActivity.hasJwt() && globActivity.isJwtValid()) {
+        if (globActivity.hasJwt() && (globActivity.isJwtValid())) {
             btnLoginState.changeBtnState(false)
             callGetContainers(globalVars.currentUser!!.serverUrl,
                 globalVars.currentUser!!.jwt!!,
-                globalVars.currentUser!!.currentEndpoint.id)
-        } else if (globActivity.hasJwt() && !globActivity.isJwtValid()) {
+                globalVars.currentUser!!.currentEndpoint.id, globalVars.currentUser!!.isUsingApiKey)
+        } else if (globActivity.hasJwt() && (!globActivity.isJwtValid() && !globActivity.isUserUsingApiKey())) {
             btnLoginState.changeBtnState(false)
-            authenticate(etUrl.text.toString(),
-                etUser.text.toString(),
-                etPass.text.toString(),
-                btnLoginState)
+            if (globActivity.isUserUsingApiKey()) {
+                println("u appciciciciciciicicic")
+                authenticateApi(etUrl.text.toString(),
+                    etApiKey.text.toString(),
+                    btnLoginState)
+            } else
+                authenticate(etUrl.text.toString(),
+                    etUser.text.toString(),
+                    etPass.text.toString(),
+                    btnLoginState)
         }
 
         view.setOnTouchListener { _, event ->
@@ -151,13 +177,24 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         lgnBtn.setOnClickListener {
             disableDrawerSwipe = true
             btnLoginState.changeBtnState(false)
-            if (Patterns.WEB_URL.matcher(etUrl.text.toString()).matches() && (etUrl.text.toString().toLowerCase().startsWith("http") || etUrl.text.toString().toLowerCase().startsWith("https"))) {
+            if (swUseApiKey.isChecked) {
+                authenticateApi(etUrl.text.toString(),
+                    etApiKey.text.toString(),
+                    btnLoginState)
+            } else if (Patterns.WEB_URL.matcher(etUrl.text.toString())
+                    .matches() && (etUrl.text.toString()
+                    .toLowerCase().startsWith("http") || etUrl.text.toString().toLowerCase()
+                    .startsWith("https"))
+            ) {
                 authenticate(etUrl.text.toString(),
                     etUser.text.toString(),
                     etPass.text.toString(), btnLoginState)
             } else {
 
-                val errText = if (!etUrl.text.toString().toLowerCase().startsWith("http") && !etUrl.text.toString().toLowerCase().startsWith("https"))
+                val errText = if (!etUrl.text.toString().toLowerCase()
+                        .startsWith("http") && !etUrl.text.toString().toLowerCase()
+                        .startsWith("https")
+                )
                     "The URL must start with http:// or https://"
                 else
                     "Invalid URL!"
@@ -234,7 +271,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                                 pwd = pwd,
                                 btnLoginState = btnLoginState,
                                 jwt = it,
-                                jwtValidUntil = jwtValidUntil)
+                                jwtValidUntil = jwtValidUntil,
+                                isUsingApiKey = false)
                         }
                     } else {
                         showResponseSnack(response.code().toString(), btnLoginState)
@@ -247,6 +285,40 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             })
     }
 
+    private fun authenticateApi(
+        baseUrl: String,
+        apiKey: String,
+        btnLoginState: BtnLogin,
+    ) {
+        val fullPath =
+            getString(R.string.status).replace("{baseUrl}", baseUrl.removeSuffix("/"))
+        val api = RetrofitInstance.retrofitInstance!!.create(ApiInterfaceApiKey::class.java)
+        api.getStatus(fullPath, apiKey)
+            .enqueue(object : retrofit2.Callback<ResponseBody> {
+                override fun onResponse(
+                    call: Call<ResponseBody>,
+                    response: Response<ResponseBody>,
+                ) {
+                    if (response.code() == 200) {
+                        val usr = apiKey.take(3) + ".." + apiKey.takeLast(3)
+                        getEndpointId(baseUrl = baseUrl,
+                            usr = usr,
+                            pwd = "",
+                            btnLoginState = btnLoginState,
+                            jwt = apiKey,
+                            jwtValidUntil = 0L,
+                            isUsingApiKey = true)
+                    } else {
+                        showResponseSnack(response.code().toString(), btnLoginState)
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    onLoginError(btnLoginState, "Server not permitting communication! ${t.message}")
+                }
+            })
+    }
+
     private fun getEndpointId(
         baseUrl: String,
         usr: String,
@@ -254,6 +326,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnLoginState: BtnLogin,
         jwt: String,
         jwtValidUntil: Long,
+        isUsingApiKey: Boolean,
     ) {
         fun getDockerEndpoints(response: PEndpointsResponse): Pair<DockerEndpoint?, List<DockerEndpoint>> {
             val dockerEndpoints: List<DockerEndpoint> =
@@ -268,10 +341,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             return Pair(dockerSock ?: sortedById.getOrNull(0), sortedById)
         }
 
+
+        val (api, authType) = if (!isUsingApiKey) {
+            Pair(RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java),
+                "Bearer ${jwt}")
+        } else {
+            Pair(RetrofitInstance.retrofitInstance!!.create(ApiInterfaceApiKey::class.java), jwt)
+        }
+
         val fullPath =
             getString(R.string.getEnpointId).replace("{baseUrl}", baseUrl.removeSuffix("/"))
-        val api = RetrofitInstance.retrofitInstance!!.create(ApiInterface::class.java)
-        api.getEnpointId(fullPath, "Bearer ${jwt}", 10, 0)
+
+
+        api.getEnpointId(fullPath, authType, 10, 0)
             .enqueue(object : retrofit2.Callback<PEndpointsResponse> {
                 override fun onResponse(
                     call: Call<PEndpointsResponse>,
@@ -291,9 +373,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                                 jwt = jwt,
                                 jwtValidUntil = jwtValidUntil,
                                 currentEndpoint = dockerEndpoints.first!!,
-                                listOfEndpoints = dockerEndpoints.second), true)
+                                listOfEndpoints = dockerEndpoints.second,
+                                isUsingApiKey = isUsingApiKey),
+                                true)
 
-                            callGetContainers(baseUrl, jwt, dockerEndpoints.first!!.id)
+                            callGetContainers(baseUrl,
+                                jwt,
+                                dockerEndpoints.first!!.id,
+                                isUsingApiKey)
                         } else {
                             onLoginError(btnLoginState,
                                 "There are no Portainer endpoints listed!")
@@ -308,14 +395,22 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     onLoginError(btnLoginState, "Failed to get Portainer endpoint ID!")
                 }
             })
+
     }
 
-    private fun callGetContainers(url: String, jwt: String, endpointId: Int) {
+    private fun callGetContainers(
+        url: String,
+        jwt: String,
+        endpointId: Int,
+        isUsingApiKey: Boolean,
+    ) {
         val fullUrl =
             getString(R.string.getDockerContainers).replace("{baseUrl}", url.removeSuffix("/"))
                 .replace("{endpointId}", endpointId.toString())
 
-        model.setStateEvent(HomeMainStateEvent.GetosKontejneri(jwt = jwt, url = fullUrl))
+        model.setStateEvent(HomeMainStateEvent.GetosKontejneri(jwt = jwt,
+            url = fullUrl,
+            isUsingApiKey = isUsingApiKey))
     }
 
     fun showResponseSnack(responseStatus: String, btnLoginState: BtnLogin) {
@@ -326,7 +421,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     R.color.white,
                     R.color.red)
             }
-            "422" -> {
+            "422", "401" -> {
                 onLoginError(btnLoginState,
                     "Invalid Credentials",
                     R.color.white,

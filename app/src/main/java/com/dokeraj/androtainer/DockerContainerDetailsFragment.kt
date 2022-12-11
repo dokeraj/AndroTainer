@@ -108,6 +108,7 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
 
             model.setStateEvent(MainStateEvent.DeleteContaier(globalVars.currentUser!!.jwt!!,
                 fullUrl,
+                globalVars.currentUser!!.isUsingApiKey,
                 selectedContainer))
 
             true
@@ -194,7 +195,7 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
                 val port = "### Ports [*PublicPort* : *PrivatePort* - protocol]\n"
                 val ports: String = container.ports.map { p ->
                     "> `${p.publicPort.let { it } ?: "none"}`:`${p.privatePort}` - **${p.type}**\n"
-                }.joinToString("\n")
+                }.distinct().joinToString("\n")
 
                 "$port$ports"
             } else
