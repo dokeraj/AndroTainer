@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId "com.dokeraj.androtainer"
-        minSdkVersion 29
+        minSdk 23
         targetSdkVersion 31
         versionCode 20
         versionName "2.3"

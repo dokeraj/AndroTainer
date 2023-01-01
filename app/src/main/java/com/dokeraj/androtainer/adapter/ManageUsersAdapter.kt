@@ -3,6 +3,8 @@ package com.dokeraj.androtainer.adapter
 import android.content.Context
 import android.graphics.BlendMode
 import android.graphics.BlendModeColorFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,9 +43,16 @@ class ManageUsersAdapter(
         holder.tvUsername.text = currentItem.username
         holder.btnDelete.visibility = View.VISIBLE
 
-        holder.cardHolderLayout.background.colorFilter =
-            BlendModeColorFilter(ContextCompat.getColor(context,
-                R.color.dis5), BlendMode.SRC)
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            holder.cardHolderLayout.background.colorFilter =
+                BlendModeColorFilter(ContextCompat.getColor(context,
+                    R.color.dis5), BlendMode.SRC)
+        } else {
+            holder.cardHolderLayout.background.colorFilter =
+                PorterDuffColorFilter(ContextCompat.getColor(context,
+                    R.color.dis5), PorterDuff.Mode.SRC)
+        }
+
 
         if ("${currentItem.serverUrl}.${currentItem.username}" == curLoggedUserKey)
             holder.tvCurrentUser.visibility = View.VISIBLE

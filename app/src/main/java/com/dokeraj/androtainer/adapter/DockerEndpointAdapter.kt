@@ -3,6 +3,8 @@ package com.dokeraj.androtainer.adapter
 import android.content.Context
 import android.graphics.BlendMode
 import android.graphics.BlendModeColorFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -80,9 +82,15 @@ class DockerEndpointAdapter(
         bckColor: Int,
         holder: DockerEndpointViewHolder,
     ) {
-        holder.llEndpoint.background.colorFilter =
-            BlendModeColorFilter(ContextCompat.getColor(context,
-                bckColor), BlendMode.SRC)
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            holder.llEndpoint.background.colorFilter =
+                BlendModeColorFilter(ContextCompat.getColor(context,
+                    bckColor), BlendMode.SRC)
+        } else {
+            holder.llEndpoint.background.colorFilter =
+                PorterDuffColorFilter(ContextCompat.getColor(context,
+                    bckColor), PorterDuff.Mode.SRC)
+        }
 
         holder.tvName.setTextColor(ContextCompat.getColor(context,
             textColor))

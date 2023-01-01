@@ -3,6 +3,8 @@ package com.dokeraj.androtainer.adapter
 import android.content.Context
 import android.graphics.BlendMode
 import android.graphics.BlendModeColorFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -265,9 +267,15 @@ class DockerContainerAdapter(
 
         if (holder.dockerNameView.text.toString() == currentItem.name) {
             // change cardHolderLayout background
-            holder.cardHolderLayout.background.colorFilter =
-                BlendModeColorFilter(ContextCompat.getColor(context,
-                    cardBckColor), BlendMode.SRC)
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                holder.cardHolderLayout.background.colorFilter =
+                    BlendModeColorFilter(ContextCompat.getColor(context,
+                        cardBckColor), BlendMode.SRC)
+            } else {
+                holder.cardHolderLayout.background.colorFilter =
+                    PorterDuffColorFilter(ContextCompat.getColor(context,
+                        cardBckColor), PorterDuff.Mode.SRC)
+            }
 
             // statusView text and color
             holder.dockerStatusView.text = currentItem.status.capitalize()
@@ -281,9 +289,17 @@ class DockerContainerAdapter(
             holder.dockerButton.isEnabled = buttonIsEnabled
             val btnBackground = holder.btnBackgroundView.background
             btnBackground.mutate()
-            btnBackground.colorFilter =
-                BlendModeColorFilter(ContextCompat.getColor(context,
-                    buttonColor), BlendMode.SRC)
+
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                btnBackground.colorFilter =
+                    BlendModeColorFilter(ContextCompat.getColor(context,
+                        buttonColor), BlendMode.SRC)
+            } else {
+                btnBackground.colorFilter =
+                    PorterDuffColorFilter(ContextCompat.getColor(context,
+                        buttonColor), PorterDuff.Mode.SRC)
+            }
+
             holder.btnBackgroundView.background = btnBackground
 
             // Status Icon

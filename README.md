@@ -5,10 +5,8 @@ Note:
 - _This app supports managing of Docker containers ONLY!_
 - *This app is in no way related to the official Portainer project*
 
-<a href="https://play.google.com/store/apps/details?id=com.dokeraj.androtainer"> <img src="https://i.imgur.com/GQuE8q7.png" alt="Google Play Store" width="150"/> </a>
-
-<a href="https://apt.izzysoft.de/fdroid/index/apk/com.dokeraj.androtainer/"> <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="IzzyOnDroid" width="160"/> </a>
-
+<a href='https://play.google.com/store/apps/details?id=com.dokeraj.androtainer&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img height="70" alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
+<a href="https://apt.izzysoft.de/fdroid/index/apk/com.dokeraj.androtainer/"> <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="IzzyOnDroid" height="69"/> </a>
 
 ---------------------------------------------
 
