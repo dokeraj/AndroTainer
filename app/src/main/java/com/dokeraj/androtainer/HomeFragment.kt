@@ -235,6 +235,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     disableDrawerSwipe = true
                     btnLoginState.changeBtnState(false)
                 }
+                else -> {}
             }
         })
     }

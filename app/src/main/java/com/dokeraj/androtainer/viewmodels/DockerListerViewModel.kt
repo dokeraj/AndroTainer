@@ -45,6 +45,7 @@ class DockerListerViewModel
                                 is DataState.Loading -> {
                                     _dataState.value = dlDataState
                                 }
+                                else -> {}
                             }
                         }.launchIn(viewModelScope)
 
@@ -204,6 +205,7 @@ class DockerListerViewModel
                                     /** result back to View */
                                     _dataState.value = DataState.Error(ssState.exception)
                                 }
+                                else -> {}
                             }
                         }.launchIn(viewModelScope)
                 }

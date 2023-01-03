@@ -146,6 +146,9 @@ class DockerContainerDetailsFragment : Fragment(R.layout.fragment_docker_contain
                 }
                 is DataState.None -> {
                 }
+
+                else -> {
+                }
             }
         })
     }
