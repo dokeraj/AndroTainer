@@ -1,22 +1,23 @@
 package com.dokeraj.androtainer.viewmodels
 
-import androidx.hilt.Assisted
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.dokeraj.androtainer.models.ContainerActionType
 import com.dokeraj.androtainer.models.ContainerStateType
 import com.dokeraj.androtainer.models.Kontainer
 import com.dokeraj.androtainer.repositories.DockerListerRepo
 import com.dokeraj.androtainer.util.DataState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@HiltViewModel
 class DockerListerViewModel
-@ViewModelInject constructor(
+@Inject constructor(
     private val dockerListerRepo: DockerListerRepo,
-    @Assisted private val savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val _dataState: MutableLiveData<DataState<List<Kontainer>>> = MutableLiveData()
@@ -45,6 +46,7 @@ class DockerListerViewModel
                                 is DataState.Loading -> {
                                     _dataState.value = dlDataState
                                 }
+                                else -> {}
                             }
                         }.launchIn(viewModelScope)
 
@@ -204,6 +206,7 @@ class DockerListerViewModel
                                     /** result back to View */
                                     _dataState.value = DataState.Error(ssState.exception)
                                 }
+                                else -> {}
                             }
                         }.launchIn(viewModelScope)
                 }

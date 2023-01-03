@@ -271,6 +271,8 @@ class DockerListerFragment : Fragment(R.layout.fragment_docker_lister) {
                     //recyclerAdapter.notifyItemChanged(ds.itemIndex)
                     setContainerStats(ds.data)
                 }
+
+                else -> {}
             }
         })
     }
