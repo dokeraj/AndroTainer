@@ -293,6 +293,10 @@ class MainActiviy : AppCompatActivity() {
 
         /** Load saved data from storage to a global var */
         initializeGlobalVar()
+
+        /** Lay out app in full screen */
+        // WindowCompat.setDecorFitsSystemWindows(window, false) // needs work
+
     }
 
 
