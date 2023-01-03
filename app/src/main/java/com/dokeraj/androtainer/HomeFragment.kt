@@ -456,8 +456,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         private val SWIPE_VELOCITY_THRESHOLD = 100
 
         override fun onFling(
-            downEvent: MotionEvent?,
-            moveEvent: MotionEvent?,
+            downEvent: MotionEvent, //safe calls removed, currently conflict with compileSdkVersion 33 https://issuetracker.google.com/issues/242021191
+            moveEvent: MotionEvent,
             velocityX: Float,
             velocityY: Float,
         ): Boolean {
